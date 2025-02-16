@@ -1,5 +1,5 @@
 package com.com2here.com2hereback.vo;
 
-public class ex {
+public class MemberResponseVo {
 
 }
