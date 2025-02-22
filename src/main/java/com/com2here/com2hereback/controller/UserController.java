@@ -3,6 +3,7 @@ package com.com2here.com2hereback.controller;
 import com.com2here.com2hereback.dto.CMRespDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserResponseDto;
+import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.UserResponseVo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

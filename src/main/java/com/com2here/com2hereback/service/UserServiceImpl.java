@@ -5,6 +5,7 @@ import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserResponseDto;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.security.JwtTokenProvider;
+import com.com2here.com2hereback.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +21,14 @@ public class UserServiceImpl implements UserService {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final JwtProvider jwtProvider;
+    private TokenProvider tokenProvider;
 
     @Autowired
     public UserServiceImpl(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository,
-        JwtTokenProvider jwtTokenProvider, JwtProvider jwtProvider) {
+        TokenProvider tokenProvider) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.jwtProvider = jwtProvider;
+        this.tokenProvider = tokenProvider;
     }
 
     // Access Token 반환
@@ -80,7 +79,7 @@ public class UserServiceImpl implements UserService {
         if (user != null && bCryptPasswordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
             // 로그인 성공 시 JWT 토큰 발급 로직 추가
             // String token = tokenProvider.create(user); // 토큰 생성
-            String token = jwtProvider.create(user);
+            String token = tokenProvider.create(user);
             return UserResponseDto.builder()
                 .message("로그인 성공")
                 .token(token)
