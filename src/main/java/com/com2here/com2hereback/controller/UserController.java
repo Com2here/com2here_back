@@ -1,7 +1,7 @@
 package com.com2here.com2hereback.controller;
 
-import com.com2here.com2hereback.dto.UserRequestDTO;
 import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.security.TokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDTO userDTO) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRequestDto userDTO) {
         try {
             if (userDTO == null || userDTO.getPassword() == null || userDTO.getEmail() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일과 비밀번호를 입력하세요.");
@@ -52,7 +52,7 @@ public class UserController {
 
             User registeredUser = userService.create(user);
 
-            UserRequestDTO responseUserDTO = UserRequestDTO.builder()
+            UserRequestDto responseUserDTO = UserRequestDto.builder()
                     .user_id(registeredUser.getUser_id())
                     .username(registeredUser.getUsername())
                     .email(registeredUser.getEmail())
@@ -67,7 +67,7 @@ public class UserController {
     @PostMapping("/login")
     @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호로 로그인하여 인증 토큰을 받습니다.")
     public ResponseEntity<?> authenticate(
-            @Parameter(description = "사용자의 이메일 주소", schema = @Schema(example = "{\"password\": \"1234\",\"email\": \"kim1@example.com\"}")) @RequestBody UserRequestDTO userDTO) {
+            @Parameter(description = "사용자의 이메일 주소", schema = @Schema(example = "{\"password\": \"1234\",\"email\": \"kim1@example.com\"}")) @RequestBody UserRequestDto userDTO) {
         try {
             if (userDTO.getEmail() == null || userDTO.getPassword() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일과 비밀번호를 입력하세요.");
@@ -78,7 +78,7 @@ public class UserController {
             if (user != null) {
                 final String token = tokenProvider.create(user);
 
-                final UserRequestDTO responseUserDTO = UserRequestDTO.builder()
+                final UserRequestDto responseUserDTO = UserRequestDto.builder()
                         .username(user.getUsername())
                         .user_id(user.getUser_id())
                         .token(token)

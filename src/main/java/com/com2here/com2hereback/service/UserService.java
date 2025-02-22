@@ -1,7 +1,6 @@
 package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.UserRequestDTO;
 import com.com2here.com2hereback.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
