@@ -5,18 +5,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
+        return http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/signin", "/auth/signup").permitAll() // 로그인, 회원가입은 누구나 접근 가능
-                        .anyRequest().authenticated()) // 나머지 요청은 인증 필요
-                .formLogin(); // 기본 로그인 페이지 사용
-
-        return http.build();
+                        .requestMatchers("api/v1/login", "api/v1/register").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(withDefaults()) // 기본 로그인 페이지 사용
+                .build();
     }
 }

@@ -10,15 +10,13 @@ import jakarta.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int user_id;
 
     private String username;
     private String email;
     private String password;
-
-    // 기타 필요한 필드들 추가
 }
