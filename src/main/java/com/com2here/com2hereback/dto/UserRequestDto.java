@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserRequestDto {
+public class UserRequestDTO {
 
     private int user_id;
     private String username;
@@ -17,7 +17,7 @@ public class UserRequestDto {
     private String token; // JWT 토큰
 
     @Builder
-    public UserRequestDto(int user_id, String username, String email, String password, String token) {
+    public UserRequestDTO(int user_id, String username, String email, String password, String token) {
         this.user_id = user_id;
         this.username = username;
         this.email = email;
