@@ -1,5 +1,5 @@
 package com.com2here.com2hereback.repository;
 
-public class MemberRepository {
+public class UserRepository {
 
 }
