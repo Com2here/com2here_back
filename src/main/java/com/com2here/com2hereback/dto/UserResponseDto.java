@@ -9,4 +9,5 @@ public class UserResponseDto {
 
     private String message;
     private String token;
+    // private String refreshToken;
 }
