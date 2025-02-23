@@ -27,7 +27,9 @@ public class TokenProvider {
     // application.properties에서 값을 가져옴
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expiration-time}") long expirationTime) {
-        // this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));; // 보안 적용된 Key
+        // this.signingKey =
+        // Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));; // 보안 적용된
+        // Key
         secretKey = secretKey.replaceAll("\\s+", "");
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
         this.expirationTime = expirationTime;
@@ -42,7 +44,7 @@ public class TokenProvider {
                 .setSubject(String.valueOf(userEntity.getUser_id()))
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(key,SignatureAlgorithm.HS256) // 보안 적용된 서명 방식
+                .signWith(key, SignatureAlgorithm.HS256) // 보안 적용된 서명 방식
                 .compact();
 
     }
@@ -50,9 +52,9 @@ public class TokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -61,10 +63,10 @@ public class TokenProvider {
 
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
         return claims.getSubject();
     }
@@ -72,19 +74,19 @@ public class TokenProvider {
     // JWT 디코딩 메서드
     public Claims decodeToken(String token) {
         return Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody(); // 클레임 반환
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody(); // 클레임 반환
     }
 
-    //토큰에서 값 추출
+    // 토큰에서 값 추출
     public int getSubject(String token) {
         String subject = Jwts.parser()
-            .setSigningKey(key)
-            .parseClaimsJws(token)
-            .getBody()
-            .getSubject();
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
 
         // String에서 int로 변환
         try {

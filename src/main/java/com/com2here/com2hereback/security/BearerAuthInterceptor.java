@@ -10,8 +10,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class BearerAuthInterceptor implements HandlerInterceptor {
 
-    private static final Pattern BASE64_URL_PATTERN =
-        Pattern.compile("^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+){2}$");
+    private static final Pattern BASE64_URL_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+){2}$");
 
     private AuthorizationExtractor authExtractor;
     private TokenProvider tokenProvider;
@@ -23,7 +22,7 @@ public class BearerAuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request,
-        HttpServletResponse response, Object handler) {
+            HttpServletResponse response, Object handler) {
         System.out.println(">>> interceptor.preHandle 호출");
 
         String token = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");

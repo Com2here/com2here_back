@@ -25,11 +25,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .httpBasic(basic -> basic.disable())
+                .httpBasic(basic -> basic.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("api/v1/user/**").permitAll()
@@ -37,13 +36,13 @@ public class SecurityConfig {
                 .build();
     }
 
-		// 추가한 코드
+    // 추가한 코드
     public class CustomDsl extends AbstractHttpConfigurer<CustomDsl, HttpSecurity> {
 
         @Override
         public void configure(HttpSecurity builder) {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-            builder.addFilter(corsFilter); 		// 추가한 코드
+            builder.addFilter(corsFilter); // 추가한 코드
 
         }
     }
