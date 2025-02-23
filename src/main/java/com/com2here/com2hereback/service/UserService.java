@@ -1,6 +1,5 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.dto.CMRespDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserResponseDto;
