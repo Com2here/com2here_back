@@ -12,7 +12,7 @@ import feign.Client;
 @Configuration
 @EnableFeignClients(basePackages = "com.com2here.com2hereback.client") // Feign 클라이언트가 있는 패키지 경로
 @ImportAutoConfiguration({ FeignAutoConfiguration.class, HttpClientConfiguration.class })
-public class KakaoFeignConfiguration {
+public class OauthFeignConfiguration {
     @Bean
     public Client feignClient() {
         return new Client.Default(null, null);

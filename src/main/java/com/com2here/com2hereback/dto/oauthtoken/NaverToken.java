@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.dto;
+package com.com2here.com2hereback.dto.oauthtoken;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -11,18 +11,17 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class KakaoToken {
-    private String tokenType;
+public class NaverToken {
     private String accessToken;
     private String refreshToken;
     private Long expiresIn;
-    private Long refreshTokenExpiresIn;
+    private String tokenType;
 
-    public static KakaoToken fail() {
-        return new KakaoToken(null, null);
+    public static NaverToken fail() {
+        return new NaverToken(null, null);
     }
 
-    private KakaoToken(final String accessToken, final String refreshToken) {
+    private NaverToken(final String accessToken, final String refreshToken) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

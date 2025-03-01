@@ -4,12 +4,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.com2here.com2hereback.dto.KakaoAccount;
-import com.com2here.com2hereback.dto.GoogleAccount;
-import com.com2here.com2hereback.dto.NaverAccount;
-import com.com2here.com2hereback.service.KakaoService;
-import com.com2here.com2hereback.service.GoogleService;
-import com.com2here.com2hereback.service.NaverService;
+import com.com2here.com2hereback.dto.oauthaccount.GoogleAccount;
+import com.com2here.com2hereback.dto.oauthaccount.KakaoAccount;
+import com.com2here.com2hereback.dto.oauthaccount.NaverAccount;
+import com.com2here.com2hereback.service.oauthservice.GoogleService;
+import com.com2here.com2hereback.service.oauthservice.KakaoService;
+import com.com2here.com2hereback.service.oauthservice.NaverService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class SocialLoginController {
+public class OauthLoginController {
 
     private final KakaoService kakaoService;
     private final GoogleService googleService;

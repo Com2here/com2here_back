@@ -1,4 +1,6 @@
-package com.com2here.com2hereback.dto;
+package com.com2here.com2hereback.dto.oauthaccount;
+
+import com.com2here.com2hereback.dto.Profile;
 
 import lombok.Getter;
 import lombok.ToString;

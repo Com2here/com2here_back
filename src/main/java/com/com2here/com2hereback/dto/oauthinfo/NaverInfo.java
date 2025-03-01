@@ -1,5 +1,6 @@
-package com.com2here.com2hereback.dto;
+package com.com2here.com2hereback.dto.oauthinfo;
 
+import com.com2here.com2hereback.dto.oauthaccount.NaverAccount;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
@@ -11,10 +12,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class GoogleInfo {
-    private GoogleAccount googleAccount;
+public class NaverInfo {
+    private NaverAccount naverAccount;
 
-    public static GoogleInfo fail() {
+    public static NaverInfo fail() {
         return null;
     }
 }

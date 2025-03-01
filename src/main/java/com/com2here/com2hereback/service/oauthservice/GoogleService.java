@@ -1,13 +1,13 @@
-package com.com2here.com2hereback.service;
+package com.com2here.com2hereback.service.oauthservice;
 
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.com2here.com2hereback.client.KakaoClient;
-import com.com2here.com2hereback.dto.GoogleInfo;
-import com.com2here.com2hereback.dto.GoogleToken;
+import com.com2here.com2hereback.client.OauthClient;
+import com.com2here.com2hereback.dto.oauthinfo.GoogleInfo;
+import com.com2here.com2hereback.dto.oauthtoken.GoogleToken;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GoogleService {
 
-    private final KakaoClient client;
+    private final OauthClient client;
 
     @Value("${google.auth-url}")
     private String googleAuthUrl;

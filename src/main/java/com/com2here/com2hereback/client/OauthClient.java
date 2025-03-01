@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.com2here.com2hereback.config.KakaoFeignConfiguration;
-import com.com2here.com2hereback.dto.KakaoInfo;
-import com.com2here.com2hereback.dto.KakaoToken;
-import com.com2here.com2hereback.dto.GoogleInfo;
-import com.com2here.com2hereback.dto.GoogleToken;
-import com.com2here.com2hereback.dto.NaverInfo;
-import com.com2here.com2hereback.dto.NaverToken;
+import com.com2here.com2hereback.config.OauthFeignConfiguration;
+import com.com2here.com2hereback.dto.oauthinfo.GoogleInfo;
+import com.com2here.com2hereback.dto.oauthinfo.KakaoInfo;
+import com.com2here.com2hereback.dto.oauthinfo.NaverInfo;
+import com.com2here.com2hereback.dto.oauthtoken.GoogleToken;
+import com.com2here.com2hereback.dto.oauthtoken.KakaoToken;
+import com.com2here.com2hereback.dto.oauthtoken.NaverToken;
 
-@FeignClient(name = "kakaoClient", configuration = KakaoFeignConfiguration.class)
+@FeignClient(name = "kakaoClient", configuration = OauthFeignConfiguration.class)
 @Component
-public interface KakaoClient {
+public interface OauthClient {
 
         // Kakao
         @PostMapping

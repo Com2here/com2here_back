@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.dto;
+package com.com2here.com2hereback.dto.oauthtoken;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
