@@ -1,6 +1,8 @@
 package com.com2here.com2hereback.controller;
 
-import com.com2here.com2hereback.config.exception.InvalidCredentialsException;
+import com.com2here.com2hereback.common.BaseResponseStatus;
+import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.common.exception.InvalidCredentialsException;
 import com.com2here.com2hereback.dto.CMRespDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
@@ -105,10 +107,10 @@ public class UserController {
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@RequestBody UserRequestDto userRequestDto, HttpServletRequest request) {
         try {
-            int code = userService.deleteUser(userRequestDto, request);
-            return ResponseEntity.ok().body(new CMRespDto<>(code, "삭제 성공", null));
+            BaseResponseStatus status = userService.deleteUser(userRequestDto, request);
+            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),null));
         } catch (Exception e) {
-            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.", null));
+            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
         }
     }
 }

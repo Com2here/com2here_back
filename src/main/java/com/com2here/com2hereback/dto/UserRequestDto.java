@@ -24,4 +24,5 @@ public class UserRequestDto {
         this.password = password;
         this.token = token;
     }
+
 }

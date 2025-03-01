@@ -27,9 +27,6 @@ public class TokenProvider {
     // application.properties에서 값을 가져옴
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expiration-time}") long expirationTime) {
-        // this.signingKey =
-        // Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));; // 보안 적용된
-        // Key
         secretKey = secretKey.replaceAll("\\s+", "");
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
         this.expirationTime = expirationTime;
@@ -62,7 +59,7 @@ public class TokenProvider {
         }
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

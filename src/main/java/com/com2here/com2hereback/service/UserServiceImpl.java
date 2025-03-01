@@ -1,6 +1,8 @@
 package com.com2here.com2hereback.service;
 
+import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.dto.CMRespDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserResponseDto;
@@ -9,6 +11,8 @@ import com.com2here.com2hereback.security.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +57,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ShowUserResponseDto ShowUser(HttpServletRequest request) {
-        User user = userRepository.findById(tokenProvider.getSubject(request.getHeader("Authorization")));
+        // SecurityContext에서 Authentication 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = (int) authentication.getPrincipal(); // userId를 가져옵니다.
+
+        User user = userRepository.findById(userId);
         ShowUserResponseDto showUserResponseDto = ShowUserResponseDto.entityToDto(user);
         return showUserResponseDto;
     }
@@ -61,8 +69,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(UserRequestDto userRequestDto, HttpServletRequest request) {
-        User user = userRepository.findById(tokenProvider.getSubject(request.getHeader("Authorization")));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = (int) authentication.getPrincipal(); // userId를 가져옵니다.
 
+        User user = userRepository.findById(userId);
         User updatedUser = User.builder()
             .user_id(user.getUser_id())
             .username(userRequestDto.getUsername() != null ? userRequestDto.getUsername() : user.getUsername())
@@ -75,18 +85,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public int deleteUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+    public BaseResponseStatus deleteUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = (int) authentication.getPrincipal(); // userId를 가져옵니다.
 
-        User user = userRepository.findById(tokenProvider.getSubject(request.getHeader("Authorization")));
-
-        // 입력된 비밀번호와 저장된 비밀번호 비교
+        // 2106
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return BaseResponseStatus.NO_EXIST_MEMBERS; // 존재하지 않는 사용자
+        }
+        // 2202
         if (!bCryptPasswordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
-            return 403;
+            return BaseResponseStatus.PASSWORD_MISMATCH;
         }
 
-        // 비밀번호가 일치하면 사용자 삭제
         userRepository.delete(user);
-        return 200;
+        // 200
+        return BaseResponseStatus.MEMBER_DELETE_SUCCESS;
     }
 
 

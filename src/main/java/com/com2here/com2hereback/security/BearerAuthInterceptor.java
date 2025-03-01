@@ -1,8 +1,14 @@
 package com.com2here.com2hereback.security;
 
+import com.com2here.com2hereback.common.BaseResponseStatus;
+import com.com2here.com2hereback.common.exception.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,23 +31,27 @@ public class BearerAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler) {
         System.out.println(">>> interceptor.preHandle 호출");
-
         String token = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
+        if (tokenProvider.validateToken(token)) {
+            int userId = tokenProvider.getSubject(token);
 
-        if (StringUtils.isEmpty(token)) {
-            return true;
+            // 사용자 정보를 기반으로 Authentication 객체 생성
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
+
+            // SecurityContext에 Authentication 설정
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 요청 속성에 userId 설정
+            request.setAttribute("userId", userId);
+
+        } else if (!BASE64_URL_PATTERN.matcher(token).matches()) {
+            // 토큰 유효 X 2002
+            throw new CustomException(BaseResponseStatus.TOKEN_NOT_VALID);
+        } else {
+            // 토큰 검증 실패 2005
+            throw new CustomException(BaseResponseStatus.JWT_VALID_FAILED);
         }
 
-        // Base64 URL 형식 확인
-        if (!BASE64_URL_PATTERN.matcher(token).matches()) {
-            throw new IllegalArgumentException("잘못된 토큰 형식");
-        }
-
-        if (!tokenProvider.validateToken(token)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰");
-        }
-        int userId = tokenProvider.getSubject(token);
-        request.setAttribute("userId", userId);
         return true;
     }
 }

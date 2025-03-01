@@ -1,5 +1,6 @@
 package com.com2here.com2hereback.service;
 
+import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.dto.CMRespDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
@@ -21,5 +22,5 @@ public interface UserService {
     void updateUser(UserRequestDto userRequestDto, HttpServletRequest request);
 
     // 삭제
-    int deleteUser(UserRequestDto userRequestDto, HttpServletRequest request);
+    BaseResponseStatus deleteUser(UserRequestDto userRequestDto, HttpServletRequest request);
 }
