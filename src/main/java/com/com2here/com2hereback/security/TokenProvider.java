@@ -36,12 +36,12 @@ public class TokenProvider {
     }
 
     // JWT 생성 메서드
-    public String create(User userEntity) {
+    public String create(User user) {
         Date expiryDate = new Date(System.currentTimeMillis() + expirationTime);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(String.valueOf(userEntity.getUser_id()))
+                .setSubject(String.valueOf(user.getUser_id()))
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(key, SignatureAlgorithm.HS256) // 보안 적용된 서명 방식
@@ -49,6 +49,7 @@ public class TokenProvider {
 
     }
 
+    // jwt 검증 메소드
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()

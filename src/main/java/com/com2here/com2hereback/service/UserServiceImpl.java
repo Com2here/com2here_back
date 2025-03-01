@@ -32,7 +32,6 @@ public class UserServiceImpl implements UserService {
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail()).build();
 
-        System.out.println(userRequestDto.getPassword());
         userRepository.save(user);
 
         return 201;

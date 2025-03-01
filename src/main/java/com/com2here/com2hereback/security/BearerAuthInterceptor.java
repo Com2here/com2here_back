@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+// Bearer 토큰 인터셉터
 @Component
 public class BearerAuthInterceptor implements HandlerInterceptor {
 
