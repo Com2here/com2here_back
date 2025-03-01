@@ -1,99 +1,114 @@
 package com.com2here.com2hereback.controller;
 
-import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.config.exception.InvalidCredentialsException;
+import com.com2here.com2hereback.dto.CMRespDto;
+import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
+import com.com2here.com2hereback.dto.UserResponseDto;
+import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.service.UserService;
-import com.com2here.com2hereback.security.TokenProvider;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.http.HttpStatus;
+import com.com2here.com2hereback.vo.ShowUserResponseVo;
+import com.com2here.com2hereback.vo.UserResponseVo;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     private final UserService userService;
-    private final TokenProvider tokenProvider;
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserRepository userRepository;
 
-    // 비밀번호 강도 검사
-    private boolean isPasswordStrong(String password) {
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        return password.matches(regex);
-    }
-
+    // 회원가입 API
+    // 입력값 : userRequestDto
+    // 반환값 : String
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDto userDTO) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRequestDto userRequestDto) {
+        // Dto 유무, 비밀번호 유무, 이메일 유무 확인
+        if (userRequestDto == null || userRequestDto.getPassword() == null || userRequestDto.getEmail() == null) {
+            return ResponseEntity.ok().body(new CMRespDto<>(400, "이메일과 비밀번호를 입력하세요.",null));
+        }
+
+        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
+        if (!(userRequestDto.getPassword()).matches(regex)) {
+            return ResponseEntity.ok().body(new CMRespDto<>(400, "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자여야 합니다.",null));
+        }
+
+        if (userRepository.existsByEmail(userRequestDto.getEmail())) {
+            return ResponseEntity.ok().body(new CMRespDto<>(409, "이미 등록된 이메일입니다.",null));
+        }
         try {
-            if (userDTO == null || userDTO.getPassword() == null || userDTO.getEmail() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일과 비밀번호를 입력하세요.");
-            }
+            int code = userService.RegisterUser(userRequestDto);
 
-            if (!isPasswordStrong(userDTO.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자여야 합니다.");
-            }
-
-            if (userService.existsByEmail(userDTO.getEmail())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 등록된 이메일입니다.");
-            }
-
-            User user = User.builder()
-                    .username(userDTO.getUsername())
-                    .password(passwordEncoder.encode(userDTO.getPassword()))
-                    .email(userDTO.getEmail()).build();
-
-            User registeredUser = userService.create(user);
-
-            UserRequestDto responseUserDTO = UserRequestDto.builder()
-                    .user_id(registeredUser.getUser_id())
-                    .username(registeredUser.getUsername())
-                    .email(registeredUser.getEmail())
-                    .build();
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseUserDTO);
+            return ResponseEntity.ok().body(new CMRespDto<>(code, "회원가입 성공", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.",null));
         }
     }
 
+    // 로그인 API
+    // 입력값 : email, password
     @PostMapping("/login")
-    @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호로 로그인하여 인증 토큰을 받습니다.")
-    public ResponseEntity<?> authenticate(
-            @Parameter(description = "사용자의 이메일 주소", schema = @Schema(example = "{\"password\": \"1234\",\"email\": \"kim1@example.com\"}")) @RequestBody UserRequestDto userDTO) {
+    public ResponseEntity<?> loginUser(@RequestBody UserRequestDto userRequestDto) {
+        if (userRequestDto.getEmail() == null || userRequestDto.getPassword() == null) {
+            return ResponseEntity.ok().body(new CMRespDto<>(400, "이메일과 비밀번호를 입력하세요.",null));
+        }
         try {
-            if (userDTO.getEmail() == null || userDTO.getPassword() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일과 비밀번호를 입력하세요.");
-            }
+            UserResponseDto userResponseDto = userService.LoginUser(userRequestDto);
 
-            User user = userService.getByCredentials(userDTO.getEmail(), userDTO.getPassword(), passwordEncoder);
+            UserResponseVo userResponseVo = UserResponseVo.builder()
+                .message(userResponseDto.getMessage())
+                .token(userResponseDto.getToken())
+                .build();
+            return ResponseEntity.ok().body(new CMRespDto<>(200,userResponseVo.getMessage(), userResponseVo.getToken()));
 
-            if (user != null) {
-                final String token = tokenProvider.create(user);
-
-                final UserRequestDto responseUserDTO = UserRequestDto.builder()
-                        .username(user.getUsername())
-                        .user_id(user.getUser_id())
-                        .token(token)
-                        .email(user.getEmail())
-                        .build();
-                return ResponseEntity.ok().body(responseUserDTO);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("이메일 또는 비밀번호가 잘못되었습니다.");
-            }
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("로그인 처리 중 오류가 발생했습니다.");
+        } catch (InvalidCredentialsException e){
+            // 로그인 실패 시
+            return ResponseEntity.ok().body(new CMRespDto<>(401, "이메일 또는 비밀번호가 잘못되었습니다.", null));
+        }
+        catch (Exception e) {
+            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.", null));
         }
     }
 
+    // 유저 조회 API
+    // 입력값 : Token
+    @GetMapping("/show")
+    public ResponseEntity<?> showUser(HttpServletRequest request) {
+        try{
+            ShowUserResponseDto showUserResponseDto = userService.ShowUser(request);
+            ShowUserResponseVo showUserResponseVo = ShowUserResponseVo.dtoToVo(showUserResponseDto);
+            return ResponseEntity.ok().body(new CMRespDto<>(200, "유저 조회 성공", showUserResponseVo));
+        }catch (Exception e) {
+            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.", null));
+        }
+    }
+
+    // 유저 정보 수정 API
+    // 입력값 : Token, userRequestDto
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateUser(@RequestBody UserRequestDto userRequestDto, HttpServletRequest request) {
+        try{
+            userService.updateUser(userRequestDto, request);
+            return ResponseEntity.ok().body(new CMRespDto<>(200, "정보 수정 성공", null));
+        }catch (Exception e) {
+            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.", null));
+        }
+    }
+
+    // 유저 정보 삭제 API
+    // 입력값
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@RequestBody UserRequestDto userRequestDto, HttpServletRequest request) {
+        try {
+            int code = userService.deleteUser(userRequestDto, request);
+            return ResponseEntity.ok().body(new CMRespDto<>(code, "삭제 성공", null));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(new CMRespDto<>(500, "서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.", null));
+        }
+    }
 }

@@ -1,12 +1,13 @@
-package com.com2here.com2hereback.vo;
+package com.com2here.com2hereback.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class UserResponseVo {
+public class UserResponseDto {
 
     private String message;
     private String token;
+    // private String refreshToken;
 }
