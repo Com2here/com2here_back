@@ -25,6 +25,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // jwt 필터
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -36,13 +37,11 @@ public class SecurityConfig {
                 .build();
     }
 
-    // 추가한 코드
     public class CustomDsl extends AbstractHttpConfigurer<CustomDsl, HttpSecurity> {
-
         @Override
         public void configure(HttpSecurity builder) {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-            builder.addFilter(corsFilter); // 추가한 코드
+            builder.addFilter(corsFilter);
 
         }
     }
