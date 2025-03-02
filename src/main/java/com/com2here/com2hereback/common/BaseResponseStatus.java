@@ -25,6 +25,17 @@ public enum BaseResponseStatus {
     MEMBER_INFO_UPDATED(HttpStatus.OK, true, 200, "회원 정보가 수정되었습니다."),
     MEMBER_INFO_UPDATE_FAILED(HttpStatus.BAD_REQUEST, false, 2301, "회원 정보 수정에 실패했습니다."),
 
+    // 로그인 성공
+    LOGIN_SUCCESS(HttpStatus.OK, true, 200, "로그인에 성공했습니다."),
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, false, 2401, "로그인에 실패했습니다. 아이디나 비밀번호를 확인하세요."),
+
+    // 회원가입 성공
+    REGISTRATION_SUCCESS(HttpStatus.CREATED, true, 201, "회원가입이 완료되었습니다."),
+    REGISTRATION_FAILED(HttpStatus.BAD_REQUEST, false, 2501, "회원가입에 실패했습니다. 중복된 아이디일 수 있습니다."),
+
+    // 비밀번호 형식 불일치
+    PASSWORD_FORMAT_INVALID(HttpStatus.BAD_REQUEST, false, 2601, "비밀번호 형식이 불일치합니다. 최소 8자 이상 최대 20자 이하, 영문, 숫자, 특수문자를 포함해야 합니다."),
+
     /**
      * 400 : security 에러
      */
@@ -68,7 +79,7 @@ public enum BaseResponseStatus {
     DUPLICATED_MEMBERS(HttpStatus.CONFLICT, false, 2101, "이미 가입된 멤버입니다."),
     MASSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, false, 2102, "인증번호 전송에 실패했습니다."),
     MASSAGE_VALID_FAILED(HttpStatus.NOT_FOUND, false, 2103, "인증번호가 일치하지 않습니다."),
-    FAILED_TO_LOGIN(HttpStatus.UNAUTHORIZED, false, 2104, "아이디 또는 패스워드를 다시 확인하세요."),
+    FAILED_TO_LOGIN(HttpStatus.UNAUTHORIZED, false, 2104, "이메일 또는 비밀번호를 다시 확인하세요."),
     FAILED_TO_PASSWORD(HttpStatus.UNAUTHORIZED, false, 2104, "비밀번호를 다시 한번 확인 해 주세요."),
     WITHDRAWAL_MEMBERS(HttpStatus.FORBIDDEN, false, 2105, "탈퇴한 회원입니다."),
     NO_EXIST_MEMBERS(HttpStatus.NOT_FOUND, false, 2106, "존재하지 않는 멤버 정보입니다."),
