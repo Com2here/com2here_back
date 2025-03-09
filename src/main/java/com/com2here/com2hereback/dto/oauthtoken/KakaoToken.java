@@ -12,18 +12,21 @@ import lombok.ToString;
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KakaoToken {
+
     private String tokenType;
     private String accessToken;
-    private String refreshToken;
     private Long expiresIn;
-    private Long refreshTokenExpiresIn;
 
+    // 실패 시 KakaoToken 객체를 반환
     public static KakaoToken fail() {
-        return new KakaoToken(null, null);
+        return new KakaoToken(null, null, null);
     }
 
-    private KakaoToken(final String accessToken, final String refreshToken) {
+    // 생성자 (accessToken만 포함)
+    private KakaoToken(final String accessToken, final String tokenType, final Long expiresIn) {
         this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
+        this.tokenType = tokenType;
+        this.expiresIn = expiresIn;
     }
+
 }
