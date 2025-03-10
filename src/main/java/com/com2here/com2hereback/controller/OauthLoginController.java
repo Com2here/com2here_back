@@ -17,6 +17,7 @@ import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.oauthaccount.GoogleAccount;
 import com.com2here.com2hereback.dto.oauthaccount.KakaoAccount;
 import com.com2here.com2hereback.dto.oauthaccount.NaverAccount;
+import com.com2here.com2hereback.dto.oauthinfo.GoogleInfo;
 import com.com2here.com2hereback.dto.oauthinfo.KakaoInfo;
 import com.com2here.com2hereback.dto.oauthinfo.NaverInfo;
 import com.com2here.com2hereback.dto.oauthtoken.NaverToken;
@@ -50,14 +51,20 @@ public class OauthLoginController {
     @Value("${naver.redirectUrl}")
     private String naverredirectUri;
 
-    /**
-     * 구글 로그인 콜백
-     */
-    @GetMapping("/callback/google")
-    public GoogleAccount getGoogleAccount(@RequestParam("code") String code) {
-        log.debug("Google code = {}", code);
-        return googleService.getInfo(code).getGoogleAccount();
-    }
+    @Value("${google.restapi-key}")
+    private String googleclientId;
+
+    @Value("${google.redirectUrl}")
+    private String googleredirectUri;
+
+    // /**
+    // * 구글 로그인 콜백
+    // */
+    // @GetMapping("/callback/google")
+    // public GoogleAccount getGoogleAccount(@RequestParam("code") String code) {
+    // log.debug("Google code = {}", code);
+    // return googleService.getInfo(code).getGoogleAccount();
+    // }
 
     // /**
     // * 네이버 로그인 콜백
@@ -145,6 +152,48 @@ public class OauthLoginController {
             response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
         } else {
             log.error("Failed to retrieve Naver account.");
+            // 실패 시 리다이렉트
+            response.sendRedirect("http://localhost:5173/login"); // 로그인 실패 시 login 페이지로 이동
+        }
+    }
+
+    /**
+     * 구글 로그인 URL 반환
+     */
+    @GetMapping("/login/google/url")
+    public Map<String, String> getGoogleLoginUrl() throws UnsupportedEncodingException {
+
+        // redirectUri에서 불필요한 부분 제거 (예시로 localhost:3000/callback만 사용)
+        String cleanRedirectUri = googleredirectUri.replace(" ", "").replace("google", "");
+
+        // URL 인코딩 처리
+        String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
+
+        String url = "https://accounts.google.com/o/oauth2/v2/auth"
+                + "?response_type=code"
+                + "&client_id=" + googleclientId
+                + "&redirect_uri=" + encodedRedirectUri
+                + "&scope=openid%20profile%20email"; // 구글 로그인에 필요한 scope 추가
+
+        Map<String, String> response = new HashMap<>();
+        response.put("url", url); // JSON 형식으로 반환
+
+        return response;
+    }
+
+    @GetMapping("/callback/google")
+    public void getGoogleAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        log.debug("Google code = {}", code);
+
+        GoogleInfo googleInfo = googleService.getInfo(code);
+        GoogleAccount googleAccount = googleInfo.getGoogleAccount();
+
+        if (googleAccount != null) {
+            log.debug("Google account found: {}", googleAccount);
+            // 로그인 성공 후 리다이렉트 URL로 이동 (메인 페이지)
+            response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
+        } else {
+            log.error("Failed to retrieve Google account.");
             // 실패 시 리다이렉트
             response.sendRedirect("http://localhost:5173/login"); // 로그인 실패 시 login 페이지로 이동
         }
