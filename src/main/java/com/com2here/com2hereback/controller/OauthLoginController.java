@@ -18,6 +18,8 @@ import com.com2here.com2hereback.dto.oauthaccount.GoogleAccount;
 import com.com2here.com2hereback.dto.oauthaccount.KakaoAccount;
 import com.com2here.com2hereback.dto.oauthaccount.NaverAccount;
 import com.com2here.com2hereback.dto.oauthinfo.KakaoInfo;
+import com.com2here.com2hereback.dto.oauthinfo.NaverInfo;
+import com.com2here.com2hereback.dto.oauthtoken.NaverToken;
 import com.com2here.com2hereback.service.oauthservice.GoogleService;
 import com.com2here.com2hereback.service.oauthservice.KakaoService;
 import com.com2here.com2hereback.service.oauthservice.NaverService;
@@ -37,10 +39,16 @@ public class OauthLoginController {
     private final NaverService naverService;
 
     @Value("${kakao.restapi-key}")
-    private String clientId;
+    private String kakaoclientId;
 
     @Value("${kakao.redirectUrl}")
-    private String redirectUri;
+    private String kakaoredirectUri;
+
+    @Value("${naver.restapi-key}")
+    private String naverclientId;
+
+    @Value("${naver.redirectUrl}")
+    private String naverredirectUri;
 
     /**
      * 구글 로그인 콜백
@@ -51,14 +59,14 @@ public class OauthLoginController {
         return googleService.getInfo(code).getGoogleAccount();
     }
 
-    /**
-     * 네이버 로그인 콜백
-     */
-    @GetMapping("/callback/naver")
-    public NaverAccount getNaverAccount(@RequestParam("code") String code) {
-        log.debug("Naver code = {}", code);
-        return naverService.getInfo(code).getNaverAccount();
-    }
+    // /**
+    // * 네이버 로그인 콜백
+    // */
+    // @GetMapping("/callback/naver")
+    // public NaverAccount getNaverAccount(@RequestParam("code") String code) {
+    // log.debug("Naver code = {}", code);
+    // return naverService.getInfo(code).getNaverAccount();
+    // }
 
     /**
      * 카카오 로그인 URL 반환
@@ -67,14 +75,14 @@ public class OauthLoginController {
     public Map<String, String> getKakaoLoginUrl() throws UnsupportedEncodingException {
 
         // redirectUri에서 불필요한 부분 제거 (예시로 localhost:3000/callback만 사용)
-        String cleanRedirectUri = redirectUri.replace(" ", "").replace("kakao", "");
+        String cleanRedirectUri = kakaoredirectUri.replace(" ", "").replace("kakao", "");
 
         // URL 인코딩 처리
         String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
 
         String url = "https://kauth.kakao.com/oauth/authorize"
                 + "?response_type=code"
-                + "&client_id=" + clientId
+                + "&client_id=" + kakaoclientId
                 + "&redirect_uri=" + encodedRedirectUri;
 
         Map<String, String> response = new HashMap<>();
@@ -83,7 +91,7 @@ public class OauthLoginController {
         return response;
     }
 
-    @GetMapping("/callback")
+    @GetMapping("/callback/kakao")
     public void getKakaoAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         log.debug("Kakao code = {}", code);
 
@@ -96,6 +104,47 @@ public class OauthLoginController {
             response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
         } else {
             log.error("Failed to retrieve Kakao account.");
+            // 실패 시 리다이렉트
+            response.sendRedirect("http://localhost:5173/login"); // 로그인 실패 시 login 페이지로 이동
+        }
+    }
+
+    /**
+     * 네이버 로그인 URL 반환
+     */
+    @GetMapping("/login/naver/url")
+    public Map<String, String> getNaverLoginUrl() throws UnsupportedEncodingException {
+
+        // redirectUri에서 불필요한 부분 제거 (예시로 localhost:3000/callback만 사용)
+        String cleanRedirectUri = naverredirectUri.replace(" ", "").replace("naver", "");
+
+        // URL 인코딩 처리
+        String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
+
+        String url = "https://nid.naver.com/oauth2.0/authorize"
+                + "?response_type=code"
+                + "&client_id=" + naverclientId
+                + "&redirect_uri=" + encodedRedirectUri;
+
+        Map<String, String> response = new HashMap<>();
+        response.put("url", url); // JSON 형식으로 반환
+
+        return response;
+    }
+
+    @GetMapping("/callback/naver")
+    public void getNaverAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        log.debug("Naver code = {}", code);
+
+        NaverInfo naverInfo = naverService.getInfo(code);
+        NaverAccount naverAccount = naverInfo.getNaverAccount();
+
+        if (naverAccount != null) {
+            log.debug("Naver account found: {}", naverAccount);
+            // 로그인 성공 후 리다이렉트 URL로 이동 (메인 페이지)
+            response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
+        } else {
+            log.error("Failed to retrieve Naver account.");
             // 실패 시 리다이렉트
             response.sendRedirect("http://localhost:5173/login"); // 로그인 실패 시 login 페이지로 이동
         }

@@ -25,6 +25,9 @@ public class NaverService {
     @Value("${naver.user-api-url}")
     private String naverUserApiUrl;
 
+    @Value("${naver.restapi-key}")
+    private String restapiKey;
+
     // @Value("${naver.client-id}")
     // private String clientId;
 
@@ -34,26 +37,35 @@ public class NaverService {
     @Value("${naver.redirect-url}")
     private String redirectUrl;
 
-    @Value("${kakao.restapi-key}")
-    private String restapiKey;
-
     public NaverInfo getInfo(final String code) {
         final NaverToken token = getToken(code);
-        log.debug("token = {}", token);
-        try {
-            return client.getNaverInfo(new URI(naverUserApiUrl), "Bearer " + token.getAccessToken());
-        } catch (Exception e) {
-            log.error("Something went wrong while fetching Naver user info.", e);
-            return NaverInfo.fail();
+        log.debug("Received token: {}", token);
+
+        if (token != null && token.getAccessToken() != null) {
+            try {
+                NaverInfo naverInfo = client.getNaverInfo(new URI(naverUserApiUrl),
+                        "Bearer " + token.getAccessToken());
+                log.debug("NaverInfo: {}", naverInfo);
+                return naverInfo;
+            } catch (Exception e) {
+                log.error("Error while requesting Naver Info", e);
+                return NaverInfo.fail(); // API 요청 실패 처리
+            }
+        } else {
+            log.error("Failed to get token or token is null.");
+            return NaverInfo.fail(); // 토큰이 없으면 실패 처리
         }
     }
 
     private NaverToken getToken(final String code) {
         try {
-            return client.getNaverToken(new URI(naverAuthUrl), restapiKey, redirectUrl, code, "authorization_code");
+            NaverToken token = client.getNaverToken(new URI(naverAuthUrl), restapiKey, redirectUrl, code,
+                    "authorization_code");
+            log.debug("Naver Token: {}", token);
+            return token;
         } catch (Exception e) {
-            log.error("Something went wrong while fetching Naver token.", e);
-            return NaverToken.fail();
+            log.error("Error while getting Naver Token", e);
+            return NaverToken.fail(); // 토큰 요청 실패 처리
         }
     }
 }

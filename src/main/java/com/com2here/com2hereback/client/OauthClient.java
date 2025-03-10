@@ -17,7 +17,7 @@ import com.com2here.com2hereback.dto.oauthtoken.GoogleToken;
 import com.com2here.com2hereback.dto.oauthtoken.KakaoToken;
 import com.com2here.com2hereback.dto.oauthtoken.NaverToken;
 
-@FeignClient(name = "kakaoClient", configuration = OauthFeignConfiguration.class)
+@FeignClient(name = "OauthClient", configuration = OauthFeignConfiguration.class)
 @Component
 public interface OauthClient {
 

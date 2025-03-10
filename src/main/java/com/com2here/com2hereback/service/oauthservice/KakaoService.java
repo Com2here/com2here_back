@@ -31,33 +31,6 @@ public class KakaoService {
     @Value("${kakao.redirect-url}")
     private String redirectUrl;
 
-    // public KakaoInfo getInfo(final String code) {
-    // final KakaoToken token = getToken(code);
-    // log.debug("token = {}", token);
-    // try {
-    // if (token != null && token.getAccessToken() != null) {
-    // return client.getKakaoInfo(new URI(kakaoUserApiUrl),
-    // token.getTokenType() + " " + token.getAccessToken());
-    // } else {
-    // log.error("Failed to get token.");
-    // return KakaoInfo.fail(); // Token이 없으면 실패 처리
-    // }
-    // } catch (Exception e) {
-    // log.error("something error..", e);
-    // return KakaoInfo.fail();
-    // }
-    // }
-
-    // private KakaoToken getToken(final String code) {
-    // try {
-    // return client.getKakaoToken(new URI(kakaoAuthUrl), restapiKey, redirectUrl,
-    // code, "authorization_code");
-    // } catch (Exception e) {
-    // log.error("Something error..", e);
-    // return KakaoToken.fail();
-    // }
-    // }
-
     // KakaoInfo를 받아오는 메서드
     public KakaoInfo getInfo(final String code) {
         final KakaoToken token = getToken(code);
