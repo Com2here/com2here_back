@@ -57,24 +57,6 @@ public class OauthLoginController {
     @Value("${google.redirectUrl}")
     private String googleredirectUri;
 
-    // /**
-    // * 구글 로그인 콜백
-    // */
-    // @GetMapping("/callback/google")
-    // public GoogleAccount getGoogleAccount(@RequestParam("code") String code) {
-    // log.debug("Google code = {}", code);
-    // return googleService.getInfo(code).getGoogleAccount();
-    // }
-
-    // /**
-    // * 네이버 로그인 콜백
-    // */
-    // @GetMapping("/callback/naver")
-    // public NaverAccount getNaverAccount(@RequestParam("code") String code) {
-    // log.debug("Naver code = {}", code);
-    // return naverService.getInfo(code).getNaverAccount();
-    // }
-
     /**
      * 카카오 로그인 URL 반환
      */

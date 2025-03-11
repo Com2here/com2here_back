@@ -6,10 +6,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebConfig implements WebMvcConfigurer {
     private final BearerAuthInterceptor bearerAuthInterceptor;
 
-    public WebMvcConfig(BearerAuthInterceptor bearerAuthInterceptor) {
+    public WebConfig(BearerAuthInterceptor bearerAuthInterceptor) {
         this.bearerAuthInterceptor = bearerAuthInterceptor;
     }
 
