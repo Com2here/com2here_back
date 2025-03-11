@@ -25,13 +25,7 @@ public class GoogleService {
     @Value("${google.user-api-url}")
     private String googleUserApiUrl;
 
-    // @Value("${google.client-id}")
-    // private String clientId;
-
-    // @Value("${google.client-secret}")
-    // private String clientSecret;
-
-    @Value("${kakao.restapi-key}")
+    @Value("${google.restapi-key}")
     private String restapiKey;
 
     @Value("${google.redirect-url}")
@@ -40,24 +34,36 @@ public class GoogleService {
     @Value("${google.scope}")
     private String googleScope;
 
+    // GoogleInfo를 받아오는 메서드
     public GoogleInfo getInfo(final String code) {
         final GoogleToken token = getToken(code);
-        log.debug("token = {}", token);
-        try {
-            return client.getGoogleInfo(new URI(googleUserApiUrl), "Bearer " + token.getAccessToken());
-        } catch (Exception e) {
-            log.error("Something went wrong while fetching Google user info.", e);
-            return GoogleInfo.fail();
+        log.debug("Received token: {}", token);
+
+        if (token != null && token.getAccessToken() != null) {
+            try {
+                GoogleInfo googleInfo = client.getGoogleInfo(new URI(googleUserApiUrl),
+                        token.getTokenType() + " " + token.getAccessToken());
+                log.debug("GoogleInfo: {}", googleInfo);
+                return googleInfo;
+            } catch (Exception e) {
+                log.error("Error while requesting Google Info", e);
+                return GoogleInfo.fail(); // API 요청 실패 처리
+            }
+        } else {
+            log.error("Failed to get token or token is null.");
+            return GoogleInfo.fail(); // 토큰이 없으면 실패 처리
         }
     }
 
     private GoogleToken getToken(final String code) {
         try {
-            return client.getGoogleToken(new URI(googleAuthUrl), restapiKey, redirectUrl, code,
+            GoogleToken token = client.getGoogleToken(new URI(googleAuthUrl), restapiKey, redirectUrl, code,
                     "authorization_code", googleScope);
+            log.debug("Google Token: {}", token);
+            return token;
         } catch (Exception e) {
-            log.error("Something went wrong while fetching Google token.", e);
-            return GoogleToken.fail();
+            log.error("Error while getting Google Token", e);
+            return GoogleToken.fail(); // 토큰 요청 실패 처리
         }
     }
 }

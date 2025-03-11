@@ -9,7 +9,5 @@ import lombok.ToString;
 @ToString
 public class GoogleAccount {
     private Profile profile;
-    private String gender;
-    private String birthday;
     private String email;
 }
