@@ -11,8 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
