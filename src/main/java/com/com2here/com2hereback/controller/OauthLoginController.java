@@ -151,11 +151,15 @@ public class OauthLoginController {
         // URL 인코딩 처리
         String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
 
+        String encodedScope = URLEncoder.encode(
+                "openid profile email",
+                "UTF-8");
+
         String url = "https://accounts.google.com/o/oauth2/v2/auth"
                 + "?response_type=code"
                 + "&client_id=" + googleclientId
                 + "&redirect_uri=" + encodedRedirectUri
-                + "&scope=openid%20profile%20email"; // 구글 로그인에 필요한 scope 추가
+                + "&scope=" + encodedScope; // URL 인코딩된 scope 추가
 
         Map<String, String> response = new HashMap<>();
         response.put("url", url); // JSON 형식으로 반환

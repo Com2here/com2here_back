@@ -10,4 +10,5 @@ import lombok.ToString;
 public class GoogleAccount {
     private Profile profile;
     private String email;
+    private String openid;
 }

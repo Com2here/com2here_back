@@ -31,8 +31,8 @@ public class NaverService {
     // @Value("${naver.client-id}")
     // private String clientId;
 
-    // @Value("${naver.client-secret}")
-    // private String clientSecret;
+    @Value("${naver.client-secret}")
+    private String clientSecret;
 
     @Value("${naver.redirect-url}")
     private String redirectUrl;
@@ -60,7 +60,7 @@ public class NaverService {
     private NaverToken getToken(final String code) {
         try {
             NaverToken token = client.getNaverToken(new URI(naverAuthUrl), restapiKey, redirectUrl, code,
-                    "authorization_code");
+                    "authorization_code", clientSecret);
             log.debug("Naver Token: {}", token);
             return token;
         } catch (Exception e) {

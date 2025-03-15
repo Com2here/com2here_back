@@ -37,7 +37,7 @@ public interface OauthClient {
 
         @PostMapping
         GoogleToken getGoogleToken(URI baseUrl, @RequestParam("client_id") String restApiKey,
-                        // @RequestParam("client-secret") String clientsecret,
+                        @RequestParam("client-secret") String clientsecret,
                         @RequestParam("redirect_uri") String redirectUri,
                         @RequestParam("code") String code,
                         @RequestParam("grant_type") String grantType,
@@ -51,5 +51,6 @@ public interface OauthClient {
         NaverToken getNaverToken(URI baseUrl, @RequestParam("client_id") String restApiKey,
                         @RequestParam("redirect_uri") String redirectUri,
                         @RequestParam("code") String code,
-                        @RequestParam("grant_type") String grantType);
+                        @RequestParam("grant_type") String grantType,
+                        @RequestParam("client-secret") String clientsecret);
 }

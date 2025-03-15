@@ -41,6 +41,14 @@ public class KakaoService {
                 KakaoInfo kakaoInfo = client.getKakaoInfo(new URI(kakaoUserApiUrl),
                         token.getTokenType() + " " + token.getAccessToken());
                 log.debug("KakaoInfo: {}", kakaoInfo);
+
+                // refreshToken도 확인해서 로그로 남기기
+                if (token.getRefreshToken() != null) {
+                    log.debug("Kakao Refresh Token: {}", token.getRefreshToken());
+                } else {
+                    log.warn("Kakao Refresh Token is null.");
+                }
+
                 return kakaoInfo;
             } catch (Exception e) {
                 log.error("Error while requesting Kakao Info", e);
@@ -57,6 +65,14 @@ public class KakaoService {
             KakaoToken token = client.getKakaoToken(new URI(kakaoAuthUrl), restapiKey, redirectUrl, code,
                     "authorization_code");
             log.debug("Kakao Token: {}", token);
+
+            // refreshToken도 확인해서 로그 남기기
+            if (token.getRefreshToken() != null) {
+                log.debug("Received Kakao Refresh Token: {}", token.getRefreshToken());
+            } else {
+                log.warn("No Kakao Refresh Token received.");
+            }
+
             return token;
         } catch (Exception e) {
             log.error("Error while getting Kakao Token", e);

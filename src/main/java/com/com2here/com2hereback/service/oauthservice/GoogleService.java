@@ -34,6 +34,9 @@ public class GoogleService {
     @Value("${google.scope}")
     private String googleScope;
 
+    @Value("${google.client-secret}")
+    private String clientSecret; // client_secret 추가
+
     // GoogleInfo를 받아오는 메서드
     public GoogleInfo getInfo(final String code) {
         final GoogleToken token = getToken(code);
@@ -58,7 +61,7 @@ public class GoogleService {
     private GoogleToken getToken(final String code) {
         try {
             GoogleToken token = client.getGoogleToken(new URI(googleAuthUrl), restapiKey, redirectUrl, code,
-                    "authorization_code", googleScope);
+                    "authorization_code", clientSecret, googleScope); // client_secret 전달
             log.debug("Google Token: {}", token);
             return token;
         } catch (Exception e) {
