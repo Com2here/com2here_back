@@ -2,8 +2,9 @@ package com.com2here.com2hereback.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
-
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -169,9 +170,14 @@ public class OauthLoginController {
 
     @GetMapping("/callback/google")
     public void getGoogleAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8.name());
         log.debug("Google code = {}", code);
 
-        GoogleInfo googleInfo = googleService.getInfo(code);
+        // 디코딩된 code에서 %2F를 /로 변환
+        String finalCode = decodedCode.replace("%2F", "/");
+        log.debug("Final Google code = {}", finalCode);
+
+        GoogleInfo googleInfo = googleService.getInfo(finalCode);
         GoogleAccount googleAccount = googleInfo.getGoogleAccount();
 
         if (googleAccount != null) {
