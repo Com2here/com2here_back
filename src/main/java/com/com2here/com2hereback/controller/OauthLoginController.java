@@ -160,7 +160,9 @@ public class OauthLoginController {
                 + "?response_type=code"
                 + "&client_id=" + googleclientId
                 + "&redirect_uri=" + encodedRedirectUri
-                + "&scope=" + encodedScope; // URL 인코딩된 scope 추가
+                + "&scope=" + encodedScope // URL 인코딩된 scope 추가
+                + "&access_type=offline" // refresh token 발급(google용용)
+                + "&prompt=consent";
 
         Map<String, String> response = new HashMap<>();
         response.put("url", url); // JSON 형식으로 반환

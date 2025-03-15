@@ -41,7 +41,8 @@ public interface OauthClient {
                         @RequestParam("redirect_uri") String redirectUri,
                         @RequestParam("code") String code,
                         @RequestParam("grant_type") String grantType,
-                        @RequestParam("scope") String scope); // scope 추가
+                        @RequestParam("scope") String scope, // scope 추가
+                        @RequestParam("access_type") String accessType); // access_type 추가
 
         // Naver
         @PostMapping
