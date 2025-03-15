@@ -14,14 +14,17 @@ import lombok.ToString;
 public class GoogleToken {
     private String tokenType;
     private String accessToken;
+    private String refreshToken;
     private Long expiresIn;
 
     public static GoogleToken fail() {
-        return new GoogleToken(null, null, null);
+        return new GoogleToken(null, null, null, null);
     }
 
-    private GoogleToken(final String accessToken, final String tokenType, final Long expiresIn) {
+    private GoogleToken(final String accessToken, final String refreshToken, final String tokenType,
+            final Long expiresIn) {
         this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
     }

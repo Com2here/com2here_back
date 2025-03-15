@@ -37,11 +37,12 @@ public interface OauthClient {
 
         @PostMapping
         GoogleToken getGoogleToken(URI baseUrl, @RequestParam("client_id") String restApiKey,
-                        // @RequestParam("client-secret") String clientsecret,
+                        @RequestParam("client-secret") String clientsecret,
                         @RequestParam("redirect_uri") String redirectUri,
                         @RequestParam("code") String code,
                         @RequestParam("grant_type") String grantType,
-                        @RequestParam("scope") String scope); // scope 추가
+                        @RequestParam("scope") String scope, // scope 추가
+                        @RequestParam("access_type") String accessType); // access_type 추가
 
         // Naver
         @PostMapping
@@ -51,5 +52,6 @@ public interface OauthClient {
         NaverToken getNaverToken(URI baseUrl, @RequestParam("client_id") String restApiKey,
                         @RequestParam("redirect_uri") String redirectUri,
                         @RequestParam("code") String code,
-                        @RequestParam("grant_type") String grantType);
+                        @RequestParam("grant_type") String grantType,
+                        @RequestParam("client-secret") String clientsecret);
 }

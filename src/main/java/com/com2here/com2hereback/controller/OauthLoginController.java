@@ -2,8 +2,9 @@ package com.com2here.com2hereback.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
-
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -151,11 +152,17 @@ public class OauthLoginController {
         // URL 인코딩 처리
         String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
 
+        String encodedScope = URLEncoder.encode(
+                "openid profile email",
+                "UTF-8");
+
         String url = "https://accounts.google.com/o/oauth2/v2/auth"
                 + "?response_type=code"
                 + "&client_id=" + googleclientId
                 + "&redirect_uri=" + encodedRedirectUri
-                + "&scope=openid%20profile%20email"; // 구글 로그인에 필요한 scope 추가
+                + "&scope=" + encodedScope // URL 인코딩된 scope 추가
+                + "&access_type=offline" // refresh token 발급(google용용)
+                + "&prompt=consent";
 
         Map<String, String> response = new HashMap<>();
         response.put("url", url); // JSON 형식으로 반환
@@ -165,9 +172,14 @@ public class OauthLoginController {
 
     @GetMapping("/callback/google")
     public void getGoogleAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8.name());
         log.debug("Google code = {}", code);
 
-        GoogleInfo googleInfo = googleService.getInfo(code);
+        // 디코딩된 code에서 %2F를 /로 변환
+        String finalCode = decodedCode.replace("%2F", "/");
+        log.debug("Final Google code = {}", finalCode);
+
+        GoogleInfo googleInfo = googleService.getInfo(finalCode);
         GoogleAccount googleAccount = googleInfo.getGoogleAccount();
 
         if (googleAccount != null) {
