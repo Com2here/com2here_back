@@ -36,6 +36,15 @@ public enum BaseResponseStatus {
     // 비밀번호 형식 불일치
     PASSWORD_FORMAT_INVALID(HttpStatus.BAD_REQUEST, false, 2601, "비밀번호 형식이 불일치합니다. 최소 8자 이상 최대 20자 이하, 영문, 숫자, 특수문자를 포함해야 합니다."),
     UNMATCHED_PASSWORD(HttpStatus.FORBIDDEN, false, 2602, "비밀번호가 일치하지 않습니다."),
+    
+    // 인증코드 불일치
+    UNMATCHED_EMAIL_CODE(HttpStatus.FORBIDDEN, false, 2610, "인증코드가 일치하지 않습니다."),
+    FAIL_CODE_CREATE(HttpStatus.FORBIDDEN, false, 2611, "인증코드 생성에 실패했습니다."),
+    FAIL_MAIL_SET(HttpStatus.FORBIDDEN, false, 2612, "메일 초기화에 실패했습니다."),
+    FAIL_MAIL_CREATE(HttpStatus.FORBIDDEN, false, 2613, "메일 폼 생성에 실패했습니다."),
+    FAIL_MAIL_SEND(HttpStatus.FORBIDDEN, false, 2614, "메일 전송에 실패했습니다."),
+    FAIL_MAIL_VERIFY(HttpStatus.FORBIDDEN, false, 2615, "메일 인증에 실패했습니다."),
+    INVALID_VERIFICATION_CODE(HttpStatus.FORBIDDEN, false, 2616, "인증코드 인증에 실패했습니다."),
     /**
      * 400 : security 에러
      */

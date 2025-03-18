@@ -22,13 +22,16 @@ public class User {
     private String password;
     private String refreshToken;
 
+    private boolean isEmailVerified;
+
     @Builder
-    public User(int user_id,String uuid, String username, String email, String password, String refreshToken) {
+    public User(int user_id,String uuid, String username, String email, String password, String refreshToken, boolean isEmailVerified) {
         this.user_id = user_id;
         this.uuid = uuid != null ? uuid : UUID.randomUUID().toString();
         this.username = username;
         this.email = email;
         this.password = password;
         this.refreshToken = refreshToken;
+        this.isEmailVerified = isEmailVerified;
     }
 }
