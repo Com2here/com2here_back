@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.security;
+package com.com2here.com2hereback.config.jwt;
 
 import io.jsonwebtoken.io.Decoders;
 import java.security.Key;

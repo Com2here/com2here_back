@@ -23,14 +23,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // jwt 필터
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .httpBasic(basic -> basic.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/v1/user/**").permitAll()
+                        .requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
                         .anyRequest().authenticated())
                 .build();
     }

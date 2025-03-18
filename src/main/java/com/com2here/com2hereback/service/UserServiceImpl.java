@@ -7,7 +7,7 @@ import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.repository.UserRepository;
-import com.com2here.com2hereback.security.TokenProvider;
+import com.com2here.com2hereback.config.jwt.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +62,12 @@ public class UserServiceImpl implements UserService {
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail())
             .uuid(null)
+            .isEmailVerified(false)
             .build();
 
+
         userRepository.save(user);
+
         status = BaseResponseStatus.REGISTRATION_SUCCESS;
 
         return CMResponse.success(status.getCode(),status,null);

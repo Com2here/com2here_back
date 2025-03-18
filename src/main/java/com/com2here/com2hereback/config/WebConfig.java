@@ -1,6 +1,6 @@
 package com.com2here.com2hereback.config;
 
-import com.com2here.com2hereback.security.BearerAuthInterceptor;
+import com.com2here.com2hereback.config.jwt.BearerAuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
