@@ -4,8 +4,10 @@ import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.EmailRequestDto;
 import com.com2here.com2hereback.service.EmailService;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,9 +37,10 @@ public class EmailController {
     @GetMapping("/verify")
     public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code) {
         try {
-            CMResponse status = emailService.verifyCode(email, code);
-            System.out.println(status.getMessage());
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), status.getData()));
+            emailService.verifyCode(email, code);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:5173"))
+                .build();
         } catch (Exception e) {
             return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
         }

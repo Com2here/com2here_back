@@ -3,7 +3,8 @@ package com.com2here.com2hereback.service;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.config.redis.RedisUtil;
-import jakarta.mail.MessagingException;
+import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
 import java.util.Random;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -27,6 +27,7 @@ public class EmailServiceImpl implements EmailService{
     private final JavaMailSender javaMailSender;
     private static final String senderEmail = "ck8901ck@gmail.com";
     private final RedisUtil redisUtil;
+    private final UserRepository userRepository;
 
     @Override
     public CMResponse createCode() {
@@ -90,7 +91,6 @@ public class EmailServiceImpl implements EmailService{
         try {
             // 인증 코드 생성
             String authCode = (String) createCode().getData();
-            System.out.println("authCode : " + authCode);
             MimeMessage message = javaMailSender.createMimeMessage();
             message.addRecipients(RecipientType.TO, email);
             message.setSubject("안녕하세요. 인증번호입니다.");
@@ -126,7 +126,6 @@ public class EmailServiceImpl implements EmailService{
             // 이메일 발송
             try {
                 javaMailSender.send(emailForm);
-                System.out.println("Email sent successfully to: " + email);
             } catch (Exception e) {
                 System.err.println("Failed to send email: " + e.getMessage());
                 throw e;  // 예외를 다시 던져 호출자에게 알림
@@ -144,10 +143,7 @@ public class EmailServiceImpl implements EmailService{
     public CMResponse verifyCode(String email, String code) {
         BaseResponseStatus status;
         try {
-            log.info("Attempting to verify code for email: " + email); // 이메일 로그 추가
             String codeFoundByEmail = redisUtil.getData(email);
-            log.info("Code found by email: " + codeFoundByEmail); // 코드 로그 추가
-            log.info("Code: " + code); // 코드 로그 추가
 
             if (codeFoundByEmail == null) {
                 status = BaseResponseStatus.UNMATCHED_EMAIL_CODE;
@@ -158,6 +154,21 @@ public class EmailServiceImpl implements EmailService{
                 status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
                 return CMResponse.fail(status.getCode(), status, null);
             }
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                status = BaseResponseStatus.NO_EXIST_MEMBERS;
+                return CMResponse.fail(status.getCode(), status, null);
+            }
+            user = User.builder()
+                .user_id(user.getUser_id())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .email(user.getEmail())
+                .uuid(user.getUuid())
+                .isEmailVerified(true)
+                .build();
+
+            userRepository.save(user);
 
             status = BaseResponseStatus.SUCCESS;
             return CMResponse.success(status.getCode(), status, null);
