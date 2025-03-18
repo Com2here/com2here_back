@@ -91,7 +91,6 @@ public class EmailServiceImpl implements EmailService{
         try {
             // 인증 코드 생성
             String authCode = (String) createCode().getData();
-            System.out.println("authCode : " + authCode);
             MimeMessage message = javaMailSender.createMimeMessage();
             message.addRecipients(RecipientType.TO, email);
             message.setSubject("안녕하세요. 인증번호입니다.");
@@ -127,7 +126,6 @@ public class EmailServiceImpl implements EmailService{
             // 이메일 발송
             try {
                 javaMailSender.send(emailForm);
-                System.out.println("Email sent successfully to: " + email);
             } catch (Exception e) {
                 System.err.println("Failed to send email: " + e.getMessage());
                 throw e;  // 예외를 다시 던져 호출자에게 알림
