@@ -8,7 +8,6 @@ import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -115,7 +114,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CMResponse ShowUser(HttpServletRequest request) {
+    public CMResponse ShowUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
@@ -130,7 +129,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CMResponse updateUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+    public CMResponse updateUser(UserRequestDto userRequestDto) {
         BaseResponseStatus status;
 
         // 400 : 데이터 누락
@@ -160,7 +159,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CMResponse deleteUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+    public CMResponse deleteUser(UserRequestDto userRequestDto) {
         BaseResponseStatus status;
 
         // 400 : 데이터 누락
@@ -187,6 +186,7 @@ public class UserServiceImpl implements UserService {
         // 200
         return CMResponse.success(status.getCode(),status,null);
     }
+
 
 
 }

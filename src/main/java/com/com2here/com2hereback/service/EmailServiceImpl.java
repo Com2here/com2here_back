@@ -11,6 +11,7 @@ import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
@@ -28,6 +29,7 @@ public class EmailServiceImpl implements EmailService{
     private static final String senderEmail = "ck8901ck@gmail.com";
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public CMResponse createCode() {
@@ -93,7 +95,7 @@ public class EmailServiceImpl implements EmailService{
             String authCode = (String) createCode().getData();
             MimeMessage message = javaMailSender.createMimeMessage();
             message.addRecipients(RecipientType.TO, email);
-            message.setSubject("안녕하세요. 인증번호입니다.");
+            message.setSubject("컴히얼 인증 메일");
             message.setFrom(senderEmail);
 
             // 인증 코드로 이메일 내용 설정
@@ -111,7 +113,6 @@ public class EmailServiceImpl implements EmailService{
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
-
 
     @Override
     public CMResponse sendEmail(String email) {
@@ -138,6 +139,64 @@ public class EmailServiceImpl implements EmailService{
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
+
+    @Override
+    @Transactional
+    public CMResponse sendPasswordEmail(String email) {
+        BaseResponseStatus status;
+        try {
+            String newPassword = (String) createCode().getData();
+            User user = userRepository.findByEmail(email);
+
+            // 2700 : 이메일 인증이 되지않은 계정
+            if(user.isEmailVerified() == false){
+                status = BaseResponseStatus.NOT_EMAIL_VERIFY;
+                return CMResponse.fail(status.getCode(),status,null);
+            }
+            user = User.builder()
+                .user_id(user.getUser_id())
+                .username(user.getUsername())
+                .password(bCryptPasswordEncoder.encode(newPassword))
+                .email(user.getEmail())
+                .uuid(user.getUuid())
+                .isEmailVerified(user.isEmailVerified())
+                .build();
+
+            userRepository.save(user);
+
+            // 이메일 템플릿 준비
+            Context context = new Context();
+            context.setVariable("password", newPassword); // 비밀번호를 템플릿에 전달
+            ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+            templateResolver.setPrefix("templates/");
+            templateResolver.setSuffix(".html");
+            templateResolver.setTemplateMode(TemplateMode.HTML);
+            templateResolver.setCacheable(false);
+
+            TemplateEngine templateEngine = new TemplateEngine();
+            templateEngine.setTemplateResolver(templateResolver);
+
+            // 템플릿 처리
+            String emailContent = templateEngine.process("password", context);
+
+            // 이메일 발송
+            MimeMessage message = javaMailSender.createMimeMessage();
+            message.addRecipients(RecipientType.TO, email);
+            message.setSubject("비밀번호 안내 메일");
+            message.setFrom(senderEmail);
+            message.setContent(emailContent, "text/html; charset=utf-8");
+
+            // 이메일 발송
+            javaMailSender.send(message);
+
+            status = BaseResponseStatus.SUCCESS;
+            return CMResponse.success(status.getCode(), status, newPassword);
+        } catch (Exception e) {
+            status = BaseResponseStatus.FAIL_MAIL_SEND;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+    }
+
 
     @Override
     public CMResponse verifyCode(String email, String code) {
