@@ -45,6 +45,10 @@ public enum BaseResponseStatus {
     FAIL_MAIL_SEND(HttpStatus.FORBIDDEN, false, 2614, "메일 전송에 실패했습니다."),
     FAIL_MAIL_VERIFY(HttpStatus.FORBIDDEN, false, 2615, "메일 인증에 실패했습니다."),
     INVALID_VERIFICATION_CODE(HttpStatus.FORBIDDEN, false, 2616, "인증코드 인증에 실패했습니다."),
+
+    NOT_EMAIL_VERIFY(HttpStatus.FORBIDDEN, false, 2700, "이메일 인증이 되지 않은 계정입니다."),
+
+
     /**
      * 400 : security 에러
      */

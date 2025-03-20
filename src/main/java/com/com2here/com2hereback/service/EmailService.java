@@ -13,9 +13,12 @@ public interface EmailService {
     // 이메일 폼 생성
     CMResponse createEmailForm(String email);
 
-    // 인증코드 발송
+    // 인증메일 발송
     CMResponse sendEmail(String string);
 
-    // 인증코드 검증
+
+    CMResponse sendPasswordEmail(String email);
+
+    // 인증메일 검증
     CMResponse verifyCode(String email, String code);
 }

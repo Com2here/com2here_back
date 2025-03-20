@@ -2,9 +2,11 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.dto.EmailRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
+import com.com2here.com2hereback.service.EmailService;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.ShowUserResponseVo;
 import com.com2here.com2hereback.vo.UserTokenResponseVo;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    private final EmailService emailService;
 
     // 회원가입 API
     // 입력값 : userRequestDto
@@ -57,9 +60,9 @@ public class UserController {
     // 입력값 : Token
     // 출력값 : code, message, showUserResponseVo
     @GetMapping("/show")
-    public ResponseEntity<?> showUser(HttpServletRequest request) {
+    public ResponseEntity<?> showUser() {
         try{
-            CMResponse status = userService.ShowUser(request);
+            CMResponse status = userService.ShowUser();
             ShowUserResponseVo showUserResponseVo = ShowUserResponseVo.dtoToVo((ShowUserResponseDto) status.getData());
             return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), showUserResponseVo));
         }catch (Exception e) {
@@ -71,9 +74,9 @@ public class UserController {
     // 입력값 : Token, userRequestDto
     // 출력값 : code, message, null
     @PatchMapping("/update")
-    public ResponseEntity<?> updateUser(@RequestBody UserRequestDto userRequestDto, HttpServletRequest request) {
+    public ResponseEntity<?> updateUser(@RequestBody UserRequestDto userRequestDto) {
         try{
-            CMResponse status = userService.updateUser(userRequestDto, request);
+            CMResponse status = userService.updateUser(userRequestDto);
             return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), null));
         }catch (Exception e) {
             return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
@@ -84,12 +87,13 @@ public class UserController {
     // 입력값 : password
     // 출력값 : code, message, null
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@RequestBody UserRequestDto userRequestDto, HttpServletRequest request) {
+    public ResponseEntity<?> deleteUser(@RequestBody UserRequestDto userRequestDto) {
         try {
-            CMResponse status = userService.deleteUser(userRequestDto, request);
+            CMResponse status = userService.deleteUser(userRequestDto);
             return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),null));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
         }
     }
+
 }

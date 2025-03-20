@@ -46,5 +46,16 @@ public class EmailController {
         }
     }
 
-
+    // 비밀번호 찾기 API
+    // 입력값 :
+    // 출력값 : 비밀번호 재설정
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody EmailRequestDto emailRequestDto) {
+        try {
+            CMResponse status = emailService.sendPasswordEmail(emailRequestDto.getMail());
+            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),status.getData()));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
 }
