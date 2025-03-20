@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        // .requestMatchers("/api/v1/user/password/reset", "/api/v1/user/register", "/api/v1/user/login").permitAll()
                         .requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
                         .anyRequest().authenticated())
                 .build();

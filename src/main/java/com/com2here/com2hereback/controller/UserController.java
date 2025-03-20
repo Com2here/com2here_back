@@ -2,6 +2,7 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.EmailRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
@@ -96,4 +97,16 @@ public class UserController {
         }
     }
 
+    // 비밀번호 변경 API
+    // 입력값 : currentPassword, password, confirmPassword
+    // 출력값 : code, message, null
+    @PatchMapping("/password/change")
+    public ResponseEntity<?> chgPassword(@RequestBody ChgPasswordRequestDto chgPasswordRequestDto) {
+        try{
+            CMResponse status = userService.chgPassword(chgPasswordRequestDto);
+            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), null));
+        }catch (Exception e) {
+            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
 }
