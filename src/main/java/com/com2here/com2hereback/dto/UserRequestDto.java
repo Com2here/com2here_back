@@ -14,16 +14,16 @@ public class UserRequestDto {
     private String username;
     private String email;
     private String password;
-    private String password_confirmation;
+    private String confirmPassword;
     private String token; // JWT 토큰
 
     @Builder
-    public UserRequestDto(int user_id, String username, String email, String password,String password_confirmation , String token) {
+    public UserRequestDto(int user_id, String username, String email, String password,String confirmPassword , String token) {
         this.user_id = user_id;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.password_confirmation = password_confirmation;
+        this.confirmPassword = confirmPassword;
         this.token = token;
     }
 

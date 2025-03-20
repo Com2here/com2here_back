@@ -1,6 +1,7 @@
 package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 
 public interface UserService {
@@ -19,5 +20,8 @@ public interface UserService {
 
     // 삭제
     CMResponse deleteUser(UserRequestDto userRequestDto);
+
+    // 비밀번호 변경
+    CMResponse chgPassword(ChgPasswordRequestDto chgPasswordRequestDto);
 
 }
