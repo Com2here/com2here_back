@@ -1,5 +1,9 @@
 package com.com2here.com2hereback.config;
 
+import com.com2here.com2hereback.config.jwt.AuthorizationExtractor;
+import com.com2here.com2hereback.config.jwt.JwtAuthenticationFilter;
+import com.com2here.com2hereback.config.jwt.TokenProvider;
+import com.com2here.com2hereback.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,14 +13,24 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CorsFilter corsFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final TokenProvider tokenProvider;
+    private final UserRepository userRepository;
+    private final AuthorizationExtractor authExtractor;
+
+    public SecurityConfig(TokenProvider tokenProvider, UserRepository userRepository,  AuthorizationExtractor authExtractor) {
+        this.tokenProvider = tokenProvider;
+        this.userRepository = userRepository;
+        this.authExtractor = authExtractor;
+        this.jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider, userRepository, authExtractor);
+    }
 
     @Bean // -> 암호화
     public BCryptPasswordEncoder passwordEncoder() {
@@ -26,21 +40,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .httpBasic(basic -> basic.disable())
-                .csrf(csrf -> csrf.disable())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        // .requestMatchers("/api/v1/user/password/reset", "/api/v1/user/register", "/api/v1/user/login").permitAll()
-                        .requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
+                        .requestMatchers("/api/v1/user/password/reset", "/api/v1/user/register", "/api/v1/user/login").permitAll()
+                        //.requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
                         .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    public class CustomDsl extends AbstractHttpConfigurer<CustomDsl, HttpSecurity> {
-        @Override
-        public void configure(HttpSecurity builder) {
-            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-            builder.addFilter(corsFilter);
-
-        }
-    }
 }
