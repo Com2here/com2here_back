@@ -7,7 +7,7 @@ build/
 !**/src/test/**/build/  
 
 ### STS ###  
-.apt_generated  
+.apt_generated
 .classpath  
 .factorypath  
 .project  
@@ -19,7 +19,8 @@ bin/
 !**/src/test/**/bin/  
 
 ### IntelliJ IDEA ###  
-application.properties  
+application.properties
+.env
 .idea  
 *.iws  
 *.iml  
