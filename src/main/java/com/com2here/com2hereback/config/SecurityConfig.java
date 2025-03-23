@@ -25,7 +25,8 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final AuthorizationExtractor authExtractor;
 
-    public SecurityConfig(TokenProvider tokenProvider, UserRepository userRepository,  AuthorizationExtractor authExtractor) {
+    public SecurityConfig(TokenProvider tokenProvider, UserRepository userRepository,
+            AuthorizationExtractor authExtractor) {
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.authExtractor = authExtractor;
@@ -43,8 +44,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/v1/user/password/reset", "/api/v1/user/register", "/api/v1/user/login").permitAll()
-                        //.requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
+                        .requestMatchers("/api/v1/email/send", "/api/v1/email/verify", "/api/v1/user/password/reset",
+                                "/api/v1/user/register", "/api/v1/user/login")
+                        .permitAll()
+                        // .requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

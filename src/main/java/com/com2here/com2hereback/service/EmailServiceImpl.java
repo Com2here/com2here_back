@@ -23,10 +23,10 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class EmailServiceImpl implements EmailService{
+public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail = "ck8901ck@gmail.com";
+    private static final String senderEmail = "lysfox8@gmail.com";
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -34,7 +34,7 @@ public class EmailServiceImpl implements EmailService{
     @Override
     public CMResponse createCode() {
         BaseResponseStatus status;
-        try{
+        try {
 
             int leftLimit = 48; // number '0'
             int rightLimit = 122; // alphabet 'z'
@@ -42,15 +42,15 @@ public class EmailServiceImpl implements EmailService{
             Random random = new Random();
 
             String code = random.ints(leftLimit, rightLimit + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 | i >= 97))
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 | i >= 97))
+                    .limit(targetStringLength)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
 
             status = BaseResponseStatus.SUCCESS;
 
-            return CMResponse.success(status.getCode(), status,code);
-        }catch (Exception e){
+            return CMResponse.success(status.getCode(), status, code);
+        } catch (Exception e) {
             status = BaseResponseStatus.FAIL_CODE_CREATE;
             return CMResponse.fail(status.getCode(), status, null);
         }
@@ -86,7 +86,6 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
-
     @Override
     public CMResponse createEmailForm(String email) {
         BaseResponseStatus status;
@@ -99,7 +98,7 @@ public class EmailServiceImpl implements EmailService{
             message.setFrom(senderEmail);
 
             // 인증 코드로 이메일 내용 설정
-            String emailContent = (String) setEmail(email, authCode).getData();  // authCode를 여기에서 전달해야 합니다.
+            String emailContent = (String) setEmail(email, authCode).getData(); // authCode를 여기에서 전달해야 합니다.
 
             message.setContent(emailContent, "text/html; charset=utf-8");
 
@@ -117,7 +116,7 @@ public class EmailServiceImpl implements EmailService{
     @Override
     public CMResponse sendEmail(String email) {
         BaseResponseStatus status;
-        try{
+        try {
 
             if (redisUtil.existData(email)) {
                 redisUtil.deleteData(email);
@@ -129,7 +128,7 @@ public class EmailServiceImpl implements EmailService{
                 javaMailSender.send(emailForm);
             } catch (Exception e) {
                 System.err.println("Failed to send email: " + e.getMessage());
-                throw e;  // 예외를 다시 던져 호출자에게 알림
+                throw e; // 예외를 다시 던져 호출자에게 알림
             }
 
             status = BaseResponseStatus.SUCCESS;
@@ -149,18 +148,18 @@ public class EmailServiceImpl implements EmailService{
             User user = userRepository.findByEmail(email);
 
             // 2700 : 이메일 인증이 되지않은 계정
-            if(user.isEmailVerified() == false){
+            if (user.isEmailVerified() == false) {
                 status = BaseResponseStatus.NOT_EMAIL_VERIFY;
-                return CMResponse.fail(status.getCode(),status,null);
+                return CMResponse.fail(status.getCode(), status, null);
             }
             user = User.builder()
-                .user_id(user.getUser_id())
-                .username(user.getUsername())
-                .password(bCryptPasswordEncoder.encode(newPassword))
-                .email(user.getEmail())
-                .uuid(user.getUuid())
-                .isEmailVerified(user.isEmailVerified())
-                .build();
+                    .user_id(user.getUser_id())
+                    .username(user.getUsername())
+                    .password(bCryptPasswordEncoder.encode(newPassword))
+                    .email(user.getEmail())
+                    .uuid(user.getUuid())
+                    .isEmailVerified(user.isEmailVerified())
+                    .build();
 
             userRepository.save(user);
 
@@ -197,7 +196,6 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
-
     @Override
     public CMResponse verifyCode(String email, String code) {
         BaseResponseStatus status;
@@ -219,13 +217,13 @@ public class EmailServiceImpl implements EmailService{
                 return CMResponse.fail(status.getCode(), status, null);
             }
             user = User.builder()
-                .user_id(user.getUser_id())
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .email(user.getEmail())
-                .uuid(user.getUuid())
-                .isEmailVerified(true)
-                .build();
+                    .user_id(user.getUser_id())
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .email(user.getEmail())
+                    .uuid(user.getUuid())
+                    .isEmailVerified(true)
+                    .build();
 
             userRepository.save(user);
 
