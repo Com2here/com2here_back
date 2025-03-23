@@ -5,6 +5,7 @@ import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.repository.UserRepository;
@@ -105,13 +106,15 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updateUser);
 
-        UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.builder()
+        UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
+            .username(user.getUsername())
+            .email(user.getEmail())
             .build();
 
         status = BaseResponseStatus.LOGIN_SUCCESS;
-        return CMResponse.success(status.getCode(),status, userTokenResponseDto);
+        return CMResponse.success(status.getCode(),status, userLoginResponseDto);
     }
 
     @Override

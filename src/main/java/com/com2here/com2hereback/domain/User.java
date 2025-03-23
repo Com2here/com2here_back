@@ -17,11 +17,18 @@ public class User {
     @Column(nullable = false, unique = true)
     private String uuid;
 
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
     private String refreshToken;
 
+    @Column(nullable = false)
     private boolean isEmailVerified;
 
     @Builder
