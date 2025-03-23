@@ -42,39 +42,39 @@ spring.data.redis.host=${SPRING_DATA_REDIS_HOST}
 spring.data.redis.port=${SPRING_DATA_REDIS_PORT}
 spring.data.redis.password=${SPRING_DATA_REDIS_PASSWORD}
 
-spring.session.store-type=redis
+spring.session.store-type=
 
-server.servlet.session.timeout=3600
-spring.session.redis.namespace=spring:session
+server.servlet.session.timeout=
+spring.session.redis.namespace=
 
 # Server Configuration
 server.port=3000
 
 # Kakao Configuration
-kakao.authUrl=https://kauth.kakao.com/oauth/token
-kakao.userApiUrl=https://kapi.kakao.com/v2/user/me
+kakao.authUrl=
+kakao.userApiUrl=
 kakao.restapiKey=${KAKAO_RESTAPI_KEY}
 # 리다이렉트될 URL
-kakao.redirectUrl=http://localhost:5173
+kakao.redirectUrl=
 
 # Google Configuration
-google.authUrl=https://accounts.google.com/o/oauth2/v2/auth
-google.tokenUrl=https://oauth2.googleapis.com/token
-google.userApiUrl=https://www.googleapis.com/oauth2/v3/userinfo
+google.authUrl=
+google.tokenUrl=
+google.userApiUrl=
 google.restapiKey=${GOOGLE_RESTAPI_KEY}
 # 리다이렉트될 URL
-google.redirectUrl=http://localhost:5173
+google.redirectUrl=
 google.client-secret=${GOOGLE_CLIENT_SECRET}
-google.scope=openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email
+google.scope=
 
 # Naver Configuration
-naver.authUrl=https://nid.naver.com/oauth2.0/authorize
-naver.tokenUrl=https://nid.naver.com/oauth2.0/token
-naver.userApiUrl=https://openapi.naver.com/v1/nid/me
+naver.authUrl=
+naver.tokenUrl=
+naver.userApiUrl=
 naver.restapiKey=${NAVER_RESTAPI_KEY}
 naver.client-secret=${NAVER_CLIENT_SECRET}
 # 리다이렉트될 URL
-naver.redirectUrl=http://localhost:5173
+naver.redirectUrl=
 
 # Logging Configuration
 logging.level.root=INFO
