@@ -29,7 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final AuthorizationExtractor authExtractor;
 
-    public JwtAuthenticationFilter(TokenProvider tokenProvider, UserRepository userRepository, AuthorizationExtractor authExtractor) {
+    public JwtAuthenticationFilter(TokenProvider tokenProvider, UserRepository userRepository,
+            AuthorizationExtractor authExtractor) {
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.authExtractor = authExtractor;
@@ -37,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
 
         log.info(">>> JwtAuthenticationFilter 호출: {}", request.getRequestURI());
 
@@ -74,17 +75,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String newRefreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
                     User updatedUser = User.builder()
-                        .user_id(user.getUser_id())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .password(user.getPassword())
-                        .uuid(user.getUuid())
-                        .refreshToken(newRefreshToken)
-                        .build();
+                            .user_id(user.getUser_id())
+                            .username(user.getUsername())
+                            .email(user.getEmail())
+                            .password(user.getPassword())
+                            .uuid(user.getUuid())
+                            .refreshToken(newRefreshToken)
+                            .build();
 
                     userRepository.save(updatedUser);
 
-                    UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(newAccessToken, newRefreshToken);
+                    UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(newAccessToken,
+                            newRefreshToken);
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
                     status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
@@ -104,10 +106,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 로그인 API 등 필터를 건너뛰어야 하는 경로 확인
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return
-            path.equals("/api/v1/user/login") ||
-            path.equals("/api/v1/user/register") ||
-            path.equals("/api/v1/user/password/reset");
+        return path.equals("/api/v1/user/login") ||
+                path.equals("/api/v1/user/register") ||
+                path.equals("/api/v1/email/send") ||
+                path.equals("/api/v1/email/verify") ||
+                path.equals("/api/v1/user/login/kakao/url") ||
+                path.equals("/api/v1/user/login/naver/url") ||
+                path.equals("/api/v1/user/login/google/url") ||
+                path.equals("/api/v1/user/password/reset");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {
