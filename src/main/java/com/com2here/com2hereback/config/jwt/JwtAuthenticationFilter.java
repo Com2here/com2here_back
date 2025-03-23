@@ -110,10 +110,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/user/register") ||
                 path.equals("/api/v1/email/send") ||
                 path.equals("/api/v1/email/verify") ||
+                path.equals("/api/v1/email/authcode") ||
+                path.equals("/api/v1/email/password/reset") ||
                 path.equals("/api/v1/user/login/kakao/url") ||
                 path.equals("/api/v1/user/login/naver/url") ||
-                path.equals("/api/v1/user/login/google/url") ||
-                path.equals("/api/v1/user/password/reset");
+                path.equals("/api/v1/user/login/google/url");
+
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {

@@ -3,6 +3,7 @@ package com.com2here.com2hereback.controller;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.EmailRequestDto;
+import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
 import com.com2here.com2hereback.service.EmailService;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class EmailController {
 
     // 이메일 인증코드 전송
     @PostMapping("/send")
-    public ResponseEntity<?> sendCode(@RequestBody EmailRequestDto emailRequestDto){
+    public ResponseEntity<?> sendAuthEmail(@RequestBody EmailRequestDto emailRequestDto){
         try {
             CMResponse status = emailService.sendEmail(emailRequestDto.getMail());
             return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),status.getData()));
@@ -46,13 +47,26 @@ public class EmailController {
         }
     }
 
-    // 비밀번호 찾기 API
-    // 입력값 :
-    // 출력값 : 비밀번호 재설정
-    @PostMapping("/password/reset")
-    public ResponseEntity<?> resetPassword(@RequestBody EmailRequestDto emailRequestDto) {
+    // 인증코드 전송 API
+    // 입력값 : mail
+    // 출력값 :
+    @PostMapping("/authcode")
+    public ResponseEntity<?> sendCodeEmail(@RequestBody EmailRequestDto emailRequestDto) {
         try {
-            CMResponse status = emailService.sendPasswordEmail(emailRequestDto.getMail());
+            CMResponse status = emailService.sendCodeEmail(emailRequestDto.getMail());
+            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),status.getData()));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    // 비밀번호 재설정 API
+    // 입력값 :
+    // 출력값 :
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDto resetPasswordRequestDto) {
+        try {
+            CMResponse status = emailService.resetPassword(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode(), resetPasswordRequestDto.getPassword(), resetPasswordRequestDto.getConfirmPassword());
             return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),status.getData()));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));

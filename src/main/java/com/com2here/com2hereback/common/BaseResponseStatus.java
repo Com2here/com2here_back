@@ -38,6 +38,9 @@ public enum BaseResponseStatus {
     UNMATCHED_PASSWORD(HttpStatus.FORBIDDEN, false, 2602, "비밀번호가 일치하지 않습니다."),
     INVALID_CURRENT_PASSWORD(HttpStatus.FORBIDDEN, false, 2603, "현재 비밀번호가 일치하지 않습니다."),
     PASSWORD_CHANGE_SUCCESS(HttpStatus.OK, true, 2604, "비밀번호가 변경되었습니다."),
+    FAIL_PASSWORD_RESET(HttpStatus.BAD_REQUEST, true, 2605, "비밀번호가 변경 실패."),
+
+
 
     // 인증코드 불일치
     UNMATCHED_EMAIL_CODE(HttpStatus.FORBIDDEN, false, 2610, "인증코드가 일치하지 않습니다."),
