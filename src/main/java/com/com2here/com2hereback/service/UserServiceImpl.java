@@ -64,6 +64,8 @@ public class UserServiceImpl implements UserService {
             .email(userRequestDto.getEmail())
             .uuid(null)
             .isEmailVerified(false)
+            .role(false)
+            .profileImageUrl(null)
             .build();
 
 

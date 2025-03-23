@@ -31,8 +31,14 @@ public class User {
     @Column(nullable = false)
     private boolean isEmailVerified;
 
+    @Column(nullable = false)
+    private boolean role;
+
+    private String profileImageUrl;
+
+
     @Builder
-    public User(int user_id,String uuid, String username, String email, String password, String refreshToken, boolean isEmailVerified) {
+    public User(int user_id,String uuid, String username, String email, String password, String refreshToken, boolean isEmailVerified, boolean role, String profileImageUrl) {
         this.user_id = user_id;
         this.uuid = uuid != null ? uuid : UUID.randomUUID().toString();
         this.username = username;
@@ -40,5 +46,7 @@ public class User {
         this.password = password;
         this.refreshToken = refreshToken;
         this.isEmailVerified = isEmailVerified;
+        this.role = role;
+        this.profileImageUrl = profileImageUrl;
     }
 }
