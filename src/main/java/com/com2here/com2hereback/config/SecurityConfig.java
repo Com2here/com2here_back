@@ -7,14 +7,12 @@ import com.com2here.com2hereback.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -44,9 +42,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/v1/email/send", "/api/v1/email/verify", "/api/v1/user/password/reset",
+                        .requestMatchers("/api/v1/email/send", "/api/v1/email/verify", "/api/v1/email/password/reset",
                                 "/api/v1/user/register", "/api/v1/user/login", "api/v1/user/login/kakao/url",
-                                "api/v1/user/login/naver/url", "api/v1/user/login/google/url")
+                                "api/v1/user/login/naver/url", "api/v1/user/login/google/url", "/api/v1/email/authcode")
                         .permitAll()
                         // .requestMatchers("/**").permitAll() // 모든 경로에 대해 접근 허용
                         .anyRequest().authenticated())
