@@ -4,7 +4,6 @@ import com.com2here.com2hereback.config.jwt.AuthorizationExtractor;
 import com.com2here.com2hereback.config.jwt.JwtAuthenticationFilter;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import com.com2here.com2hereback.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
