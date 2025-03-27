@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +24,7 @@ import com.com2here.com2hereback.dto.oauthaccount.NaverAccount;
 import com.com2here.com2hereback.dto.oauthinfo.GoogleInfo;
 import com.com2here.com2hereback.dto.oauthinfo.KakaoInfo;
 import com.com2here.com2hereback.dto.oauthinfo.NaverInfo;
+import com.com2here.com2hereback.dto.oauthtoken.KakaoToken;
 import com.com2here.com2hereback.dto.oauthtoken.NaverToken;
 import com.com2here.com2hereback.service.oauthservice.GoogleService;
 import com.com2here.com2hereback.service.oauthservice.KakaoService;
@@ -64,16 +68,10 @@ public class OauthLoginController {
     @GetMapping("/login/kakao/url")
     public Map<String, String> getKakaoLoginUrl() throws UnsupportedEncodingException {
 
-        // redirectUri에서 불필요한 부분 제거 (예시로 localhost:3000/callback만 사용)
-        String cleanRedirectUri = kakaoredirectUri.replace(" ", "").replace("kakao", "");
-
-        // URL 인코딩 처리
-        String encodedRedirectUri = URLEncoder.encode(cleanRedirectUri, "UTF-8");
-
         String url = "https://kauth.kakao.com/oauth/authorize"
                 + "?response_type=code"
                 + "&client_id=" + kakaoclientId
-                + "&redirect_uri=" + encodedRedirectUri;
+                + "&redirect_uri=" + kakaoredirectUri;
 
         Map<String, String> response = new HashMap<>();
         response.put("url", url); // JSON 형식으로 반환
@@ -82,20 +80,33 @@ public class OauthLoginController {
     }
 
     @GetMapping("/callback/kakao")
-    public void getKakaoAccount(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> getKakaoAccount(@RequestBody Map<String, String> request) {
+        String code = request.get("code"); // 클라이언트로부터 받은 인증 코드
         log.debug("Kakao code = {}", code);
 
-        KakaoInfo kakaoInfo = kakaoService.getInfo(code);
+        // ✅ 1. accessToken 가져오기
+        KakaoToken kakaoToken = kakaoService.getToken(code);
+        if (kakaoToken == null || kakaoToken.getAccessToken() == null) {
+            log.error("Failed to retrieve access token.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 로그인 실패");
+        }
+
+        // ✅ 2. accessToken을 이용해 사용자 정보 가져오기
+        KakaoInfo kakaoInfo = kakaoService.getInfo(kakaoToken.getAccessToken());
         KakaoAccount kakaoAccount = kakaoInfo.getKakaoAccount();
 
         if (kakaoAccount != null) {
             log.debug("Kakao account found: {}", kakaoAccount);
-            // 로그인 성공 후 리다이렉트 URL로 이동 (메인 페이지)
-            response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
+
+            // ✅ 프론트에 accessToken과 사용자 정보 전달
+            Map<String, Object> response = new HashMap<>();
+            response.put("access_token", kakaoToken.getAccessToken()); // ✅ KakaoToken에서 accessToken 가져옴
+            response.put("user", kakaoAccount); // ✅ 사용자 정보
+
+            return ResponseEntity.ok(response);
         } else {
             log.error("Failed to retrieve Kakao account.");
-            // 실패 시 리다이렉트
-            response.sendRedirect("http://localhost:5173/login"); // 로그인 실패 시 login 페이지로 이동
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 로그인 실패");
         }
     }
 
@@ -132,7 +143,7 @@ public class OauthLoginController {
         if (naverAccount != null) {
             log.debug("Naver account found: {}", naverAccount);
             // 로그인 성공 후 리다이렉트 URL로 이동 (메인 페이지)
-            response.sendRedirect("http://localhost:5173"); // 메인 페이지로 리다이렉트
+            response.sendRedirect("http://localhost:5173/"); // 메인 페이지로 리다이렉트
         } else {
             log.error("Failed to retrieve Naver account.");
             // 실패 시 리다이렉트

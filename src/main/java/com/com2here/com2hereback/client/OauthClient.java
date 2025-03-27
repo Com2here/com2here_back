@@ -25,8 +25,8 @@ public interface OauthClient {
         @PostMapping
         KakaoInfo getKakaoInfo(URI baseUrl, @RequestHeader("Authorization") String accessToken);
 
-        @PostMapping
-        KakaoToken getKakaoToken(URI baseUrl, @RequestParam("client_id") String restApiKey,
+        @PostMapping("/oauth/token") // 정확한 URL 경로를 명시
+        KakaoToken getKakaoToken(URI basUri, @RequestParam("client_id") String restApiKey,
                         @RequestParam("redirect_uri") String redirectUrl,
                         @RequestParam("code") String code,
                         @RequestParam("grant_type") String grantType);

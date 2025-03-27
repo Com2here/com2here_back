@@ -123,4 +123,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.error("응답 작성 중 오류 발생", e);
         }
     }
+
 }

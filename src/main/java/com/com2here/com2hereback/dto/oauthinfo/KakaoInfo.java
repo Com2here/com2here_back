@@ -13,9 +13,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KakaoInfo {
-    private KakaoAccount kakaoAccount;
+    private KakaoAccount kakaoAccount; // ✅ 사용자 정보 포함
+    // ✅ 실패 응답을 반환하는 정적 메서드 추가
 
     public static KakaoInfo fail() {
-        return null;
+        return new KakaoInfo(); // 실패 시 빈 객체 반환
     }
 }
