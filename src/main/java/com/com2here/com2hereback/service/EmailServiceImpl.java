@@ -26,7 +26,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail = "ck8901ck@gmail.com";
+    private static final String senderEmail = "lysfox8@gmail.com";
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -256,13 +256,13 @@ public class EmailServiceImpl implements EmailService {
             String hashedPassword = bCryptPasswordEncoder.encode(newPassword);
 
             user = User.builder()
-                .user_id(user.getUser_id())
-                .username(user.getUsername())
-                .password(hashedPassword)
-                .email(user.getEmail())
-                .uuid(user.getUuid())
-                .isEmailVerified(user.isEmailVerified())
-                .build();
+                    .user_id(user.getUser_id())
+                    .username(user.getUsername())
+                    .password(hashedPassword)
+                    .email(user.getEmail())
+                    .uuid(user.getUuid())
+                    .isEmailVerified(user.isEmailVerified())
+                    .build();
 
             userRepository.save(user);
 
@@ -276,6 +276,5 @@ public class EmailServiceImpl implements EmailService {
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
-
 
 }
