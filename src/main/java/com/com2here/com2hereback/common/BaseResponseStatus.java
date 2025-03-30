@@ -50,6 +50,9 @@ public enum BaseResponseStatus {
 
     NOT_EMAIL_VERIFY(HttpStatus.FORBIDDEN, false, 2700, "이메일 인증이 되지 않은 계정입니다."),
 
+    FAIL_CREATE_OAUTH_URL(HttpStatus.INTERNAL_SERVER_ERROR, false, 2800, "카카오 URL 생성에 실패했습니다."),
+    FAIL_RETURN_OAUTH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, false, 2801, "카카오 토큰 반환에 실패했습니다."),
+    FAIL_RETURN_OAUTH_INFO(HttpStatus.INTERNAL_SERVER_ERROR, false, 2802, "카카오 정보 요청 중 오류가 발생했습니다."),
 
     /**
      * 400 : security 에러

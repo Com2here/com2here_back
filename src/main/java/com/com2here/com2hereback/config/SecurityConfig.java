@@ -4,13 +4,11 @@ import com.com2here.com2hereback.config.jwt.AuthorizationExtractor;
 import com.com2here.com2hereback.config.jwt.JwtAuthenticationFilter;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import com.com2here.com2hereback.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -53,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/email/send", "/api/v1/email/verify", "/api/v1/user/password/reset",
                                 "/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/login/kakao/url",
                                 "/api/v1/user/login/naver/url", "/api/v1/user/login/google/url",
-                                "/api/v1/user/callback/kakao")
+                                "/api/v1/user/callback/kakao","/api/v1/user/callback/naver","/api/v1/user/callback/google")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
