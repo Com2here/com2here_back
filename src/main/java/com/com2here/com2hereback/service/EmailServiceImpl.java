@@ -26,7 +26,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail = "ck8901ck@gmail.com";
+    private static final String senderEmail = "lysfox01@gmail.com";
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -56,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /* mail -> codemail(template수정) */
     @Override
     public CMResponse setEmail(String email, String code) {
         BaseResponseStatus status;
@@ -75,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
             templateEngine.setTemplateResolver(templateResolver);
 
             // 템플릿 처리
-            String setEmail = templateEngine.process("mail", context);
+            String setEmail = templateEngine.process("codemail", context);
 
             status = BaseResponseStatus.SUCCESS;
             return CMResponse.success(status.getCode(), status, setEmail);
@@ -188,26 +189,72 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /* 동혁's code */
+    // @Override
+    // public CMResponse verifyCode(String email, String code) {
+    // BaseResponseStatus status;
+    // try {
+    // String codeFoundByEmail = redisUtil.getData(email);
+
+    // if (codeFoundByEmail == null) {
+    // status = BaseResponseStatus.UNMATCHED_EMAIL_CODE;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+
+    // if (!codeFoundByEmail.equals(code)) {
+    // status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // User user = userRepository.findByEmail(email);
+    // if (user == null) {
+    // status = BaseResponseStatus.NO_EXIST_MEMBERS;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // user = User.builder()
+    // .user_id(user.getUser_id())
+    // .username(user.getUsername())
+    // .password(user.getPassword())
+    // .email(user.getEmail())
+    // .uuid(user.getUuid())
+    // .isEmailVerified(true)
+    // .build();
+
+    // userRepository.save(user);
+
+    // status = BaseResponseStatus.SUCCESS;
+    // return CMResponse.success(status.getCode(), status, null);
+    // } catch (Exception e) {
+    // log.error("Error during email verification: ", e);
+    // status = BaseResponseStatus.FAIL_MAIL_VERIFY;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // }
+
+    /* 인증 code로 메일 인증하는 형식으로 수정 */
     @Override
     public CMResponse verifyCode(String email, String code) {
-        BaseResponseStatus status;
         try {
             String codeFoundByEmail = redisUtil.getData(email);
 
             if (codeFoundByEmail == null) {
-                status = BaseResponseStatus.UNMATCHED_EMAIL_CODE;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 인증 코드가 Redis에서 찾을 수 없는 경우
+                return CMResponse.fail(BaseResponseStatus.UNMATCHED_EMAIL_CODE.getCode(),
+                        BaseResponseStatus.UNMATCHED_EMAIL_CODE, null);
             }
 
             if (!codeFoundByEmail.equals(code)) {
-                status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 인증 코드가 일치하지 않는 경우
+                return CMResponse.fail(BaseResponseStatus.INVALID_VERIFICATION_CODE.getCode(),
+                        BaseResponseStatus.INVALID_VERIFICATION_CODE, null);
             }
+
             User user = userRepository.findByEmail(email);
             if (user == null) {
-                status = BaseResponseStatus.NO_EXIST_MEMBERS;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 사용자 정보가 없을 경우
+                return CMResponse.fail(BaseResponseStatus.NO_EXIST_MEMBERS.getCode(),
+                        BaseResponseStatus.NO_EXIST_MEMBERS, null);
             }
+
             user = User.builder()
                     .user_id(user.getUser_id())
                     .username(user.getUsername())
@@ -219,12 +266,13 @@ public class EmailServiceImpl implements EmailService {
 
             userRepository.save(user);
 
-            status = BaseResponseStatus.SUCCESS;
-            return CMResponse.success(status.getCode(), status, null);
+            // 인증 성공 시
+            return CMResponse.success(BaseResponseStatus.SUCCESS.getCode(), BaseResponseStatus.SUCCESS, null);
         } catch (Exception e) {
             log.error("Error during email verification: ", e);
-            status = BaseResponseStatus.FAIL_MAIL_VERIFY;
-            return CMResponse.fail(status.getCode(), status, null);
+            // 예외 발생 시 실패 처리
+            return CMResponse.fail(BaseResponseStatus.FAIL_MAIL_VERIFY.getCode(), BaseResponseStatus.FAIL_MAIL_VERIFY,
+                    null);
         }
     }
 
@@ -256,13 +304,13 @@ public class EmailServiceImpl implements EmailService {
             String hashedPassword = bCryptPasswordEncoder.encode(newPassword);
 
             user = User.builder()
-                .user_id(user.getUser_id())
-                .username(user.getUsername())
-                .password(hashedPassword)
-                .email(user.getEmail())
-                .uuid(user.getUuid())
-                .isEmailVerified(user.isEmailVerified())
-                .build();
+                    .user_id(user.getUser_id())
+                    .username(user.getUsername())
+                    .password(hashedPassword)
+                    .email(user.getEmail())
+                    .uuid(user.getUuid())
+                    .isEmailVerified(user.isEmailVerified())
+                    .build();
 
             userRepository.save(user);
 
@@ -276,6 +324,5 @@ public class EmailServiceImpl implements EmailService {
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
-
 
 }

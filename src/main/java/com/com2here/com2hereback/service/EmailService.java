@@ -16,7 +16,6 @@ public interface EmailService {
     // 인증메일 발송
     CMResponse sendEmail(String string);
 
-
     CMResponse sendCodeEmail(String email);
 
     // 인증메일 검증

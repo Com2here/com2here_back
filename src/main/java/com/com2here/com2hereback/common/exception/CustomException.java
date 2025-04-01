@@ -3,12 +3,12 @@ package com.com2here.com2hereback.common.exception;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 
 public class CustomException extends RuntimeException {
-    private final BaseResponseStatus status;
+    private BaseResponseStatus status = null;
 
-    public CustomException(BaseResponseStatus status) {
-        super(status.getMessage());
+    public CustomException() {
         this.status = status;
     }
+
 
     public BaseResponseStatus getStatus() {
         return status;
