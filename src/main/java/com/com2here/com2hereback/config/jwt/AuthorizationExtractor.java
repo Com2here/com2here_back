@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.security;
+package com.com2here.com2hereback.config.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;

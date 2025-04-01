@@ -3,12 +3,12 @@ package com.com2here.com2hereback.service;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.repository.UserRepository;
-import com.com2here.com2hereback.security.TokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import com.com2here.com2hereback.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         BaseResponseStatus status;
 
         // 400 : 데이터 누락
-        if (userRequestDto == null || userRequestDto.getPassword() == null || userRequestDto.getEmail() == null || userRequestDto.getPassword_confirmation() == null) {
+        if (userRequestDto == null || userRequestDto.getPassword() == null || userRequestDto.getEmail() == null || userRequestDto.getConfirmPassword() == null) {
             status = BaseResponseStatus.WRONG_PARAM;
             return CMResponse.fail(status.getCode(),status,null);
         }
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2602 : 비밀번호 불일치
-        if (!userRequestDto.getPassword().equals(userRequestDto.getPassword_confirmation())) {
+        if (!userRequestDto.getPassword().equals(userRequestDto.getConfirmPassword())) {
             status = BaseResponseStatus.UNMATCHED_PASSWORD;
             return CMResponse.fail(status.getCode(),status,null);
         }
@@ -62,9 +62,14 @@ public class UserServiceImpl implements UserService {
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail())
             .uuid(null)
+            .isEmailVerified(false)
+            .role(false)
+            .profileImageUrl(null)
             .build();
 
+
         userRepository.save(user);
+
         status = BaseResponseStatus.REGISTRATION_SUCCESS;
 
         return CMResponse.success(status.getCode(),status,null);
@@ -102,17 +107,19 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updateUser);
 
-        UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.builder()
+        UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
+            .username(user.getUsername())
+            .email(user.getEmail())
             .build();
 
         status = BaseResponseStatus.LOGIN_SUCCESS;
-        return CMResponse.success(status.getCode(),status, userTokenResponseDto);
+        return CMResponse.success(status.getCode(),status, userLoginResponseDto);
     }
 
     @Override
-    public CMResponse ShowUser(HttpServletRequest request) {
+    public CMResponse ShowUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
@@ -127,7 +134,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CMResponse updateUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+    public CMResponse updateUser(UserRequestDto userRequestDto) {
         BaseResponseStatus status;
 
         // 400 : 데이터 누락
@@ -157,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CMResponse deleteUser(UserRequestDto userRequestDto, HttpServletRequest request) {
+    public CMResponse deleteUser(UserRequestDto userRequestDto) {
         BaseResponseStatus status;
 
         // 400 : 데이터 누락
@@ -185,5 +192,60 @@ public class UserServiceImpl implements UserService {
         return CMResponse.success(status.getCode(),status,null);
     }
 
+    @Override
+    @Transactional
+    public CMResponse chgPassword(ChgPasswordRequestDto chgPasswordRequestDto) {
+        BaseResponseStatus status;
+
+        // 400 : 데이터 누락
+        if (chgPasswordRequestDto == null || chgPasswordRequestDto.getCurrentPassword() == null ||
+            chgPasswordRequestDto.getNewPassword() == null ||
+            chgPasswordRequestDto.getEmail() == null ||
+            chgPasswordRequestDto.getConfirmPassword() == null) {
+
+            status = BaseResponseStatus.WRONG_PARAM;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+
+        // 2601 : 비밀번호 형식 불일치
+        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
+        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
+            status = BaseResponseStatus.PASSWORD_FORMAT_INVALID;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+
+        // 2602 : 비밀번호 불일치
+        if (!chgPasswordRequestDto.getNewPassword().equals(chgPasswordRequestDto.getConfirmPassword())) {
+            status = BaseResponseStatus.UNMATCHED_PASSWORD;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+
+        // 사용자 조회
+        User user = userRepository.findByEmail(chgPasswordRequestDto.getEmail());
+        if (user == null) {
+            status = BaseResponseStatus.NO_EXIST_MEMBERS;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+
+        // 현재 비밀번호 확인
+        if (!bCryptPasswordEncoder.matches(chgPasswordRequestDto.getCurrentPassword(), user.getPassword())) {
+            status = BaseResponseStatus.INVALID_CURRENT_PASSWORD;
+            return CMResponse.fail(status.getCode(), status, null);
+        }
+
+        user = User.builder()
+            .user_id(user.getUser_id())
+            .username(user.getUsername())
+            .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
+            .email(user.getEmail())
+            .uuid(user.getUuid())
+            .isEmailVerified(user.isEmailVerified())
+            .build();
+
+        userRepository.save(user);
+
+        status = BaseResponseStatus.PASSWORD_CHANGE_SUCCESS;
+        return CMResponse.success(status.getCode(), status, null);
+    }
 
 }

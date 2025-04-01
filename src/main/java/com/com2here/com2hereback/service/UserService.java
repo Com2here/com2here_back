@@ -1,9 +1,7 @@
 package com.com2here.com2hereback.service;
-
-import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserService {
 
@@ -14,11 +12,15 @@ public interface UserService {
     CMResponse LoginUser(UserRequestDto userRequestDto);
 
     // 조회
-    CMResponse ShowUser(HttpServletRequest request);
+    CMResponse ShowUser();
 
     // 수정
-    CMResponse updateUser(UserRequestDto userRequestDto, HttpServletRequest request);
+    CMResponse updateUser(UserRequestDto userRequestDto);
 
     // 삭제
-    CMResponse deleteUser(UserRequestDto userRequestDto, HttpServletRequest request);
+    CMResponse deleteUser(UserRequestDto userRequestDto);
+
+    // 비밀번호 변경
+    CMResponse chgPassword(ChgPasswordRequestDto chgPasswordRequestDto);
+
 }

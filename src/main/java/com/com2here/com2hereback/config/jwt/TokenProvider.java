@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.security;
+package com.com2here.com2hereback.config.jwt;
 
 import io.jsonwebtoken.io.Decoders;
 import java.security.Key;
@@ -26,8 +26,8 @@ public class TokenProvider {
 
     // application.properties에서 값을 가져옴
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
-        @Value("${jwt.access-token-expiration-time}") long accessTokenExpirationTime,
-        @Value("${jwt.refresh-token-expiration-time}") long refreshTokenExpirationTime) {
+            @Value("${jwt.access-token-expiration-time}") long accessTokenExpirationTime,
+            @Value("${jwt.refresh-token-expiration-time}") long refreshTokenExpirationTime) {
         secretKey = secretKey.replaceAll("\\s+", "");
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
         this.accessTokenExpirationTime = accessTokenExpirationTime;
@@ -45,12 +45,12 @@ public class TokenProvider {
     private String createToken(String uuid, long expirationTime) {
         Date expiryDate = new Date(System.currentTimeMillis() + expirationTime);
         return Jwts.builder()
-            .setHeaderParam("typ", "JWT")
-            .setSubject(uuid)
-            .setIssuedAt(new Date())
-            .setExpiration(expiryDate)
-            .signWith(signingKey, SignatureAlgorithm.HS256)
-            .compact();
+                .setHeaderParam("typ", "JWT")
+                .setSubject(uuid)
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // 토큰 유효시간 검증 메서드
@@ -65,10 +65,10 @@ public class TokenProvider {
     private boolean validateToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                    .setSigningKey(signingKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
             return claims.getExpiration().after(new Date());
         } catch (Exception e) {
