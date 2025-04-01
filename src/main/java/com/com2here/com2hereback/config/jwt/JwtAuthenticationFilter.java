@@ -115,8 +115,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/email/password/reset") ||
                 path.equals("/api/v1/user/login/kakao/url") ||
                 path.equals("/api/v1/user/login/naver/url") ||
-                path.equals("/api/v1/user/login/google/url");
-
+                path.equals("/api/v1/user/login/google/url") ||
+                path.equals("/api/v1/user/password/reset") ||
+                path.equals("/api/v1/user/callback/kakao") ||
+                path.equals("/api/v1/user/callback/naver") ||
+                path.equals("/api/v1/user/callback/google");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {
@@ -126,4 +129,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.error("응답 작성 중 오류 발생", e);
         }
     }
+
 }
