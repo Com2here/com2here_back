@@ -16,9 +16,11 @@ public interface EmailService {
     // 인증메일 발송
     CMResponse sendEmail(String string);
 
-
-    CMResponse sendPasswordEmail(String email);
+    CMResponse sendCodeEmail(String email);
 
     // 인증메일 검증
     CMResponse verifyCode(String email, String code);
+
+    // 인증코드로 비밀번호 재설정
+    CMResponse resetPassword(String email, String code, String newPassword, String confirmPassword);
 }

@@ -90,7 +90,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
                     status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
-                    CMResponse cmResponse = CMResponse.success(status.getCode(), status, userTokenResponseVo);
+                    CMResponse cmResponse = CMResponse.success(status.getCode(), status,
+                        userTokenResponseVo);
                     writeResponse(response, cmResponse);
                     return;
                 }
@@ -110,6 +111,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/user/register") ||
                 path.equals("/api/v1/email/send") ||
                 path.equals("/api/v1/email/verify") ||
+                path.equals("/api/v1/email/authcode") ||
+                path.equals("/api/v1/email/password/reset") ||
                 path.equals("/api/v1/user/login/kakao/url") ||
                 path.equals("/api/v1/user/login/naver/url") ||
                 path.equals("/api/v1/user/login/google/url") ||
@@ -117,7 +120,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/user/callback/kakao") ||
                 path.equals("/api/v1/user/callback/naver") ||
                 path.equals("/api/v1/user/callback/google");
-
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {

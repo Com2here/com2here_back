@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/login/kakao/url",
                                 "/api/v1/user/login/naver/url", "/api/v1/user/login/google/url",
                                 "/api/v1/user/callback/kakao","/api/v1/user/callback/naver","/api/v1/user/callback/google")
+
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

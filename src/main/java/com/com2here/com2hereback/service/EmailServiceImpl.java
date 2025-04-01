@@ -26,7 +26,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail = "lysfox8@gmail.com";
+    private static final String senderEmail = "lysfox01@gmail.com";
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -56,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /* mail -> codemail(template수정) */
     @Override
     public CMResponse setEmail(String email, String code) {
         BaseResponseStatus status;
@@ -75,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
             templateEngine.setTemplateResolver(templateResolver);
 
             // 템플릿 처리
-            String setEmail = templateEngine.process("mail", context);
+            String setEmail = templateEngine.process("codemail", context);
 
             status = BaseResponseStatus.SUCCESS;
             return CMResponse.success(status.getCode(), status, setEmail);
@@ -141,31 +142,23 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
-    public CMResponse sendPasswordEmail(String email) {
+    public CMResponse sendCodeEmail(String email) {
         BaseResponseStatus status;
         try {
-            String newPassword = (String) createCode().getData();
             User user = userRepository.findByEmail(email);
-
-            // 2700 : 이메일 인증이 되지않은 계정
-            if (user.isEmailVerified() == false) {
-                status = BaseResponseStatus.NOT_EMAIL_VERIFY;
+            if (user == null) {
+                status = BaseResponseStatus.NO_EXIST_MEMBERS;
                 return CMResponse.fail(status.getCode(), status, null);
             }
-            user = User.builder()
-                    .user_id(user.getUser_id())
-                    .username(user.getUsername())
-                    .password(bCryptPasswordEncoder.encode(newPassword))
-                    .email(user.getEmail())
-                    .uuid(user.getUuid())
-                    .isEmailVerified(user.isEmailVerified())
-                    .build();
+            // 인증 코드 생성
+            String code = (String) createCode().getData();
 
-            userRepository.save(user);
+            // Redis에 인증 코드 저장 (유효기간 30분)
+            redisUtil.setDataExpire(email, code, 60 * 30L);
 
             // 이메일 템플릿 준비
             Context context = new Context();
-            context.setVariable("password", newPassword); // 비밀번호를 템플릿에 전달
+            context.setVariable("code", code); // 인증 코드를 템플릿에 전달
             ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
             templateResolver.setPrefix("templates/");
             templateResolver.setSuffix(".html");
@@ -176,12 +169,12 @@ public class EmailServiceImpl implements EmailService {
             templateEngine.setTemplateResolver(templateResolver);
 
             // 템플릿 처리
-            String emailContent = templateEngine.process("password", context);
+            String emailContent = templateEngine.process("codemail", context);
 
             // 이메일 발송
             MimeMessage message = javaMailSender.createMimeMessage();
             message.addRecipients(RecipientType.TO, email);
-            message.setSubject("비밀번호 안내 메일");
+            message.setSubject("인증코드 안내 메일");
             message.setFrom(senderEmail);
             message.setContent(emailContent, "text/html; charset=utf-8");
 
@@ -189,33 +182,79 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(message);
 
             status = BaseResponseStatus.SUCCESS;
-            return CMResponse.success(status.getCode(), status, newPassword);
+            return CMResponse.success(status.getCode(), status, code);
         } catch (Exception e) {
             status = BaseResponseStatus.FAIL_MAIL_SEND;
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
 
+    /* 동혁's code */
+    // @Override
+    // public CMResponse verifyCode(String email, String code) {
+    // BaseResponseStatus status;
+    // try {
+    // String codeFoundByEmail = redisUtil.getData(email);
+
+    // if (codeFoundByEmail == null) {
+    // status = BaseResponseStatus.UNMATCHED_EMAIL_CODE;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+
+    // if (!codeFoundByEmail.equals(code)) {
+    // status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // User user = userRepository.findByEmail(email);
+    // if (user == null) {
+    // status = BaseResponseStatus.NO_EXIST_MEMBERS;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // user = User.builder()
+    // .user_id(user.getUser_id())
+    // .username(user.getUsername())
+    // .password(user.getPassword())
+    // .email(user.getEmail())
+    // .uuid(user.getUuid())
+    // .isEmailVerified(true)
+    // .build();
+
+    // userRepository.save(user);
+
+    // status = BaseResponseStatus.SUCCESS;
+    // return CMResponse.success(status.getCode(), status, null);
+    // } catch (Exception e) {
+    // log.error("Error during email verification: ", e);
+    // status = BaseResponseStatus.FAIL_MAIL_VERIFY;
+    // return CMResponse.fail(status.getCode(), status, null);
+    // }
+    // }
+
+    /* 인증 code로 메일 인증하는 형식으로 수정 */
     @Override
     public CMResponse verifyCode(String email, String code) {
-        BaseResponseStatus status;
         try {
             String codeFoundByEmail = redisUtil.getData(email);
 
             if (codeFoundByEmail == null) {
-                status = BaseResponseStatus.UNMATCHED_EMAIL_CODE;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 인증 코드가 Redis에서 찾을 수 없는 경우
+                return CMResponse.fail(BaseResponseStatus.UNMATCHED_EMAIL_CODE.getCode(),
+                        BaseResponseStatus.UNMATCHED_EMAIL_CODE, null);
             }
 
             if (!codeFoundByEmail.equals(code)) {
-                status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 인증 코드가 일치하지 않는 경우
+                return CMResponse.fail(BaseResponseStatus.INVALID_VERIFICATION_CODE.getCode(),
+                        BaseResponseStatus.INVALID_VERIFICATION_CODE, null);
             }
+
             User user = userRepository.findByEmail(email);
             if (user == null) {
-                status = BaseResponseStatus.NO_EXIST_MEMBERS;
-                return CMResponse.fail(status.getCode(), status, null);
+                // 사용자 정보가 없을 경우
+                return CMResponse.fail(BaseResponseStatus.NO_EXIST_MEMBERS.getCode(),
+                        BaseResponseStatus.NO_EXIST_MEMBERS, null);
             }
+
             user = User.builder()
                     .user_id(user.getUser_id())
                     .username(user.getUsername())
@@ -227,11 +266,61 @@ public class EmailServiceImpl implements EmailService {
 
             userRepository.save(user);
 
+            // 인증 성공 시
+            return CMResponse.success(BaseResponseStatus.SUCCESS.getCode(), BaseResponseStatus.SUCCESS, null);
+        } catch (Exception e) {
+            log.error("Error during email verification: ", e);
+            // 예외 발생 시 실패 처리
+            return CMResponse.fail(BaseResponseStatus.FAIL_MAIL_VERIFY.getCode(), BaseResponseStatus.FAIL_MAIL_VERIFY,
+                    null);
+        }
+    }
+
+    @Override
+    @Transactional
+    public CMResponse resetPassword(String email, String code, String newPassword, String confirmPassword) {
+        BaseResponseStatus status;
+
+        try {
+            // 인증 코드 검증
+            CMResponse verificationResponse = verifyCode(email, code);
+            if (verificationResponse.getCode() != BaseResponseStatus.SUCCESS.getCode()) {
+                status = BaseResponseStatus.INVALID_VERIFICATION_CODE;
+                return CMResponse.fail(status.getCode(), status, null);
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                status = BaseResponseStatus.PASSWORD_MISMATCH;
+                return CMResponse.fail(status.getCode(), status, null);
+            }
+
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                status = BaseResponseStatus.NO_EXIST_MEMBERS;
+                return CMResponse.fail(status.getCode(), status, null);
+            }
+
+            // 비밀번호 해싱
+            String hashedPassword = bCryptPasswordEncoder.encode(newPassword);
+
+            user = User.builder()
+                    .user_id(user.getUser_id())
+                    .username(user.getUsername())
+                    .password(hashedPassword)
+                    .email(user.getEmail())
+                    .uuid(user.getUuid())
+                    .isEmailVerified(user.isEmailVerified())
+                    .build();
+
+            userRepository.save(user);
+
+            redisUtil.deleteData(email);
+
             status = BaseResponseStatus.SUCCESS;
             return CMResponse.success(status.getCode(), status, null);
         } catch (Exception e) {
-            log.error("Error during email verification: ", e);
-            status = BaseResponseStatus.FAIL_MAIL_VERIFY;
+            log.error("Error during password reset: ", e);
+            status = BaseResponseStatus.FAIL_PASSWORD_RESET;
             return CMResponse.fail(status.getCode(), status, null);
         }
     }
