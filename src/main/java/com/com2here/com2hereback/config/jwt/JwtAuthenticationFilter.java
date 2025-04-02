@@ -90,16 +90,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
                     status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
-                    CMResponse cmResponse = CMResponse.success(status.getCode(), status,
-                        userTokenResponseVo);
-                    writeResponse(response, cmResponse);
+//                    CMResponse cmResponse = CMResponse.success(status.getCode(), status,
+//                        userTokenResponseVo);
+                    writeResponse(response, null);
                     return;
                 }
             }
 
             // 리프레시 토큰이 유효하지 않거나 사용자를 찾을 수 없는 경우
             status = BaseResponseStatus.TOKEN_EXPIRED;
-            CMResponse cmResponse = CMResponse.fail(status.getCode(), status);
+            CMResponse cmResponse = CMResponse.fail(status);
             writeResponse(response, cmResponse);
         }
     }
@@ -108,18 +108,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.equals("/api/v1/user/login") ||
+                path.startsWith("/api/v1/oauth/") ||
                 path.equals("/api/v1/user/register") ||
-                path.equals("/api/v1/email/send") ||
                 path.equals("/api/v1/email/verify") ||
                 path.equals("/api/v1/email/authcode") ||
                 path.equals("/api/v1/email/password/reset") ||
-                path.equals("/api/v1/user/login/kakao/url") ||
-                path.equals("/api/v1/user/login/naver/url") ||
-                path.equals("/api/v1/user/login/google/url") ||
-                path.equals("/api/v1/user/password/reset") ||
-                path.equals("/api/v1/user/callback/kakao") ||
-                path.equals("/api/v1/user/callback/naver") ||
-                path.equals("/api/v1/user/callback/google");
+                path.equals("/api/v1/user/password/reset");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {

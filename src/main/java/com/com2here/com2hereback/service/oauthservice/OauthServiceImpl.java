@@ -2,6 +2,7 @@ package com.com2here.com2hereback.service.oauthservice;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.common.exception.BaseException;
 import com.com2here.com2hereback.dto.OauthResponseDto;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;
@@ -92,43 +93,31 @@ public class OauthServiceImpl implements OauthService {
     private String googleClientSecret;
 
     @Override
-    public CMResponse createGoogleOauthUrl() {
-        BaseResponseStatus status;
-        try{
-            String url = googleAuthUrl
-                + "?scope=email%20profile"
-                + "&access_type=offline"
-                + "&include_granted_scopes=true"
-                + "&response_type=code"
-                + "&redirect_uri=" + googleRedirectUrl
-                + "&client_id=" + googleRestapiKey;
+    public String createGoogleOauthUrl() {
+        String url = googleAuthUrl
+            + "?scope=email%20profile"
+            + "&access_type=offline"
+            + "&include_granted_scopes=true"
+            + "&response_type=code"
+            + "&redirect_uri=" + googleRedirectUrl
+            + "&client_id=" + googleRestapiKey;
 
-
-            status = BaseResponseStatus.SUCCESS;
-
-            return CMResponse.success(status.getCode(), status, url);
-        }catch (Exception e){
-            status = BaseResponseStatus.FAIL_CREATE_OAUTH_URL;
-            return CMResponse.fail(status.getCode(), status, null);
-        }
-
+        return url;
     }
 
     @Override
-    public CMResponse getGoogleUserInfo(String code)
+    public OauthResponseDto getGoogleUserInfo(String code)
         throws URISyntaxException, JsonProcessingException {
-        BaseResponseStatus status;
-        GoogleToken googleToken = getGoogleToken(code);
-        GoogleInfo googleInfo = getGoogleInfo(googleToken);
-        if(googleToken == null){
-            status = BaseResponseStatus.FAIL_RETURN_OAUTH_TOKEN;
-            return CMResponse.fail(status.getCode(), status, null);
+
+        if(code == null){
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(googleInfo, googleToken);
-        status = BaseResponseStatus.SUCCESS;
+        GoogleToken googleToken = getGoogleToken(code);
+        GoogleInfo googleInfo = getGoogleInfo(googleToken);
 
-        return CMResponse.success(status.getCode(), status, oauthResponseDto);
+        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(googleInfo, googleToken);
+        return oauthResponseDto;
     }
 
     @Override
@@ -193,39 +182,28 @@ public class OauthServiceImpl implements OauthService {
 
     // 카카오 로그인 주소 생성 메소드
     @Override
-    public CMResponse createKakaoOauthUrl() {
-        BaseResponseStatus status;
-        try{
-            String url = kakaoAuthUrl
-                + "?response_type=code"
-                + "&client_id=" + kakaoRestapiKey
-                + "&redirect_uri=" + kakaorRedirectUri;
+    public String createKakaoOauthUrl() {
+        String url = kakaoAuthUrl
+            + "?response_type=code"
+            + "&client_id=" + kakaoRestapiKey
+            + "&redirect_uri=" + kakaorRedirectUri;
 
-            status = BaseResponseStatus.SUCCESS;
-
-            return CMResponse.success(status.getCode(), status, url);
-        }catch (Exception e){
-            status = BaseResponseStatus.FAIL_CREATE_OAUTH_URL;
-            return CMResponse.fail(status.getCode(), status, null);
-        }
-
+        return url;
     }
 
     @Override
-    public CMResponse getKakaoUserInfo(String code)
+    public OauthResponseDto getKakaoUserInfo(String code)
         throws URISyntaxException, JsonProcessingException {
-        BaseResponseStatus status;
-        KakaoToken kakaoToken = getKakaoToken(code);
-        KakaoInfo kakaoInfo = getKakaoInfo(kakaoToken);
-        if(kakaoToken == null){
-            status = BaseResponseStatus.FAIL_RETURN_OAUTH_TOKEN;
-            return CMResponse.fail(status.getCode(), status, null);
+        if(code == null){
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(kakaoInfo, kakaoToken);
-        status = BaseResponseStatus.SUCCESS;
+        KakaoToken kakaoToken = getKakaoToken(code);
+        KakaoInfo kakaoInfo = getKakaoInfo(kakaoToken);
 
-        return CMResponse.success(status.getCode(), status, oauthResponseDto);
+        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(kakaoInfo, kakaoToken);
+
+        return oauthResponseDto;
     }
 
     @Override
@@ -294,40 +272,30 @@ public class OauthServiceImpl implements OauthService {
         return kakaoInfo;
     }
     @Override
-    public CMResponse createNaverOauthUrl() {
-        BaseResponseStatus status;
-        try{
-            String url = naverAuthUrl
-                + "?response_type=code"
-                // + "&state=STATE_STRING"
-                + "&client_id=" + naverRestapiKey
-                + "&redirect_uri=" + naverRedirectUri;
+    public String createNaverOauthUrl() {
+        String url = naverAuthUrl
+            + "?response_type=code"
+            // + "&state=STATE_STRING"
+            + "&client_id=" + naverRestapiKey
+            + "&redirect_uri=" + naverRedirectUri;
 
-            status = BaseResponseStatus.SUCCESS;
-
-            return CMResponse.success(status.getCode(), status, url);
-        }catch (Exception e){
-            status = BaseResponseStatus.FAIL_CREATE_OAUTH_URL;
-            return CMResponse.fail(status.getCode(), status, null);
-        }
-
+        return url;
     }
 
     @Override
-    public CMResponse getNaverUserInfo(String code)
+    public OauthResponseDto getNaverUserInfo(String code)
         throws URISyntaxException, JsonProcessingException {
-        BaseResponseStatus status;
-        NaverToken naverToken = getNaverToken(code);
-        NaverInfo naverInfo = getNaverInfo(naverToken);
-        if(naverToken == null){
-            status = BaseResponseStatus.FAIL_RETURN_OAUTH_TOKEN;
-            return CMResponse.fail(status.getCode(), status, null);
+
+        if(code == null){
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(naverInfo, naverToken);
-        status = BaseResponseStatus.SUCCESS;
+        NaverToken naverToken = getNaverToken(code);
+        NaverInfo naverInfo = getNaverInfo(naverToken);
 
-        return CMResponse.success(status.getCode(), status, oauthResponseDto);
+        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(naverInfo, naverToken);
+
+        return oauthResponseDto;
     }
 
     @Override

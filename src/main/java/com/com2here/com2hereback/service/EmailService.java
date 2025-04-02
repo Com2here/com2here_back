@@ -1,26 +1,24 @@
 package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 public interface EmailService {
 
     // 인증코드 생성
-    CMResponse createCode();
+    String createCode();
 
     // 이메일 내용 초기화
-    CMResponse setEmail(String email, String code);
+    String setEmail(String email, String code);
 
     // 이메일 폼 생성
-    CMResponse createEmailForm(String email);
+    MimeMessage createEmailForm(String email) throws MessagingException;
 
-    // 인증메일 발송
-    CMResponse sendEmail(String string);
+    void sendEmail(String string) throws MessagingException;
 
-    CMResponse sendCodeEmail(String email);
+    void verifyCode(String email, String code);
 
-    // 인증메일 검증
-    CMResponse verifyCode(String email, String code);
-
-    // 인증코드로 비밀번호 재설정
-    CMResponse resetPassword(String email, String code, String newPassword, String confirmPassword);
+    void resetPassword(ResetPasswordRequestDto resetPasswordRequestDto);
 }

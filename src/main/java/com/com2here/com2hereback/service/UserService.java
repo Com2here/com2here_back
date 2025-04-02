@@ -1,26 +1,28 @@
 package com.com2here.com2hereback.service;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
+import com.com2here.com2hereback.dto.ShowUserResponseDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 
 public interface UserService {
 
     // 회원가입
-    CMResponse RegisterUser(UserRequestDto userRequestDto);
+    void RegisterUser(UserRequestDto userRequestDto);
 
     // 로그인
-    CMResponse LoginUser(UserRequestDto userRequestDto);
+    UserLoginResponseDto LoginUser(UserRequestDto userRequestDto);
 
     // 조회
-    CMResponse ShowUser();
+    ShowUserResponseDto ShowUser();
 
     // 수정
-    CMResponse updateUser(UserRequestDto userRequestDto);
+    void updateUser(UserRequestDto userRequestDto);
 
     // 삭제
-    CMResponse deleteUser(UserRequestDto userRequestDto);
+    void deleteUser(UserRequestDto userRequestDto);
 
     // 비밀번호 변경
-    CMResponse chgPassword(ChgPasswordRequestDto chgPasswordRequestDto);
+    void chgPassword(ChgPasswordRequestDto chgPasswordRequestDto);
 
 }
