@@ -90,8 +90,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
                     status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
-//                    CMResponse cmResponse = CMResponse.success(status.getCode(), status,
-//                        userTokenResponseVo);
+                    // CMResponse cmResponse = CMResponse.success(status.getCode(), status,
+                    // userTokenResponseVo);
                     writeResponse(response, null);
                     return;
                 }
