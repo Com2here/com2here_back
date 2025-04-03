@@ -50,7 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Authorization 헤더에서 JWT 토큰 추출
         String accessToken = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
         String refreshToken = authExtractor.extractRefreshToken(request);
-
         // accessToken 유효시간 검증 성공 시
         if (StringUtils.hasText(accessToken) && tokenProvider.validateAccessToken(accessToken)) {
             String uuid = tokenProvider.getSubject(accessToken);
@@ -58,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null, new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute("uuid", uuid);
-
             filterChain.doFilter(request, response);
         } else {
             BaseResponseStatus status;

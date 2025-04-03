@@ -162,8 +162,9 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
 
-        // 2106
         User user = userRepository.findByUuid(uuid);
+
+        // 2106
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
