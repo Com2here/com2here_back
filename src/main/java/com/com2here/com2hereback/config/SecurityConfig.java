@@ -45,8 +45,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/v1/email/authcode", "/api/v1/email/verify", "/api/v1/user/password/reset",
-                                "/api/v1/user/register", "/api/v1/user/login", "/api/v1/oauth/*")
+                        .requestMatchers("/api/v1/email/authcode", "/api/v1/email/verify",
+                                "/api/v1/user/password/reset",
+                                "/api/v1/user/register", "/api/v1/user/login", "/api/v1/oauth/*", "/api/v1/email/password/reset")
 
                         .permitAll()
                         .anyRequest().authenticated())

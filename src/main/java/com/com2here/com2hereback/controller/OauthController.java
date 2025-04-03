@@ -28,8 +28,8 @@ public class OauthController {
     private final OauthService oauthService;
 
     @GetMapping("/{provider}")
-    public CMResponse<String> getOauthLoginUrl(@PathVariable String provider){
-        try{
+    public CMResponse<String> getOauthLoginUrl(@PathVariable String provider) {
+        try {
             String url;
             switch (provider.toLowerCase()) {
                 case "kakao":
@@ -47,15 +47,15 @@ public class OauthController {
             return CMResponse.success(BaseResponseStatus.SUCCESS, url);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode(), e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/{provider}")
-    public CMResponse<OauthResponseVo> getOauthAccount(@PathVariable String provider, @RequestBody OauthRequestDto oauthRequestDto){
-        try{
+    public CMResponse<OauthResponseVo> getOauthAccount(@PathVariable String provider,
+            @RequestBody OauthRequestDto oauthRequestDto) {
+        try {
             OauthResponseDto oauthResponsedto;
             switch (provider.toLowerCase()) {
                 case "kakao":
@@ -74,8 +74,7 @@ public class OauthController {
             return CMResponse.success(BaseResponseStatus.SUCCESS, oauthResponseVo);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
