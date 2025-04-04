@@ -107,8 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/api/v1/oauth/") ||
             path.startsWith("/api/v1/email/") ||
             path.equals("/api/v1/user/login") ||
-            path.equals("/api/v1/user/register") ||
-            path.equals("/api/v1/user/password/change");
+            path.equals("/api/v1/user/register");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {
