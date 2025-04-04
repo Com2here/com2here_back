@@ -9,11 +9,13 @@ import lombok.Data;
 public class ShowUserResponseDto {
     private String username;
     private String email;
+    private boolean isVerified;
 
     public static ShowUserResponseDto entityToDto(User user){
         return ShowUserResponseDto.builder()
             .username(user.getUsername())
             .email(user.getEmail())
+            .isVerified(user.isEmailVerified())
             .build();
     }
 }
