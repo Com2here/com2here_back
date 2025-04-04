@@ -38,8 +38,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2601 : 비밀번호 형식 불일치
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        if (!(userRequestDto.getPassword()).matches(regex)) {
+        if (!(userRequestDto.getPassword()).matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
             throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
         }
 
@@ -48,13 +47,13 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
-        // 중복된 이메일
+        // 2100 : 중복된 이메일
         if (userRepository.existsByEmail(userRequestDto.getEmail())) {
             throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
         }
 
         User user = User.builder()
-            .username(userRequestDto.getUsername())
+            .nickname(userRequestDto.getNickname())
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail())
             .uuid(null)
@@ -87,7 +86,7 @@ public class UserServiceImpl implements UserService {
         // refreshToken 추가
         User updateUser = User.builder()
             .user_id(user.getUser_id())
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
             .uuid(user.getUuid())
@@ -99,7 +98,7 @@ public class UserServiceImpl implements UserService {
         UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .build();
 
@@ -141,7 +140,7 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = User.builder()
             .user_id(user.getUser_id())
-            .username(userRequestDto.getUsername() != null ? userRequestDto.getUsername() : user.getUsername())
+            .nickname(userRequestDto.getNickname() != null ? userRequestDto.getNickname() : user.getNickname())
             .email(userRequestDto.getEmail() != null ? userRequestDto.getEmail() : user.getEmail())
             .password(user.getPassword())
             .uuid(user.getUuid())
@@ -160,7 +159,7 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
+        String uuid = (String) authentication.getPrincipal();
 
         User user = userRepository.findByUuid(uuid);
 
@@ -186,17 +185,6 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
-        // 2601 : 비밀번호 형식 불일치
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
-            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
-        }
-
-        // 2602 : 비밀번호 불일치
-        if (!chgPasswordRequestDto.getNewPassword().equals(chgPasswordRequestDto.getConfirmPassword())) {
-            throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
-        }
-
         // 사용자 조회
         User user = userRepository.findByEmail(chgPasswordRequestDto.getEmail());
         if (user == null) {
@@ -208,9 +196,20 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.INVALID_CURRENT_PASSWORD);
         }
 
+        // 2601 : 비밀번호 형식 불일치
+        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
+        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
+            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
+        }
+
+        // 2602 : 비밀번호 불일치
+        if (!chgPasswordRequestDto.getNewPassword().equals(chgPasswordRequestDto.getConfirmPassword())) {
+            throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
+        }
+
         user = User.builder()
             .user_id(user.getUser_id())
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
             .email(user.getEmail())
             .uuid(user.getUuid())

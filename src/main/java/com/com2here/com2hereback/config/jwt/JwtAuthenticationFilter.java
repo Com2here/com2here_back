@@ -74,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     User updatedUser = User.builder()
                             .user_id(user.getUser_id())
-                            .username(user.getUsername())
+                            .nickname(user.getNickname())
                             .email(user.getEmail())
                             .password(user.getPassword())
                             .uuid(user.getUuid())
@@ -102,16 +102,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    // 로그인 API 등 필터를 건너뛰어야 하는 경로 확인
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.equals("/api/v1/user/login") ||
-                path.startsWith("/api/v1/oauth/") ||
-                path.equals("/api/v1/user/register") ||
-                path.equals("/api/v1/email/verify") ||
-                path.equals("/api/v1/email/authcode") ||
-                path.equals("/api/v1/email/password/reset") ||
-                path.equals("/api/v1/user/password/reset");
+        return path.startsWith("/api/v1/oauth/") ||
+            path.startsWith("/api/v1/email/") ||
+            path.equals("/api/v1/user/login") ||
+            path.equals("/api/v1/user/register") ||
+            path.equals("/api/v1/user/password/change");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {

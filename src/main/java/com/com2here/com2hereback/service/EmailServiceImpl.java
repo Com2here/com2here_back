@@ -53,6 +53,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public String setEmail(String email, String code) {
+
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
@@ -76,27 +77,39 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public MimeMessage createEmailForm(String email) throws MessagingException {
-            // 인증 코드 생성
-            String authCode = createCode();
-            MimeMessage message = javaMailSender.createMimeMessage();
+    public MimeMessage createEmailForm(String email) {
+        // 인증 코드 생성
+        String authCode = createCode();
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        try {
             message.addRecipients(RecipientType.TO, email);
             message.setSubject("컴히얼 인증코드 안내 메일");
             message.setFrom(senderEmail);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
 
-            // 인증 코드로 이메일 내용 설정
-            String emailContent = setEmail(email, authCode);
+        // 인증 코드로 이메일 내용 설정
+        String emailContent = setEmail(email, authCode);
 
+        try {
             message.setContent(emailContent, "text/html; charset=utf-8");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
 
-            redisUtil.setDataExpire(email, authCode, 60 * 30L);
+        redisUtil.setDataExpire(email, authCode, 60 * 30L);
 
-
-            return message;
+        return message;
     }
 
     @Override
-    public void sendEmail(String email) throws MessagingException {
+    public void sendEmail(String email) {
+        if(email == null){
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+        }
+
         if (redisUtil.existData(email)) {
             redisUtil.deleteData(email);
         }
@@ -126,7 +139,7 @@ public class EmailServiceImpl implements EmailService {
          }
          user = User.builder()
          .user_id(user.getUser_id())
-         .username(user.getUsername())
+         .nickname(user.getNickname())
          .password(user.getPassword())
          .email(user.getEmail())
          .uuid(user.getUuid())
@@ -142,7 +155,7 @@ public class EmailServiceImpl implements EmailService {
             verifyCode(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode());
 
             if (!resetPasswordRequestDto.getPassword().equals(resetPasswordRequestDto.getConfirmPassword())) {
-                throw new BaseException(BaseResponseStatus.PASSWORD_MISMATCH);
+                throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
             }
 
             User user = userRepository.findByEmail(resetPasswordRequestDto.getMail());
@@ -155,7 +168,7 @@ public class EmailServiceImpl implements EmailService {
 
             user = User.builder()
                     .user_id(user.getUser_id())
-                    .username(user.getUsername())
+                    .nickname(user.getNickname())
                     .password(hashedPassword)
                     .email(user.getEmail())
                     .uuid(user.getUuid())

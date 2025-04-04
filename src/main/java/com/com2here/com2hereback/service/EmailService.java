@@ -14,9 +14,9 @@ public interface EmailService {
     String setEmail(String email, String code);
 
     // 이메일 폼 생성
-    MimeMessage createEmailForm(String email) throws MessagingException;
+    MimeMessage createEmailForm(String email);
 
-    void sendEmail(String string) throws MessagingException;
+    void sendEmail(String string) ;
 
     void verifyCode(String email, String code);
 

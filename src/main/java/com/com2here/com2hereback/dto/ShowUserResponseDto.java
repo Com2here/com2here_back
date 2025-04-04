@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 @Builder
 public class ShowUserResponseDto {
-    private String username;
+    private String nickname;
     private String email;
     private boolean isVerified;
 
     public static ShowUserResponseDto entityToDto(User user){
         return ShowUserResponseDto.builder()
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .isVerified(user.isEmailVerified())
             .build();

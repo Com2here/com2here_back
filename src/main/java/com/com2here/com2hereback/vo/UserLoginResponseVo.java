@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 public class UserLoginResponseVo {
     private String accessToken;
     private String refreshToken;
-    private String username;
+    private String nickname;
     private String email;
 
     @Builder
-    public UserLoginResponseVo(String accessToken, String refreshToken, String username, String email) {
+    public UserLoginResponseVo(String accessToken, String refreshToken, String nickname, String email) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.username = username;
+        this.nickname = nickname;
         this.email = email;
     }
 
@@ -27,7 +27,7 @@ public class UserLoginResponseVo {
         return UserLoginResponseVo.builder()
             .accessToken(userLoginResponseDto.getAccessToken())
             .refreshToken(userLoginResponseDto.getRefreshToken())
-            .username(userLoginResponseDto.getUsername())
+            .nickname(userLoginResponseDto.getNickname())
             .email(userLoginResponseDto.getEmail())
             .build();
     }
