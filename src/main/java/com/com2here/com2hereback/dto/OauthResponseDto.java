@@ -13,14 +13,14 @@ import lombok.Data;
 @Builder
 public class OauthResponseDto {
     private String email;
-    private String username;
+    private String nickname;
     private String accessToken;
     private String refreshToken;
 
     public static OauthResponseDto entityToDto(KakaoInfo kakaoInfo, KakaoToken kakaoToken) {
         return OauthResponseDto.builder()
             .email(kakaoInfo.getEmail())
-            .username(kakaoInfo.getNickname())
+            .nickname(kakaoInfo.getNickname())
             .accessToken(kakaoToken.getAccessToken())
             .refreshToken(kakaoToken.getRefreshToken())
             .build();
@@ -29,7 +29,7 @@ public class OauthResponseDto {
     public static OauthResponseDto entityToDto(NaverInfo naverInfo, NaverToken naverToken) {
         return OauthResponseDto.builder()
             .email(naverInfo.getEmail())
-            .username(naverInfo.getName())
+            .nickname(naverInfo.getName())
             .accessToken(naverToken.getAccessToken())
             .refreshToken(naverToken.getRefreshToken())
             .build();
@@ -38,7 +38,7 @@ public class OauthResponseDto {
     public static OauthResponseDto entityToDto(GoogleInfo googleInfo, GoogleToken googleToken) {
         return OauthResponseDto.builder()
             .email(googleInfo.getEmail())
-            .username(googleInfo.getName())
+            .nickname(googleInfo.getName())
             .accessToken(googleToken.getAccessToken())
             .refreshToken(googleToken.getRefreshToken())
             .build();

@@ -11,16 +11,16 @@ import lombok.Setter;
 public class UserRequestDto {
 
     private int user_id;
-    private String username;
+    private String nickname;
     private String email;
     private String password;
     private String confirmPassword;
     private String token; // JWT 토큰
 
     @Builder
-    public UserRequestDto(int user_id, String username, String email, String password,String confirmPassword , String token) {
+    public UserRequestDto(int user_id, String nickname, String email, String password,String confirmPassword , String token) {
         this.user_id = user_id;
-        this.username = username;
+        this.nickname = nickname;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;

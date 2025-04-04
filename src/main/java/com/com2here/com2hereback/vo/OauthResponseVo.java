@@ -7,23 +7,23 @@ import lombok.Data;
 @Data
 public class OauthResponseVo {
     private String email;
-    private String username;
+    private String nickname;
     private String accessToken;
     private String refreshToken;
 
     public static OauthResponseVo dtoToVo(OauthResponseDto dto) {
         return OauthResponseVo.builder()
             .email(dto.getEmail())
-            .username(dto.getUsername())
+            .nickname(dto.getNickname())
             .accessToken(dto.getAccessToken())
             .refreshToken(dto.getRefreshToken())
             .build();
     }
 
     @Builder
-    public OauthResponseVo(String email, String username, String accessToken, String refreshToken) {
+    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken) {
         this.email = email;
-        this.username = username;
+        this.nickname = nickname;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

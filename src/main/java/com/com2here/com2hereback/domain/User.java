@@ -18,7 +18,7 @@ public class User {
     private String uuid;
 
     @Column(nullable = false)
-    private String username;
+    private String nickname;
 
     @Column(nullable = false)
     private String email;
@@ -38,10 +38,10 @@ public class User {
 
 
     @Builder
-    public User(int user_id,String uuid, String username, String email, String password, String refreshToken, boolean isEmailVerified, boolean role, String profileImageUrl) {
+    public User(int user_id,String uuid, String nickname, String email, String password, String refreshToken, boolean isEmailVerified, boolean role, String profileImageUrl) {
         this.user_id = user_id;
         this.uuid = uuid != null ? uuid : UUID.randomUUID().toString();
-        this.username = username;
+        this.nickname = nickname;
         this.email = email;
         this.password = password;
         this.refreshToken = refreshToken;

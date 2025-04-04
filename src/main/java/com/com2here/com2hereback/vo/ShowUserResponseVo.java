@@ -7,19 +7,19 @@ import lombok.Data;
 @Data
 @Builder
 public class ShowUserResponseVo {
-    private String username;
+    private String nickname;
     private String email;
 
     @Builder
-    public ShowUserResponseVo(String username, String email) {
-        this.username = username;
+    public ShowUserResponseVo(String nickname, String email) {
+        this.nickname = nickname;
         this.email = email;
     }
 
     public static ShowUserResponseVo dtoToVo(
         ShowUserResponseDto showUserResponseDto) {
         return ShowUserResponseVo.builder()
-            .username(showUserResponseDto.getUsername())
+            .nickname(showUserResponseDto.getNickname())
             .email(showUserResponseDto.getEmail())
             .build();
     }

@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 @Builder
 public class ShowUserResponseDto {
-    private String username;
+    private String nickname;
     private String email;
 
     public static ShowUserResponseDto entityToDto(User user){
         return ShowUserResponseDto.builder()
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .build();
     }
