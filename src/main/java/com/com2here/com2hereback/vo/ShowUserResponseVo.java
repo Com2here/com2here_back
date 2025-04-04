@@ -9,11 +9,13 @@ import lombok.Data;
 public class ShowUserResponseVo {
     private String nickname;
     private String email;
+    boolean isVerified;
 
     @Builder
-    public ShowUserResponseVo(String nickname, String email) {
+    public ShowUserResponseVo(String username, String email, boolean isVerified) {
         this.nickname = nickname;
         this.email = email;
+        this.isVerified = isVerified;
     }
 
     public static ShowUserResponseVo dtoToVo(
@@ -21,6 +23,7 @@ public class ShowUserResponseVo {
         return ShowUserResponseVo.builder()
             .nickname(showUserResponseDto.getNickname())
             .email(showUserResponseDto.getEmail())
+            .isVerified(showUserResponseDto.isVerified())
             .build();
     }
 }
