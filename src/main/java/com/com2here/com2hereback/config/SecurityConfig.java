@@ -42,18 +42,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/v1/email/send", "/api/v1/email/verify", "/api/v1/user/password/reset",
-                                "/api/v1/user/register", "/api/v1/user/login", "/api/v1/user/login/kakao/url",
-                                "/api/v1/user/login/naver/url", "/api/v1/user/login/google/url",
-                                "/api/v1/user/callback/kakao","/api/v1/user/callback/naver","/api/v1/user/callback/google")
-
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())); // CORS 설정 추가
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers(
+                    "/api/v1/email/*",
+                    "/api/v1/oauth/*",
+                    "/api/v1/user/register",
+                    "/api/v1/user/login"
+                    )
+                .permitAll()
+                .anyRequest().authenticated())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())); // CORS 설정 추가
 
         return http.build();
     }

@@ -2,6 +2,7 @@ package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.common.exception.BaseException;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
@@ -29,36 +30,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public CMResponse RegisterUser(UserRequestDto userRequestDto) {
-        BaseResponseStatus status;
+    public void RegisterUser(UserRequestDto userRequestDto) {
 
         // 400 : 데이터 누락
         if (userRequestDto == null || userRequestDto.getPassword() == null || userRequestDto.getEmail() == null || userRequestDto.getConfirmPassword() == null) {
-            status = BaseResponseStatus.WRONG_PARAM;
-            return CMResponse.fail(status.getCode(),status,null);
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
         // 2601 : 비밀번호 형식 불일치
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        if (!(userRequestDto.getPassword()).matches(regex)) {
-            status = BaseResponseStatus.PASSWORD_FORMAT_INVALID;
-            return CMResponse.fail(status.getCode(),status,null);
+        if (!(userRequestDto.getPassword()).matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")) {
+            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
         }
 
         // 2602 : 비밀번호 불일치
         if (!userRequestDto.getPassword().equals(userRequestDto.getConfirmPassword())) {
-            status = BaseResponseStatus.UNMATCHED_PASSWORD;
-            return CMResponse.fail(status.getCode(),status,null);
+            throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
-        // 중복된 이메일
+        // 2100 : 중복된 이메일
         if (userRepository.existsByEmail(userRequestDto.getEmail())) {
-            status = BaseResponseStatus.DUPLICATE_EMAIL;
-            return CMResponse.fail(status.getCode(),status,null);
+            throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
         }
 
         User user = User.builder()
-            .username(userRequestDto.getUsername())
+            .nickname(userRequestDto.getNickname())
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail())
             .uuid(null)
@@ -69,28 +64,21 @@ public class UserServiceImpl implements UserService {
 
 
         userRepository.save(user);
-
-        status = BaseResponseStatus.REGISTRATION_SUCCESS;
-
-        return CMResponse.success(status.getCode(),status,null);
     }
 
     @Override
     @Transactional
-    public CMResponse LoginUser(UserRequestDto userRequestDto) {
-        BaseResponseStatus status;
+    public UserLoginResponseDto LoginUser(UserRequestDto userRequestDto) {
 
         // 400 : 데이터 누락
         if(userRequestDto.getEmail()==null || userRequestDto.getPassword()==null){
-            status = BaseResponseStatus.WRONG_PARAM;
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
         // 회원 존재 X 2106
         User user = userRepository.findByEmail(userRequestDto.getEmail());
         if(user==null || !bCryptPasswordEncoder.matches(userRequestDto.getPassword(), user.getPassword())){
-            status = BaseResponseStatus.NO_EXIST_MEMBERS;
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
         String accessToken = tokenProvider.createAccessToken(user.getUuid());
         String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
@@ -98,7 +86,7 @@ public class UserServiceImpl implements UserService {
         // refreshToken 추가
         User updateUser = User.builder()
             .user_id(user.getUser_id())
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
             .uuid(user.getUuid())
@@ -110,46 +98,49 @@ public class UserServiceImpl implements UserService {
         UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .email(user.getEmail())
             .build();
 
-        status = BaseResponseStatus.LOGIN_SUCCESS;
-        return CMResponse.success(status.getCode(),status, userLoginResponseDto);
+        return userLoginResponseDto;
     }
 
     @Override
-    public CMResponse ShowUser() {
+    public ShowUserResponseDto ShowUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
 
         User user = userRepository.findByUuid(uuid);
+
         if (user == null) {
-            return CMResponse.fail(2106,BaseResponseStatus.NO_EXIST_MEMBERS);
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
         ShowUserResponseDto showUserResponseDto = ShowUserResponseDto.entityToDto(user);
-        return CMResponse.success(200,BaseResponseStatus.USER_INFO_RETRIEVED,showUserResponseDto);
+        return showUserResponseDto;
     }
 
     @Override
     @Transactional
-    public CMResponse updateUser(UserRequestDto userRequestDto) {
-        BaseResponseStatus status;
+    public void updateUser(UserRequestDto userRequestDto) {
 
         // 400 : 데이터 누락
         if(userRequestDto==null){
-            status = BaseResponseStatus.WRONG_PARAM;
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
 
         User user = userRepository.findByUuid(uuid);
+
+        if (user == null) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
+        }
+
         User updatedUser = User.builder()
             .user_id(user.getUser_id())
-            .username(userRequestDto.getUsername() != null ? userRequestDto.getUsername() : user.getUsername())
+            .nickname(userRequestDto.getNickname() != null ? userRequestDto.getNickname() : user.getNickname())
             .email(userRequestDto.getEmail() != null ? userRequestDto.getEmail() : user.getEmail())
             .password(user.getPassword())
             .uuid(user.getUuid())
@@ -158,84 +149,67 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updatedUser);
 
-        status = BaseResponseStatus.MEMBER_INFO_UPDATED;
-        return CMResponse.success(status.getCode(),status,null);
     }
 
     @Override
     @Transactional
-    public CMResponse deleteUser(UserRequestDto userRequestDto) {
-        BaseResponseStatus status;
-
+    public void deleteUser(UserRequestDto userRequestDto) {
         // 400 : 데이터 누락
         if(userRequestDto==null){
-            status = BaseResponseStatus.WRONG_PARAM;
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
+        String uuid = (String) authentication.getPrincipal();
+
+        User user = userRepository.findByUuid(uuid);
 
         // 2106
-        User user = userRepository.findByUuid(uuid);
         if (user == null) {
-            status =  BaseResponseStatus.NO_EXIST_MEMBERS; // 존재하지 않는 사용자
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
         // 2202
         if (!bCryptPasswordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
-            status = BaseResponseStatus.PASSWORD_MISMATCH; // 비밀번호 불일치
-            return CMResponse.fail(status.getCode(),status);
+            throw new BaseException(BaseResponseStatus.PASSWORD_MISMATCH);
         }
         userRepository.delete(user);
-        status = BaseResponseStatus.MEMBER_DELETE_SUCCESS;
-        // 200
-        return CMResponse.success(status.getCode(),status,null);
     }
 
     @Override
     @Transactional
-    public CMResponse chgPassword(ChgPasswordRequestDto chgPasswordRequestDto) {
-        BaseResponseStatus status;
-
+    public void chgPassword(ChgPasswordRequestDto chgPasswordRequestDto) {
         // 400 : 데이터 누락
         if (chgPasswordRequestDto == null || chgPasswordRequestDto.getCurrentPassword() == null ||
             chgPasswordRequestDto.getNewPassword() == null ||
             chgPasswordRequestDto.getEmail() == null ||
             chgPasswordRequestDto.getConfirmPassword() == null) {
-
-            status = BaseResponseStatus.WRONG_PARAM;
-            return CMResponse.fail(status.getCode(), status, null);
-        }
-
-        // 2601 : 비밀번호 형식 불일치
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
-            status = BaseResponseStatus.PASSWORD_FORMAT_INVALID;
-            return CMResponse.fail(status.getCode(), status, null);
-        }
-
-        // 2602 : 비밀번호 불일치
-        if (!chgPasswordRequestDto.getNewPassword().equals(chgPasswordRequestDto.getConfirmPassword())) {
-            status = BaseResponseStatus.UNMATCHED_PASSWORD;
-            return CMResponse.fail(status.getCode(), status, null);
+            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
         // 사용자 조회
         User user = userRepository.findByEmail(chgPasswordRequestDto.getEmail());
         if (user == null) {
-            status = BaseResponseStatus.NO_EXIST_MEMBERS;
-            return CMResponse.fail(status.getCode(), status, null);
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
         // 현재 비밀번호 확인
         if (!bCryptPasswordEncoder.matches(chgPasswordRequestDto.getCurrentPassword(), user.getPassword())) {
-            status = BaseResponseStatus.INVALID_CURRENT_PASSWORD;
-            return CMResponse.fail(status.getCode(), status, null);
+            throw new BaseException(BaseResponseStatus.INVALID_CURRENT_PASSWORD);
+        }
+
+        // 2601 : 비밀번호 형식 불일치
+        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
+        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
+            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
+        }
+
+        // 2602 : 비밀번호 불일치
+        if (!chgPasswordRequestDto.getNewPassword().equals(chgPasswordRequestDto.getConfirmPassword())) {
+            throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
         user = User.builder()
             .user_id(user.getUser_id())
-            .username(user.getUsername())
+            .nickname(user.getNickname())
             .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
             .email(user.getEmail())
             .uuid(user.getUuid())
@@ -243,9 +217,6 @@ public class UserServiceImpl implements UserService {
             .build();
 
         userRepository.save(user);
-
-        status = BaseResponseStatus.PASSWORD_CHANGE_SUCCESS;
-        return CMResponse.success(status.getCode(), status, null);
     }
 
 }

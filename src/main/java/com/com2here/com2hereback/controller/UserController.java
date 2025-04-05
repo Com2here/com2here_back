@@ -2,13 +2,16 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
+import com.com2here.com2hereback.common.exception.BaseException;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.service.EmailService;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.ShowUserResponseVo;
+import com.com2here.com2hereback.vo.UserLoginResponseVo;
 import com.com2here.com2hereback.vo.UserTokenResponseVo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +30,15 @@ public class UserController {
     // 입력값 : userRequestDto
     // 반환값 : code, message
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDto userRequestDto) {
+    public CMResponse<Void> registerUser(@RequestBody UserRequestDto userRequestDto) {
         try {
-            CMResponse status = userService.RegisterUser(userRequestDto);
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), null));
-        } catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            userService.RegisterUser(userRequestDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        }
+        catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -40,18 +46,16 @@ public class UserController {
     // 입력값 : username, email, password, password_confirmation
     // 반환값 : code, message, Access Token, Refresh Token
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody UserRequestDto userRequestDto) {
+    public CMResponse<UserLoginResponseVo> loginUser(@RequestBody UserRequestDto userRequestDto) {
         try {
-            CMResponse status = userService.LoginUser(userRequestDto);
-
-            UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(String.valueOf(((UserTokenResponseDto) status.getData()).getAccessToken()), String.valueOf(((UserTokenResponseDto) status.getData()).getRefreshToken()));
-            UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
-
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),
-                userTokenResponseVo));
+            UserLoginResponseDto userLoginResponseDto = userService.LoginUser(userRequestDto);
+            UserLoginResponseVo userLoginResponseVo = UserLoginResponseVo.dtoToVo(userLoginResponseDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS, userLoginResponseVo);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
         }
         catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -59,13 +63,16 @@ public class UserController {
     // 입력값 : Token
     // 출력값 : code, message, showUserResponseVo
     @GetMapping("/show")
-    public ResponseEntity<?> showUser() {
+    public CMResponse<ShowUserResponseVo> showUser() {
         try{
-            CMResponse status = userService.ShowUser();
-            ShowUserResponseVo showUserResponseVo = ShowUserResponseVo.dtoToVo((ShowUserResponseDto) status.getData());
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), showUserResponseVo));
-        }catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            ShowUserResponseDto showUserResponseDto = userService.ShowUser();
+            ShowUserResponseVo showUserResponseVo = ShowUserResponseVo.dtoToVo(showUserResponseDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS, showUserResponseVo);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        }
+        catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -73,12 +80,15 @@ public class UserController {
     // 입력값 : Token, userRequestDto
     // 출력값 : code, message, null
     @PatchMapping("/update")
-    public ResponseEntity<?> updateUser(@RequestBody UserRequestDto userRequestDto) {
+    public CMResponse<Void> updateUser(@RequestBody UserRequestDto userRequestDto) {
         try{
-            CMResponse status = userService.updateUser(userRequestDto);
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), null));
-        }catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            userService.updateUser(userRequestDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        }
+        catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -86,12 +96,15 @@ public class UserController {
     // 입력값 : password
     // 출력값 : code, message, null
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@RequestBody UserRequestDto userRequestDto) {
+    public CMResponse<Void> deleteUser(@RequestBody UserRequestDto userRequestDto) {
         try {
-            CMResponse status = userService.deleteUser(userRequestDto);
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(),status.getMessage(),null));
-        } catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            userService.deleteUser(userRequestDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        }
+        catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -99,12 +112,15 @@ public class UserController {
     // 입력값 : currentPassword, password, confirmPassword
     // 출력값 : code, message, null
     @PatchMapping("/password/change")
-    public ResponseEntity<?> chgPassword(@RequestBody ChgPasswordRequestDto chgPasswordRequestDto) {
+    public CMResponse<Void> chgPassword(@RequestBody ChgPasswordRequestDto chgPasswordRequestDto) {
         try{
-            CMResponse status = userService.chgPassword(chgPasswordRequestDto);
-            return ResponseEntity.ok().body(new CMResponse<>(status.getCode(), status.getMessage(), null));
-        }catch (Exception e) {
-            return ResponseEntity.ok().body(new CMResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR));
+            userService.chgPassword(chgPasswordRequestDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        }
+        catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

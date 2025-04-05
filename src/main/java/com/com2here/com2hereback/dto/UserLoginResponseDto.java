@@ -8,14 +8,14 @@ import lombok.Data;
 public class UserLoginResponseDto {
     private String accessToken;
     private String refreshToken;
-    private String username;
+    private String nickname;
     private String email;
 
-    public static UserLoginResponseDto entityToDto(String accessToken, String refreshToken, String username, String email) {
+    public static UserLoginResponseDto entityToDto(String accessToken, String refreshToken, String nickname, String email) {
         return UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .username(username)
+            .nickname(nickname)
             .email(email)
             .build();
     }

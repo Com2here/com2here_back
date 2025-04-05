@@ -50,7 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Authorization 헤더에서 JWT 토큰 추출
         String accessToken = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
         String refreshToken = authExtractor.extractRefreshToken(request);
-
         // accessToken 유효시간 검증 성공 시
         if (StringUtils.hasText(accessToken) && tokenProvider.validateAccessToken(accessToken)) {
             String uuid = tokenProvider.getSubject(accessToken);
@@ -58,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null, new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute("uuid", uuid);
-
             filterChain.doFilter(request, response);
         } else {
             BaseResponseStatus status;
@@ -76,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     User updatedUser = User.builder()
                             .user_id(user.getUser_id())
-                            .username(user.getUsername())
+                            .nickname(user.getNickname())
                             .email(user.getEmail())
                             .password(user.getPassword())
                             .uuid(user.getUuid())
@@ -90,36 +88,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
                     status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
-                    CMResponse cmResponse = CMResponse.success(status.getCode(), status,
-                        userTokenResponseVo);
-                    writeResponse(response, cmResponse);
+                    // CMResponse cmResponse = CMResponse.success(status.getCode(), status,
+                    // userTokenResponseVo);
+                    writeResponse(response, null);
                     return;
                 }
             }
 
             // 리프레시 토큰이 유효하지 않거나 사용자를 찾을 수 없는 경우
             status = BaseResponseStatus.TOKEN_EXPIRED;
-            CMResponse cmResponse = CMResponse.fail(status.getCode(), status);
+            CMResponse cmResponse = CMResponse.fail(status);
             writeResponse(response, cmResponse);
         }
     }
 
-    // 로그인 API 등 필터를 건너뛰어야 하는 경로 확인
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.equals("/api/v1/user/login") ||
-                path.equals("/api/v1/user/register") ||
-                path.equals("/api/v1/email/send") ||
-                path.equals("/api/v1/email/verify") ||
-                path.equals("/api/v1/email/authcode") ||
-                path.equals("/api/v1/email/password/reset") ||
-                path.equals("/api/v1/user/login/kakao/url") ||
-                path.equals("/api/v1/user/login/naver/url") ||
-                path.equals("/api/v1/user/login/google/url") ||
-                path.equals("/api/v1/user/password/reset") ||
-                path.equals("/api/v1/user/callback/kakao") ||
-                path.equals("/api/v1/user/callback/naver") ||
-                path.equals("/api/v1/user/callback/google");
+        return path.startsWith("/api/v1/oauth/") ||
+            path.startsWith("/api/v1/email/") ||
+            path.equals("/api/v1/user/login") ||
+            path.equals("/api/v1/user/register");
     }
 
     private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {

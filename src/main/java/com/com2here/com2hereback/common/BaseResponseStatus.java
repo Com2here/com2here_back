@@ -120,7 +120,11 @@ public enum BaseResponseStatus {
     NO_EXIST_SNS_MEMBERS(HttpStatus.NOT_FOUND, false, 2106, "가입되지 않은 SNS 멤버 정보입니다."),
 
     // Address
-    NO_EXIST_ADDRESS(HttpStatus.NOT_FOUND, false, 2300, "존재하지 않는 주소입니다.");
+    NO_EXIST_ADDRESS(HttpStatus.NOT_FOUND, false, 2300, "존재하지 않는 주소입니다."),
+
+    // Oauth
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, false, 2400, "존재하지 않는 제공자입니다.");
+
 
     private final HttpStatusCode httpStatusCode;
     private final boolean isSuccess;
