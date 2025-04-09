@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,22 +24,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @Slf4j
+@AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
     private final UserRepository userRepository;
     private final AuthorizationExtractor authExtractor;
 
-    public JwtAuthenticationFilter(TokenProvider tokenProvider, UserRepository userRepository,
-            AuthorizationExtractor authExtractor) {
-        this.tokenProvider = tokenProvider;
-        this.userRepository = userRepository;
-        this.authExtractor = authExtractor;
-    }
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+        FilterChain filterChain)
+        throws ServletException, IOException {
 
         log.info(">>> JwtAuthenticationFilter 호출: {}", request.getRequestURI());
 
@@ -47,24 +43,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Authorization 헤더에서 JWT 토큰 추출
         String accessToken = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
         String refreshToken = authExtractor.extractRefreshToken(request);
-        // accessToken 유효시간 검증 성공 시
         if (StringUtils.hasText(accessToken) && tokenProvider.validateAccessToken(accessToken)) {
             String uuid = tokenProvider.getSubject(accessToken);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null, new ArrayList<>());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null,
+                new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute("uuid", uuid);
             filterChain.doFilter(request, response);
         } else {
-            BaseResponseStatus status;
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
             response.setContentType("application/json;charset=utf-8");
 
-            // 리프레시 토큰이 있고 유효한 경우
-            if (StringUtils.hasText(refreshToken) && tokenProvider.validateRefreshToken(refreshToken)) {
+            if (StringUtils.hasText(refreshToken) && tokenProvider.validateRefreshToken(
+                refreshToken)) {
                 String uuid = tokenProvider.getSubject(refreshToken);
                 User user = userRepository.findByUuid(uuid);
 
@@ -73,31 +66,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String newRefreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
                     User updatedUser = User.builder()
-                            .user_id(user.getUser_id())
-                            .nickname(user.getNickname())
-                            .email(user.getEmail())
-                            .password(user.getPassword())
-                            .uuid(user.getUuid())
-                            .refreshToken(newRefreshToken)
-                            .build();
+                        .user_id(user.getUser_id())
+                        .nickname(user.getNickname())
+                        .email(user.getEmail())
+                        .password(user.getPassword())
+                        .uuid(user.getUuid())
+                        .role(user.getRole())
+                        .refreshToken(newRefreshToken)
+                        .build();
 
                     userRepository.save(updatedUser);
 
-                    UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(newAccessToken,
-                            newRefreshToken);
+                    UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(
+                        newAccessToken,
+                        newRefreshToken);
                     UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
 
-                    status = BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS;
-                    // CMResponse cmResponse = CMResponse.success(status.getCode(), status,
-                    // userTokenResponseVo);
-                    writeResponse(response, null);
+                    CMResponse cmResponse = CMResponse.success(BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS, userTokenResponseVo);
+                    writeResponse(response, cmResponse);
                     return;
                 }
             }
 
-            // 리프레시 토큰이 유효하지 않거나 사용자를 찾을 수 없는 경우
-            status = BaseResponseStatus.TOKEN_EXPIRED;
-            CMResponse cmResponse = CMResponse.fail(status);
+            CMResponse cmResponse = CMResponse.fail(BaseResponseStatus.TOKEN_EXPIRED);
             writeResponse(response, cmResponse);
         }
     }

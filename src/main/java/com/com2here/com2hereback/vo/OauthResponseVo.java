@@ -10,6 +10,18 @@ public class OauthResponseVo {
     private String nickname;
     private String accessToken;
     private String refreshToken;
+    private String role;
+    private String provider;
+
+    @Builder
+    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken, String role, String provider) {
+        this.email = email;
+        this.nickname = nickname;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.role = role;
+        this.provider = provider;
+    }
 
     public static OauthResponseVo dtoToVo(OauthResponseDto dto) {
         return OauthResponseVo.builder()
@@ -17,14 +29,10 @@ public class OauthResponseVo {
             .nickname(dto.getNickname())
             .accessToken(dto.getAccessToken())
             .refreshToken(dto.getRefreshToken())
+            .role(dto.getRole())
+            .provider(dto.getProvider())
             .build();
     }
 
-    @Builder
-    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken) {
-        this.email = email;
-        this.nickname = nickname;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-    }
+
 }

@@ -178,8 +178,6 @@ public class OauthServiceImpl implements OauthService {
         return googleInfo;
     }
 
-
-    // 카카오 로그인 주소 생성 메소드
     @Override
     public String createKakaoOauthUrl() {
         String url = kakaoAuthUrl
