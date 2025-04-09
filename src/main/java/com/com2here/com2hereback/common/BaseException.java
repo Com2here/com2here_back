@@ -1,6 +1,5 @@
-package com.com2here.com2hereback.common.exception;
+package com.com2here.com2hereback.common;
 
-import com.com2here.com2hereback.common.BaseResponseStatus;
 import lombok.Getter;
 
 @Getter

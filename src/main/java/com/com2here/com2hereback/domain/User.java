@@ -12,7 +12,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int user_id;
+    private Long user_id;
 
     @Column(nullable = false, unique = true)
     private String uuid;
@@ -38,7 +38,7 @@ public class User {
 
 
     @Builder
-    public User(int user_id,String uuid, String nickname, String email, String password, String refreshToken, boolean isEmailVerified, boolean role, String profileImageUrl) {
+    public User(Long user_id,String uuid, String nickname, String email, String password, String refreshToken, boolean isEmailVerified, boolean role, String profileImageUrl) {
         this.user_id = user_id;
         this.uuid = uuid != null ? uuid : UUID.randomUUID().toString();
         this.nickname = nickname;

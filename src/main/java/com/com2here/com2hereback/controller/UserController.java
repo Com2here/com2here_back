@@ -2,18 +2,15 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
 import com.com2here.com2hereback.service.EmailService;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.ShowUserResponseVo;
 import com.com2here.com2hereback.vo.UserLoginResponseVo;
-import com.com2here.com2hereback.vo.UserTokenResponseVo;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,7 @@
 package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
-import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;

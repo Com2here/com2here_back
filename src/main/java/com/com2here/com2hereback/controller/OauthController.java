@@ -2,14 +2,12 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.OauthRequestDto;
 import com.com2here.com2hereback.dto.OauthResponseDto;
-import com.com2here.com2hereback.service.oauthservice.OauthService;
+import com.com2here.com2hereback.service.OauthService;
 import com.com2here.com2hereback.vo.OauthResponseVo;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
