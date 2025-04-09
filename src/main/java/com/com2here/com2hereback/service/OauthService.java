@@ -1,6 +1,5 @@
-package com.com2here.com2hereback.service.oauthservice;
+package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.OauthResponseDto;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;

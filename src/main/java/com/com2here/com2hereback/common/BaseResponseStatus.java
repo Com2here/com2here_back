@@ -56,6 +56,8 @@ public enum BaseResponseStatus {
     FAIL_RETURN_OAUTH_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, false, 2801, "카카오 토큰 반환에 실패했습니다."),
     FAIL_RETURN_OAUTH_INFO(HttpStatus.INTERNAL_SERVER_ERROR, false, 2802, "카카오 정보 요청 중 오류가 발생했습니다."),
 
+    NO_PRODUCT_FOUND(HttpStatus.BAD_REQUEST, false, 2900, "상품을 조회할 수 없습니다."),
+    NO_EXIST_PRODUCT(HttpStatus.BAD_REQUEST, false, 2901, "상품이 존재하지 않습니다."),
     /**
      * 400 : security 에러
      */

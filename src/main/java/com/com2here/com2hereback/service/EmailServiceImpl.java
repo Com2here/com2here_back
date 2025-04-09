@@ -1,13 +1,11 @@
 package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
-import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.config.redis.RedisUtil;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
 import com.com2here.com2hereback.repository.UserRepository;
-import com.fasterxml.jackson.databind.ser.Serializers.Base;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
