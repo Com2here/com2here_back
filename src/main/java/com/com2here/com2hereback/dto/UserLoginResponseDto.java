@@ -11,6 +11,7 @@ public class UserLoginResponseDto {
     private String refreshToken;
     private String nickname;
     private String email;
+    private String profileImageUrl;
     private String role;
     private String provider;
 
@@ -20,6 +21,7 @@ public class UserLoginResponseDto {
             .refreshToken(refreshToken)
             .nickname(user.getNickname())
             .email(user.getEmail())
+            .profileImageUrl(user.getProfileImageUrl())
             .role(user.getRole())
             .provider(provider)
             .build();
