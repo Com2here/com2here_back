@@ -7,9 +7,8 @@ import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
-import com.com2here.com2hereback.service.EmailService;
 import com.com2here.com2hereback.service.UserService;
-import com.com2here.com2hereback.vo.ShowUserResponseVo;
+import com.com2here.com2hereback.vo.UserShowResponseVo;
 import com.com2here.com2hereback.vo.UserLoginResponseVo;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
-    private final EmailService emailService;
 
-    // 회원가입 API
-    // 입력값 : userRequestDto
-    // 반환값 : code, message
     @PostMapping("/register")
     public CMResponse<Void> registerUser(@RequestBody UserRequestDto userRequestDto) {
         try {
@@ -39,9 +34,6 @@ public class UserController {
         }
     }
 
-    // 로그인 API
-    // 입력값 : username, email, password, password_confirmation
-    // 반환값 : code, message, Access Token, Refresh Token
     @PostMapping("/login")
     public CMResponse<UserLoginResponseVo> loginUser(@RequestBody UserRequestDto userRequestDto) {
         try {
@@ -56,15 +48,12 @@ public class UserController {
         }
     }
 
-    // 유저 조회 API
-    // 입력값 : Token
-    // 출력값 : code, message, showUserResponseVo
     @GetMapping("/show")
-    public CMResponse<ShowUserResponseVo> showUser() {
+    public CMResponse<UserShowResponseVo> showUser() {
         try{
             ShowUserResponseDto showUserResponseDto = userService.ShowUser();
-            ShowUserResponseVo showUserResponseVo = ShowUserResponseVo.dtoToVo(showUserResponseDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, showUserResponseVo);
+            UserShowResponseVo userShowResponseVo = UserShowResponseVo.dtoToVo(showUserResponseDto);
+            return CMResponse.success(BaseResponseStatus.SUCCESS, userShowResponseVo);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode());
         }
@@ -73,9 +62,6 @@ public class UserController {
         }
     }
 
-    // 유저 정보 수정 API
-    // 입력값 : Token, userRequestDto
-    // 출력값 : code, message, null
     @PatchMapping("/update")
     public CMResponse<Void> updateUser(@RequestBody UserRequestDto userRequestDto) {
         try{

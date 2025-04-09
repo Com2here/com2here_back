@@ -12,10 +12,13 @@ import lombok.Data;
 @Data
 @Builder
 public class OauthResponseDto {
-    private String email;
-    private String nickname;
     private String accessToken;
     private String refreshToken;
+    private String email;
+    private String nickname;
+    private String role;
+    private String provider;
+
 
     public static OauthResponseDto entityToDto(KakaoInfo kakaoInfo, KakaoToken kakaoToken) {
         return OauthResponseDto.builder()
@@ -23,6 +26,8 @@ public class OauthResponseDto {
             .nickname(kakaoInfo.getNickname())
             .accessToken(kakaoToken.getAccessToken())
             .refreshToken(kakaoToken.getRefreshToken())
+            .role("일반")
+            .provider("kakao")
             .build();
     }
 
@@ -32,6 +37,8 @@ public class OauthResponseDto {
             .nickname(naverInfo.getName())
             .accessToken(naverToken.getAccessToken())
             .refreshToken(naverToken.getRefreshToken())
+            .role("일반")
+            .provider("naver")
             .build();
     }
 
@@ -41,6 +48,8 @@ public class OauthResponseDto {
             .nickname(googleInfo.getName())
             .accessToken(googleToken.getAccessToken())
             .refreshToken(googleToken.getRefreshToken())
+            .role("일반")
+            .provider("google")
             .build();
     }
 }

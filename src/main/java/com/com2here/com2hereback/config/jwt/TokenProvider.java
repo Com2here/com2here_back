@@ -1,7 +1,6 @@
 package com.com2here.com2hereback.config.jwt;
 
 import io.jsonwebtoken.io.Decoders;
-import java.security.Key;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -16,15 +15,11 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class TokenProvider {
 
-    // 비밀키 생성 (실제 운영환경에서는 설정 파일에서 관리하는 것을 권장)
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final SecretKey signingKey;
 
-    // Access Token과 Refresh Token의 유효기간을 각각 설정
     private final long accessTokenExpirationTime;
     private final long refreshTokenExpirationTime;
 
-    // application.properties에서 값을 가져옴
     public TokenProvider(@Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-expiration-time}") long accessTokenExpirationTime,
             @Value("${jwt.refresh-token-expiration-time}") long refreshTokenExpirationTime) {
@@ -53,7 +48,6 @@ public class TokenProvider {
                 .compact();
     }
 
-    // 토큰 유효시간 검증 메서드
     public boolean validateAccessToken(String token) {
         return validateToken(token);
     }
@@ -86,7 +80,6 @@ public class TokenProvider {
         return claims.getSubject();
     }
 
-    // JWT 디코딩 메서드
     public Claims decodeToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
@@ -95,7 +88,6 @@ public class TokenProvider {
                 .getBody(); // 클레임 반환
     }
 
-    // 토큰에서 값 추출
     public String getSubject(String token) {
         String subject = Jwts.parser()
                 .setSigningKey(signingKey)

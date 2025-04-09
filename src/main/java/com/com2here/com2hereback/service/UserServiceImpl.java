@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
             .email(userRequestDto.getEmail())
             .uuid(null)
             .isEmailVerified(false)
-            .role(false)
+            .role("일반")
             .profileImageUrl(null)
             .build();
 
@@ -82,24 +82,19 @@ public class UserServiceImpl implements UserService {
         String accessToken = tokenProvider.createAccessToken(user.getUuid());
         String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
-        // refreshToken 추가
         User updateUser = User.builder()
             .user_id(user.getUser_id())
             .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
             .uuid(user.getUuid())
+            .role(user.getRole())
             .refreshToken(refreshToken)
             .build();
 
         userRepository.save(updateUser);
 
-        UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .nickname(user.getNickname())
-            .email(user.getEmail())
-            .build();
+        UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.entityToDto(user, accessToken, refreshToken, "normal");
 
         return userLoginResponseDto;
     }
@@ -108,7 +103,7 @@ public class UserServiceImpl implements UserService {
     public ShowUserResponseDto ShowUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
+        String uuid = (String) authentication.getPrincipal();
 
         User user = userRepository.findByUuid(uuid);
 
@@ -124,12 +119,12 @@ public class UserServiceImpl implements UserService {
     public void updateUser(UserRequestDto userRequestDto) {
 
         // 400 : 데이터 누락
-        if(userRequestDto==null){
+        if(userRequestDto == null){
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uuid = (String) authentication.getPrincipal(); // uuid를 가져옵니다.
+        String uuid = (String) authentication.getPrincipal();
 
         User user = userRepository.findByUuid(uuid);
 
@@ -141,8 +136,10 @@ public class UserServiceImpl implements UserService {
             .user_id(user.getUser_id())
             .nickname(userRequestDto.getNickname() != null ? userRequestDto.getNickname() : user.getNickname())
             .email(userRequestDto.getEmail() != null ? userRequestDto.getEmail() : user.getEmail())
+            .profileImageUrl(user.getProfileImageUrl() != null ? user.getProfileImageUrl() : null)
             .password(user.getPassword())
             .uuid(user.getUuid())
+            .role(user.getRole())
             .refreshToken(user.getRefreshToken())
             .build();
 
@@ -154,9 +151,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(UserRequestDto userRequestDto) {
         // 400 : 데이터 누락
-        if(userRequestDto==null){
+        if(userRequestDto == null){
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal();
 
@@ -212,6 +210,7 @@ public class UserServiceImpl implements UserService {
             .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
             .email(user.getEmail())
             .uuid(user.getUuid())
+            .role(user.getRole())
             .isEmailVerified(user.isEmailVerified())
             .build();
 
