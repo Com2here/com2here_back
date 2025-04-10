@@ -1,12 +1,7 @@
 package com.com2here.com2hereback.config.jwt;
 
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.common.BaseResponseStatus;
-import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
-import com.com2here.com2hereback.repository.UserRepository;
-import com.com2here.com2hereback.vo.UserTokenResponseVo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,69 +23,37 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
-    private final UserRepository userRepository;
     private final AuthorizationExtractor authExtractor;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-        FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
         log.info(">>> JwtAuthenticationFilter 호출: {}", request.getRequestURI());
+
+        String path = request.getRequestURI();
 
         if (shouldSkipFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String accessToken = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
-        String refreshToken = authExtractor.extractRefreshToken(request);
-        if (StringUtils.hasText(accessToken) && tokenProvider.validateAccessToken(accessToken)) {
-            String uuid = tokenProvider.getSubject(accessToken);
+        String token = path.equals("/api/v1/token/rotate")
+            ? authExtractor.extractRefreshToken(request)
+            : authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null,
-                new ArrayList<>());
+        String tokenType = path.equals("/api/v1/token/rotate") ? "refresh" : "access";
+
+        if (StringUtils.hasText(token) && tokenProvider.validateToken(token, tokenType)) {
+            String uuid = tokenProvider.getSubject(token);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null, new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute("uuid", uuid);
             filterChain.doFilter(request, response);
         } else {
-            response.setContentType("application/json;charset=utf-8");
-
-            if (StringUtils.hasText(refreshToken) && tokenProvider.validateRefreshToken(
-                refreshToken)) {
-                String uuid = tokenProvider.getSubject(refreshToken);
-                User user = userRepository.findByUuid(uuid);
-
-                if (user != null && user.getRefreshToken().equals(refreshToken)) {
-                    String newAccessToken = tokenProvider.createAccessToken(user.getUuid());
-                    String newRefreshToken = tokenProvider.createRefreshToken(user.getUuid());
-
-                    User updatedUser = User.builder()
-                        .user_id(user.getUser_id())
-                        .nickname(user.getNickname())
-                        .email(user.getEmail())
-                        .password(user.getPassword())
-                        .uuid(user.getUuid())
-                        .role(user.getRole())
-                        .refreshToken(newRefreshToken)
-                        .build();
-
-                    userRepository.save(updatedUser);
-
-                    UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(
-                        newAccessToken,
-                        newRefreshToken);
-                    UserTokenResponseVo userTokenResponseVo = UserTokenResponseVo.dtoToVo(userTokenResponseDto);
-
-                    CMResponse cmResponse = CMResponse.success(BaseResponseStatus.ACCESS_TOKEN_RETURNED_SUCCESS, userTokenResponseVo);
-                    writeResponse(response, cmResponse);
-                    return;
-                }
-            }
-
-            CMResponse cmResponse = CMResponse.fail(BaseResponseStatus.TOKEN_EXPIRED);
-            writeResponse(response, cmResponse);
+            BaseException.sendErrorResponse(response, BaseResponseStatus.TOKEN_EXPIRED);
         }
+
     }
 
     private boolean shouldSkipFilter(HttpServletRequest request) {
@@ -100,13 +63,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             path.equals("/api/v1/user/login") ||
             path.equals("/api/v1/user/register");
     }
-
-    private void writeResponse(HttpServletResponse response, CMResponse cmResponse) {
-        try {
-            response.getWriter().write(new ObjectMapper().writeValueAsString(cmResponse));
-        } catch (IOException e) {
-            log.error("응답 작성 중 오류 발생", e);
-        }
-    }
-
 }

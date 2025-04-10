@@ -3,7 +3,6 @@ package com.com2here.com2hereback.config;
 import com.com2here.com2hereback.config.jwt.AuthorizationExtractor;
 import com.com2here.com2hereback.config.jwt.JwtAuthenticationFilter;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
-import com.com2here.com2hereback.repository.UserRepository;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,18 +22,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final TokenProvider tokenProvider;
-    private final UserRepository userRepository;
     private final AuthorizationExtractor authExtractor;
 
-    public SecurityConfig(TokenProvider tokenProvider, UserRepository userRepository,
+    public SecurityConfig(TokenProvider tokenProvider,
             AuthorizationExtractor authExtractor) {
         this.tokenProvider = tokenProvider;
-        this.userRepository = userRepository;
         this.authExtractor = authExtractor;
-        this.jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider, userRepository, authExtractor);
+        this.jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider, authExtractor);
     }
 
-    @Bean // -> 암호화
+    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -63,8 +60,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173"); // 원하는 출처를 추가
-        configuration.addAllowedMethod("*"); // 허용할 HTTP 메서드를 지정
-        configuration.addAllowedHeader("*"); // 허용할 헤더를 지정
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
         configuration.setExposedHeaders(List.of("Authorization")); // 응답에서 노출할 헤더 추가
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
