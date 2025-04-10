@@ -88,7 +88,6 @@ public enum BaseResponseStatus {
      */
 
     // Token, Code
-    ACCESS_TOKEN_RETURNED_SUCCESS(HttpStatus.OK, true, 200, "Access Token이 성공적으로 반환되었습니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, false, 2001, "토큰이 만료되었습니다."),
     TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, false, 2002, "토큰이 유효하지 않습니다."),
     TOKEN_NULL(HttpStatus.UNAUTHORIZED, false, 2003, "토큰이 존재하지 않습니다."),
@@ -99,6 +98,7 @@ public enum BaseResponseStatus {
     LOGOUT_TOKEN(HttpStatus.UNAUTHORIZED, false, 2008, "로그아웃된 토큰입니다."),
     TOKEN_NOTFOUND(HttpStatus.UNAUTHORIZED, false, 2009, "토큰을 찾지 못했습니다."),
     UNMATCHED_TOKEN(HttpStatus.UNAUTHORIZED, false, 2010, "일치하지 않는 토큰입니다."),
+
     // Members
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, false, 2100, "사용중인 이메일입니다."),
     DUPLICATED_MEMBERS(HttpStatus.CONFLICT, false, 2101, "이미 가입된 멤버입니다."),

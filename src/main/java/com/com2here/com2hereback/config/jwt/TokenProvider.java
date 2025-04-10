@@ -1,5 +1,7 @@
 package com.com2here.com2hereback.config.jwt;
 
+import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.repository.UserRepository;
 import io.jsonwebtoken.io.Decoders;
 import java.util.Date;
 
@@ -15,15 +17,16 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class TokenProvider {
 
+    private final UserRepository userRepository;
     private final SecretKey signingKey;
-
     private final long accessTokenExpirationTime;
     private final long refreshTokenExpirationTime;
 
-    public TokenProvider(@Value("${jwt.secret}") String secretKey,
+    public TokenProvider(UserRepository userRepository, @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-expiration-time}") long accessTokenExpirationTime,
             @Value("${jwt.refresh-token-expiration-time}") long refreshTokenExpirationTime) {
         secretKey = secretKey.replaceAll("\\s+", "");
+        this.userRepository = userRepository;
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
         this.accessTokenExpirationTime = accessTokenExpirationTime;
         this.refreshTokenExpirationTime = refreshTokenExpirationTime;
@@ -48,44 +51,30 @@ public class TokenProvider {
                 .compact();
     }
 
-    public boolean validateAccessToken(String token) {
-        return validateToken(token);
-    }
-
-    public boolean validateRefreshToken(String token) {
-        return validateToken(token);
-    }
-
-    private boolean validateToken(String token) {
+    public boolean validateToken(String token, String tokenType) {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(signingKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return claims.getExpiration().after(new Date());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String getUuidFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getSubject();
-    }
+            if (!claims.getExpiration().after(new Date())) {
+                return false;
+            }
 
-    public Claims decodeToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody(); // 클레임 반환
+            if (tokenType.equals("refresh")) {
+                String uuid = claims.getSubject();
+                User user = userRepository.findByUuid(uuid);
+                if (user == null || !user.getRefreshToken().equals(token)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String getSubject(String token) {
@@ -95,10 +84,6 @@ public class TokenProvider {
                 .getBody()
                 .getSubject();
 
-        try {
-            return subject;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid subject format: " + subject, e);
-        }
+        return subject;
     }
 }
