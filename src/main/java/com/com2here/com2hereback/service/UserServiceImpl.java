@@ -92,6 +92,7 @@ public class UserServiceImpl implements UserService {
             .password(user.getPassword())
             .uuid(user.getUuid())
             .role(user.getRole())
+            .profileImageUrl(user.getProfileImageUrl())
             .refreshToken(refreshToken)
             .build();
 
@@ -218,6 +219,8 @@ public class UserServiceImpl implements UserService {
             .email(user.getEmail())
             .uuid(user.getUuid())
             .role(user.getRole())
+            .profileImageUrl(user.getProfileImageUrl())
+            .refreshToken(user.getRefreshToken())
             .isEmailVerified(user.isEmailVerified())
             .build();
 
@@ -244,6 +247,7 @@ public class UserServiceImpl implements UserService {
             .password(user.getPassword())
             .uuid(user.getUuid())
             .role(user.getRole())
+            .profileImageUrl(user.getProfileImageUrl())
             .refreshToken(newRefreshToken)
             .build();
 

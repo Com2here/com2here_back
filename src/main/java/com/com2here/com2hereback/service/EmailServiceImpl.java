@@ -27,8 +27,8 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Transactional
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender javaMailSender;
     private static final String senderEmail = "lysfox01@gmail.com";
+    private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -41,10 +41,10 @@ public class EmailServiceImpl implements EmailService {
         Random random = new Random();
 
         String code = random.ints(leftLimit, rightLimit + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 | i >= 97))
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 | i >= 97))
+            .limit(targetStringLength)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
 
         return code;
     }
@@ -104,7 +104,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmail(String email) {
-        if(email == null){
+        if (email == null) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
@@ -121,61 +121,68 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-     @Override
-     public void verifyCode(String email, String code){
-         String codeFoundByEmail = redisUtil.getData(email);
-         if (codeFoundByEmail == null) {
-             throw new BaseException(BaseResponseStatus.UNMATCHED_EMAIL_CODE);
-         }
+    @Override
+    public void verifyCode(String email, String code) {
+        String codeFoundByEmail = redisUtil.getData(email);
+        if (codeFoundByEmail == null) {
+            throw new BaseException(BaseResponseStatus.UNMATCHED_EMAIL_CODE);
+        }
 
-         if (!codeFoundByEmail.equals(code)) {
-             throw new BaseException(BaseResponseStatus.INVALID_VERIFICATION_CODE);
-         }
-         User user = userRepository.findByEmail(email);
-         if (user == null) {
-             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
-         }
-         user = User.builder()
-         .user_id(user.getUser_id())
-         .nickname(user.getNickname())
-         .password(user.getPassword())
-         .email(user.getEmail())
-         .uuid(user.getUuid())
-         .isEmailVerified(true)
-         .build();
+        if (!codeFoundByEmail.equals(code)) {
+            throw new BaseException(BaseResponseStatus.INVALID_VERIFICATION_CODE);
+        }
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
+        }
+        user = User.builder()
+            .user_id(user.getUser_id())
+            .nickname(user.getNickname())
+            .password(user.getPassword())
+            .email(user.getEmail())
+            .uuid(user.getUuid())
+            .role(user.getRole())
+            .refreshToken(user.getRefreshToken())
+            .profileImageUrl(user.getProfileImageUrl())
+            .isEmailVerified(true)
+            .build();
 
-         userRepository.save(user);
-     }
+        userRepository.save(user);
+    }
 
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto resetPasswordRequestDto) {
-            verifyCode(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode());
+        verifyCode(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode());
 
-            if (!resetPasswordRequestDto.getPassword().equals(resetPasswordRequestDto.getConfirmPassword())) {
-                throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
-            }
+        if (!resetPasswordRequestDto.getPassword()
+            .equals(resetPasswordRequestDto.getConfirmPassword())) {
+            throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
+        }
 
-            User user = userRepository.findByEmail(resetPasswordRequestDto.getMail());
-            if (user == null) {
-                throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
-            }
+        User user = userRepository.findByEmail(resetPasswordRequestDto.getMail());
+        if (user == null) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
+        }
 
-            // 비밀번호 해싱
-            String hashedPassword = bCryptPasswordEncoder.encode(resetPasswordRequestDto.getPassword());
+        // 비밀번호 해싱
+        String hashedPassword = bCryptPasswordEncoder.encode(resetPasswordRequestDto.getPassword());
 
-            user = User.builder()
-                    .user_id(user.getUser_id())
-                    .nickname(user.getNickname())
-                    .password(hashedPassword)
-                    .email(user.getEmail())
-                    .uuid(user.getUuid())
-                    .isEmailVerified(user.isEmailVerified())
-                    .build();
+        user = User.builder()
+            .user_id(user.getUser_id())
+            .nickname(user.getNickname())
+            .password(hashedPassword)
+            .email(user.getEmail())
+            .uuid(user.getUuid())
+            .role(user.getRole())
+            .refreshToken(user.getRefreshToken())
+            .profileImageUrl(user.getProfileImageUrl())
+            .isEmailVerified(user.isEmailVerified())
+            .build();
 
-            userRepository.save(user);
+        userRepository.save(user);
 
-            redisUtil.deleteData(resetPasswordRequestDto.getMail());
+        redisUtil.deleteData(resetPasswordRequestDto.getMail());
     }
 
 }
