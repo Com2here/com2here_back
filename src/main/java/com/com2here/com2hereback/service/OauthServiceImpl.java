@@ -99,7 +99,8 @@ public class OauthServiceImpl implements OauthService {
             + "&include_granted_scopes=true"
             + "&response_type=code"
             + "&redirect_uri=" + googleRedirectUrl
-            + "&client_id=" + googleRestapiKey;
+            + "&client_id=" + googleRestapiKey
+            + "&state=google";
 
         return url;
     }
@@ -183,8 +184,8 @@ public class OauthServiceImpl implements OauthService {
         String url = kakaoAuthUrl
             + "?response_type=code"
             + "&client_id=" + kakaoRestapiKey
-            + "&redirect_uri=" + kakaorRedirectUri;
-
+            + "&redirect_uri=" + kakaorRedirectUri
+            + "&state=kakao";
         return url;
     }
 
@@ -274,7 +275,8 @@ public class OauthServiceImpl implements OauthService {
             + "?response_type=code"
             // + "&state=STATE_STRING"
             + "&client_id=" + naverRestapiKey
-            + "&redirect_uri=" + naverRedirectUri;
+            + "&redirect_uri=" + naverRedirectUri
+            + "&state=naver";
 
         return url;
     }

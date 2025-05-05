@@ -18,6 +18,7 @@ public class OauthResponseDto {
     private String nickname;
     private String role;
     private String provider;
+    private String oauthId;
 
 
     public static OauthResponseDto entityToDto(KakaoInfo kakaoInfo, KakaoToken kakaoToken) {
@@ -28,6 +29,7 @@ public class OauthResponseDto {
             .refreshToken(kakaoToken.getRefreshToken())
             .role("일반")
             .provider("kakao")
+            .oauthId(String.valueOf(kakaoInfo.getId()))
             .build();
     }
 
@@ -39,6 +41,7 @@ public class OauthResponseDto {
             .refreshToken(naverToken.getRefreshToken())
             .role("일반")
             .provider("naver")
+            .oauthId(naverInfo.getId())
             .build();
     }
 
@@ -50,6 +53,7 @@ public class OauthResponseDto {
             .refreshToken(googleToken.getRefreshToken())
             .role("일반")
             .provider("google")
+            .oauthId(googleInfo.getSub())
             .build();
     }
 }
