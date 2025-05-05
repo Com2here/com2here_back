@@ -15,4 +15,6 @@ public interface UserService {
     void deleteUser(UserRequestDto userRequestDto);
     void chgPassword(ChgPasswordRequestDto chgPasswordRequestDto);
     UserTokenResponseDto rotateToken();
+    void registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl);
+
 }

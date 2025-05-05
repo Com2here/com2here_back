@@ -2,12 +2,14 @@ package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
+import com.com2here.com2hereback.domain.OauthAccount;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
 import com.com2here.com2hereback.dto.UserTokenResponseDto;
+import com.com2here.com2hereback.repository.OauthAccountRepository;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
+    private final OauthAccountRepository oauthAccountRepository;
 
     @Override
     @Transactional
@@ -65,6 +71,46 @@ public class UserServiceImpl implements UserService {
             .build();
 
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl) {
+        // 1. 이미 oauth_id + provider로 등록된 유저가 있는지 확인
+        Optional<OauthAccount> existingOauth = oauthAccountRepository.findByProviderAndOauthId(provider, oauthId);
+        if (existingOauth.isPresent()) {
+            existingOauth.get();
+            return; // 로그인 처리
+        }
+
+        // 2. 중복 이메일 확인
+        if (userRepository.existsByEmail(email)) {
+            throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL); // 에러 처리
+        }
+
+        // 3. User 엔티티 생성 (비밀번호는 null, isSocial = true)
+        User user = User.builder()
+                .nickname(nickname)
+                .email(email)
+                .password(null)
+                .uuid(UUID.randomUUID().toString())
+                .isEmailVerified(true)
+                .role("소셜") // ENUM으로 관리하면 더 좋음
+                .profileImageUrl(profileImageUrl)
+                .isSocial(true)
+                .build();
+
+        userRepository.save(user);
+
+        // 4. OauthAccount 엔티티 저장
+        OauthAccount oauthAccount = OauthAccount.builder()
+                .user(user)
+                .provider(provider)
+                .oauthId(oauthId)
+                .build();
+
+        oauthAccountRepository.save(oauthAccount);
+
     }
 
     @Override

@@ -12,15 +12,17 @@ public class OauthResponseVo {
     private String refreshToken;
     private String role;
     private String provider;
+    private String oauthId;
 
     @Builder
-    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken, String role, String provider) {
+    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken, String role, String provider, String oauthId) {
         this.email = email;
         this.nickname = nickname;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.role = role;
         this.provider = provider;
+        this.oauthId = oauthId;
     }
 
     public static OauthResponseVo dtoToVo(OauthResponseDto dto) {
@@ -31,6 +33,7 @@ public class OauthResponseVo {
             .refreshToken(dto.getRefreshToken())
             .role(dto.getRole())
             .provider(dto.getProvider())
+            .oauthId(dto.getOauthId())
             .build();
     }
 
