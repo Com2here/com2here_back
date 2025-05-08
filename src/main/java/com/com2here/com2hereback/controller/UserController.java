@@ -3,16 +3,15 @@ package com.com2here.com2hereback.controller;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.common.BaseException;
-import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
-import com.com2here.com2hereback.dto.ShowUserResponseDto;
-import com.com2here.com2hereback.dto.UserLoginResponseDto;
-import com.com2here.com2hereback.dto.UserRequestDto;
+import com.com2here.com2hereback.dto.*;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.UserShowResponseVo;
 import com.com2here.com2hereback.vo.UserLoginResponseVo;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -62,15 +61,15 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/update")
-    public CMResponse<Void> updateUser(@RequestBody UserRequestDto userRequestDto) {
-        try{
-            userService.updateUser(userRequestDto);
+    // 유저 정보 수정 API
+    @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CMResponse<Void> updateUser(@ModelAttribute UserProfileUpdateDto dto) {
+        try {
+            userService.updateUser(dto.getNickname(), dto.getEmail(), dto.getProfileImage());
             return CMResponse.success(BaseResponseStatus.SUCCESS);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
