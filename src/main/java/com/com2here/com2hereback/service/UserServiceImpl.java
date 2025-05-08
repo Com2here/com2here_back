@@ -14,11 +14,13 @@ import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final OauthAccountRepository oauthAccountRepository;
+    private final FileUploadService fileUploadService;
 
     @Override
     @Transactional
@@ -167,10 +170,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(UserRequestDto userRequestDto) {
+    public void updateUser(String nickname, String email, MultipartFile profileImage) {
+//        System.out.println("[디버깅] nickname: " + nickname);
+//        System.out.println("[디버깅] email: " + email);
+//        System.out.println("[디버깅] profileImage: " + (profileImage != null ? profileImage.getOriginalFilename() : "null"));
+        System.out.println("[서비스] profileImage.getSize(): " + (profileImage != null ? profileImage.getSize() : -1));
 
-        // 400 : 데이터 누락
-        if (userRequestDto == null) {
+        if (nickname == null && email == null && (profileImage == null || profileImage.isEmpty())) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
@@ -178,26 +184,30 @@ public class UserServiceImpl implements UserService {
         String uuid = (String) authentication.getPrincipal();
 
         User user = userRepository.findByUuid(uuid);
-
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
+        String newProfileImageUrl = user.getProfileImageUrl();
+        if (profileImage != null) {
+            newProfileImageUrl = fileUploadService.upload(profileImage);
+        }
+
         User updatedUser = User.builder()
-            .user_id(user.getUser_id())
-            .nickname(userRequestDto.getNickname() != null ? userRequestDto.getNickname()
-                : user.getNickname())
-            .email(userRequestDto.getEmail() != null ? userRequestDto.getEmail() : user.getEmail())
-            .profileImageUrl(user.getProfileImageUrl() != null ? user.getProfileImageUrl() : null)
-            .password(user.getPassword())
-            .uuid(user.getUuid())
-            .role(user.getRole())
-            .refreshToken(user.getRefreshToken())
-            .build();
+                .user_id(user.getUser_id())
+                .nickname(nickname != null ? nickname : user.getNickname())
+                .email(email != null ? email : user.getEmail())
+                .profileImageUrl(newProfileImageUrl)
+                .password(user.getPassword())
+                .uuid(user.getUuid())
+                .role(user.getRole())
+                .refreshToken(user.getRefreshToken())
+                .build();
 
         userRepository.save(updatedUser);
-
     }
+
+
 
     @Override
     @Transactional
