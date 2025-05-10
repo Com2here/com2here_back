@@ -78,43 +78,55 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl) {
+    public UserLoginResponseDto registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl) {
         // 1. 이미 oauth_id + provider로 등록된 유저가 있는지 확인
         Optional<OauthAccount> existingOauth = oauthAccountRepository.findByProviderAndOauthId(provider, oauthId);
+        User user;
         if (existingOauth.isPresent()) {
-            existingOauth.get();
-            return; // 로그인 처리
+            // 기존 회원이면 해당 user 가져오기
+            user = existingOauth.get().getUser();
+        } else {
+            // 2. 중복 이메일 확인
+            if (userRepository.existsByEmail(email)) {
+                throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
+            }
+
+            // 3. 신규 User 생성
+            user = User.builder()
+                    .nickname(nickname)
+                    .email(email)
+                    .password(null)
+                    .uuid(UUID.randomUUID().toString())
+                    .isEmailVerified(true)
+                    .role("소셜")
+                    .profileImageUrl(profileImageUrl)
+                    .isSocial(true)
+                    .build();
+
+            userRepository.save(user);
+
+            // 4. OauthAccount 저장
+            OauthAccount oauthAccount = OauthAccount.builder()
+                    .user(user)
+                    .provider(provider)
+                    .oauthId(oauthId)
+                    .build();
+
+            oauthAccountRepository.save(oauthAccount);
         }
 
-        // 2. 중복 이메일 확인
-        if (userRepository.existsByEmail(email)) {
-            throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL); // 에러 처리
-        }
+        // 5. 토큰 발급
+        String accessToken = tokenProvider.createAccessToken(user.getUuid());
+        String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
-        // 3. User 엔티티 생성 (비밀번호는 null, isSocial = true)
-        User user = User.builder()
-                .nickname(nickname)
-                .email(email)
-                .password(null)
-                .uuid(UUID.randomUUID().toString())
-                .isEmailVerified(true)
-                .role("소셜") // ENUM으로 관리하면 더 좋음
-                .profileImageUrl(profileImageUrl)
-                .isSocial(true)
-                .build();
-
+        // 6. 리프레시 토큰 저장
+        user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
-        // 4. OauthAccount 엔티티 저장
-        OauthAccount oauthAccount = OauthAccount.builder()
-                .user(user)
-                .provider(provider)
-                .oauthId(oauthId)
-                .build();
-
-        oauthAccountRepository.save(oauthAccount);
-
+        // 7. DTO 반환
+        return UserLoginResponseDto.entityToDto(user, accessToken, refreshToken, "social");
     }
+
 
     @Override
     @Transactional

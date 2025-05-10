@@ -6,6 +6,7 @@ import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.OauthRequestDto;
 import com.com2here.com2hereback.dto.OauthResponseDto;
 import com.com2here.com2hereback.dto.SocialLoginRequestDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.service.OauthService;
 import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.OauthResponseVo;
@@ -81,22 +82,23 @@ public class OauthController {
     }
 
     @PostMapping("/social-login")
-    public CMResponse<Void> socialLogin(@RequestBody SocialLoginRequestDto requestDto) {
+    public CMResponse<UserLoginResponseDto> socialLogin(@RequestBody SocialLoginRequestDto requestDto) {
         try {
-            userService.registerOrLoginSocialUser(
+            UserLoginResponseDto responseDto = userService.registerOrLoginSocialUser(
                     requestDto.getEmail(),
                     requestDto.getNickname(),
                     requestDto.getProvider(),
                     requestDto.getOauthId(),
                     requestDto.getProfileImageUrl()
             );
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
+            return CMResponse.success(BaseResponseStatus.SUCCESS, responseDto);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode());
         } catch (Exception e) {
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 }
