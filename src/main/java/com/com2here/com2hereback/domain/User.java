@@ -26,6 +26,7 @@ public class User {
     @Column(nullable = true)
     private String password;  // 소셜 유저는 null 허용
 
+    @Setter
     private String refreshToken;
 
     @Column(nullable = false)
