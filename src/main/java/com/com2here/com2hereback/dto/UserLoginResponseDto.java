@@ -22,7 +22,7 @@ public class UserLoginResponseDto {
             .nickname(user.getNickname())
             .email(user.getEmail())
             .profileImageUrl(user.getProfileImageUrl())
-            .role(user.getRole())
+            .role(user.getRole().name())
             .provider(provider)
             .build();
     }

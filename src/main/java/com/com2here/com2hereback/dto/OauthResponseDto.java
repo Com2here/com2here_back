@@ -1,5 +1,6 @@
 package com.com2here.com2hereback.dto;
 
+import com.com2here.com2hereback.domain.Role;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;
 import com.com2here.com2hereback.dto.oauth.KakaoInfo;
@@ -27,7 +28,7 @@ public class OauthResponseDto {
             .nickname(kakaoInfo.getNickname())
             .accessToken(kakaoToken.getAccessToken())
             .refreshToken(kakaoToken.getRefreshToken())
-            .role("일반")
+            .role(Role.SOCIAL.name())
             .provider("kakao")
             .oauthId(String.valueOf(kakaoInfo.getId()))
             .build();
@@ -39,7 +40,7 @@ public class OauthResponseDto {
             .nickname(naverInfo.getName())
             .accessToken(naverToken.getAccessToken())
             .refreshToken(naverToken.getRefreshToken())
-            .role("일반")
+            .role(Role.SOCIAL.name())
             .provider("naver")
             .oauthId(naverInfo.getId())
             .build();
@@ -51,7 +52,7 @@ public class OauthResponseDto {
             .nickname(googleInfo.getName())
             .accessToken(googleToken.getAccessToken())
             .refreshToken(googleToken.getRefreshToken())
-            .role("일반")
+            .role(Role.SOCIAL.name())
             .provider("google")
             .oauthId(googleInfo.getSub())
             .build();
