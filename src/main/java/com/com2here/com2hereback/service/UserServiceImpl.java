@@ -3,6 +3,7 @@ package com.com2here.com2hereback.service;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.domain.OauthAccount;
+import com.com2here.com2hereback.domain.Role;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
             .email(userRequestDto.getEmail())
             .uuid(null)
             .isEmailVerified(false)
-            .role("일반")
+            .role(Role.USER)
             .profileImageUrl(null)
             .build();
 
@@ -98,9 +99,8 @@ public class UserServiceImpl implements UserService {
                     .password(null)
                     .uuid(UUID.randomUUID().toString())
                     .isEmailVerified(true)
-                    .role("소셜")
+                    .role(Role.SOCIAL)
                     .profileImageUrl(profileImageUrl)
-                    .isSocial(true)
                     .build();
 
             userRepository.save(user);
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         // 7. DTO 반환
-        return UserLoginResponseDto.entityToDto(user, accessToken, refreshToken, "social");
+        return UserLoginResponseDto.entityToDto(user, accessToken, refreshToken, user.getRole().name());
     }
 
 
@@ -151,6 +151,7 @@ public class UserServiceImpl implements UserService {
             .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
+            .isEmailVerified(user.isEmailVerified())
             .uuid(user.getUuid())
             .role(user.getRole())
             .profileImageUrl(user.getProfileImageUrl())
@@ -160,7 +161,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(updateUser);
 
         UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.entityToDto(user,
-            accessToken, refreshToken, "normal");
+            accessToken, refreshToken, user.getRole().name());
 
         return userLoginResponseDto;
     }
