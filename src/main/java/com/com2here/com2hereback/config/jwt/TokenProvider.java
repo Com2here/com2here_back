@@ -6,6 +6,8 @@ import io.jsonwebtoken.io.Decoders;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
+
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import io.jsonwebtoken.security.Keys;
 public class TokenProvider {
 
     private final UserRepository userRepository;
+
+    @Getter
     private final SecretKey signingKey;
     private final long accessTokenExpirationTime;
     private final long refreshTokenExpirationTime;
@@ -41,10 +45,14 @@ public class TokenProvider {
     }
 
     private String createToken(String uuid, long expirationTime) {
+        User user = userRepository.findByUuid(uuid);
+        String role = user.getRole().name();
+
         Date expiryDate = new Date(System.currentTimeMillis() + expirationTime);
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(uuid)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
