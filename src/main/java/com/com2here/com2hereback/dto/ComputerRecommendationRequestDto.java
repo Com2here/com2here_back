@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ComputerRecommendationRequestDto {
     private String mainProgram;
+    private String purpose;
     private String recommendedSpec;
     private String minimumSpec;
     private LocalDateTime createdAt;

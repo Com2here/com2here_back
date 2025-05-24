@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,6 +73,7 @@ public class UserServiceImpl implements UserService {
             .isEmailVerified(false)
             .role(Role.USER)
             .profileImageUrl(null)
+            .createdAt(LocalDateTime.now())
             .build();
 
         userRepository.save(user);
@@ -101,6 +103,7 @@ public class UserServiceImpl implements UserService {
                     .isEmailVerified(true)
                     .role(Role.SOCIAL)
                     .profileImageUrl(profileImageUrl)
+                    .createdAt(LocalDateTime.now())
                     .build();
 
             userRepository.save(user);
@@ -156,6 +159,8 @@ public class UserServiceImpl implements UserService {
             .role(user.getRole())
             .profileImageUrl(user.getProfileImageUrl())
             .refreshToken(refreshToken)
+            .createdAt(user.getCreatedAt())               // 유지
+            .lastLoginAt(LocalDateTime.now())
             .build();
 
         userRepository.save(updateUser);

@@ -21,6 +21,10 @@ public class ComputerRecommendation {
     @Column(nullable = false)
     private String mainProgram;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProgramPurpose purpose;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String recommendedSpec;
 
@@ -32,4 +36,5 @@ public class ComputerRecommendation {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
 }
