@@ -25,6 +25,7 @@ public class UserShowResponseVo {
         return UserShowResponseVo.builder()
             .nickname(showUserResponseDto.getNickname())
             .email(showUserResponseDto.getEmail())
+            .profileImageUrl(showUserResponseDto.getProfileImageUrl())
             .isVerified(showUserResponseDto.isVerified())
             .build();
     }
