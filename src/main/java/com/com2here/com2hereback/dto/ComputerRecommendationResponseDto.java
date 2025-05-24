@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ComputerRecommendationResponseDto {
     private Long id;
     private String mainProgram;
+    private String purpose;
     private String recommendedSpec;
     private String minimumSpec;
     private LocalDateTime createdAt;

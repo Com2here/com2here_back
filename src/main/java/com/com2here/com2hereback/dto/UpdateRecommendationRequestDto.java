@@ -12,4 +12,5 @@ public class UpdateRecommendationRequestDto {
     private String mainProgram;
     private String recommendedSpec;
     private String minimumSpec;
+    private String purpose;
 }

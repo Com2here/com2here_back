@@ -16,7 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,36 +55,6 @@ public class ComputerRecommendationController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/show")
-    public ResponseEntity<?> getAllComputerRecommendations(Authentication authentication) {
-        try {
-            List<ComputerRecommendationResponseDto> list = service.findAll();
-            if (list.isEmpty()) {
-                return ResponseEntity.ok(new ApiResponse<>(200, "요청에 성공했지만 추천 항목이 존재하지 않습니다.", list));
-            }
-            return ResponseEntity.ok(new ApiResponse<>(200, "요청에 성공했습니다.", list));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(500, "서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.", null));
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/show/{id}")
-    public ResponseEntity<?> getComputerRecommendationById(@PathVariable Long id) {
-        try {
-            ComputerRecommendationResponseDto result = service.findById(id);
-            return ResponseEntity.ok(new ApiResponse<>(200, "요청에 성공했습니다.", result));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(404, "해당 ID의 추천 항목을 찾을 수 없습니다.", null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(500, "서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.", null));
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> updateComputerRecommendation(
             @PathVariable Long id,
@@ -93,7 +65,8 @@ public class ComputerRecommendationController {
                     id,
                     request.getMainProgram(),
                     request.getRecommendedSpec(),
-                    request.getMinimumSpec()
+                    request.getMinimumSpec(),
+                    request.getPurpose()
             );
             return ResponseEntity.ok(new ApiResponse<>(200, "추천 항목이 성공적으로 수정되었습니다.", updated));
         } catch (IllegalStateException e) {
@@ -106,6 +79,35 @@ public class ComputerRecommendationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(500, "서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.", null));
         }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/show")
+    public ResponseEntity<?> getRecommendations(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        // limit 제한
+        if (limit > 100) limit = 100;
+
+        Map<String, Object> response = service.findAllWithPagination(offset, limit);
+
+        Map<String, Object> pagination = (Map<String, Object>) response.get("pagination");
+        int totalItems = ((Number) pagination.get("totalItems")).intValue();
+        int totalPages = ((Number) pagination.get("totalPages")).intValue();
+
+        int nextOffset = offset + limit;
+        int prevOffset = Math.max(offset - limit, 0);
+
+        Map<String, String> links = new LinkedHashMap<>();
+        links.put("self", String.format("/recommendations?offset=%d&limit=%d", offset, limit));
+        links.put("first", "/recommendations?offset=0&limit=" + limit);
+        links.put("prev", offset > 0 ? String.format("/recommendations?offset=%d&limit=%d", prevOffset, limit) : null);
+        links.put("next", nextOffset < totalItems ? String.format("/recommendations?offset=%d&limit=%d", nextOffset, limit) : null);
+        links.put("last", String.format("/recommendations?offset=%d&limit=%d", ((totalPages - 1) * limit), limit));
+
+        response.put("links", links);
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
