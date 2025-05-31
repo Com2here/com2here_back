@@ -11,6 +11,7 @@ public class ShowUserResponseDto {
     private String email;
     private String profileImageUrl;
     private boolean isVerified;
+    private String role;
 
     public static ShowUserResponseDto entityToDto(User user){
         return ShowUserResponseDto.builder()
@@ -18,6 +19,7 @@ public class ShowUserResponseDto {
             .email(user.getEmail())
             .profileImageUrl(user.getProfileImageUrl())
             .isVerified(user.isEmailVerified())
+            .role(user.getRole().name())
             .build();
     }
 }

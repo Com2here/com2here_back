@@ -189,10 +189,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(String nickname, String email, MultipartFile profileImage) {
-        System.out.println("[디버깅] nickname: " + nickname);
-        System.out.println("[디버깅] email: " + email);
-        System.out.println("[디버깅] profileImage: " + (profileImage != null ? profileImage.getOriginalFilename() : "null"));
-        System.out.println("[서비스] profileImage.getSize(): " + (profileImage != null ? profileImage.getSize() : -1));
+//        System.out.println("[디버깅] nickname: " + nickname);
+//        System.out.println("[디버깅] email: " + email);
+//        System.out.println("[디버깅] profileImage: " + (profileImage != null ? profileImage.getOriginalFilename() : "null"));
+//        System.out.println("[서비스] profileImage.getSize(): " + (profileImage != null ? profileImage.getSize() : -1));
 
         if (nickname == null && email == null && (profileImage == null || profileImage.isEmpty())) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);

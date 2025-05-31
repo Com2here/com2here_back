@@ -85,12 +85,14 @@ public class ComputerRecommendationController {
     @GetMapping("/show")
     public ResponseEntity<?> getRecommendations(
             @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String purpose
     ) {
         // limit 제한
         if (limit > 100) limit = 100;
 
-        Map<String, Object> response = service.findAllWithPagination(offset, limit);
+        Map<String, Object> response = service.findAllWithPagination(offset, limit, search, purpose);
 
         Map<String, Object> pagination = (Map<String, Object>) response.get("pagination");
         int totalItems = ((Number) pagination.get("totalItems")).intValue();

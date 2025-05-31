@@ -61,11 +61,30 @@ public class ComputerRecommendationService {
                 .build();
     }
 
-    public Map<String, Object> findAllWithPagination(int offset, int limit) {
+    public Map<String, Object> findAllWithPagination(int offset, int limit, String search, String purpose) {
         Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by("createdAt").descending());
-        Page<ComputerRecommendation> page = repository.findAll(pageable);
 
-        List<ComputerRecommendationResponseDto> data = page.getContent().stream()
+        List<ComputerRecommendation> all = repository.findAll(); // 임시
+
+        // 필터링 적용
+        List<ComputerRecommendation> filtered = all.stream()
+                .filter(r -> {
+                    boolean matchesSearch = (search == null || search.isBlank()) ||
+                            r.getMainProgram().contains(search) ||
+                            r.getRecommendedSpec().contains(search) ||
+                            r.getMinimumSpec().contains(search);
+                    boolean matchesPurpose = (purpose == null || purpose.isBlank()) ||
+                            r.getPurpose().name().equalsIgnoreCase(purpose);
+                    return matchesSearch && matchesPurpose;
+                })
+                .toList();
+
+        // 페이징 수동 처리
+        int fromIndex = Math.min(offset, filtered.size());
+        int toIndex = Math.min(offset + limit, filtered.size());
+        List<ComputerRecommendation> pageContent = filtered.subList(fromIndex, toIndex);
+
+        List<ComputerRecommendationResponseDto> data = pageContent.stream()
                 .map(entity -> ComputerRecommendationResponseDto.builder()
                         .id(entity.getComputer_id())
                         .mainProgram(entity.getMainProgram())
@@ -77,21 +96,20 @@ public class ComputerRecommendationService {
                         .build())
                 .collect(Collectors.toList());
 
-        // 응답 메타데이터 구성
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("data", data);
 
         Map<String, Object> pagination = new LinkedHashMap<>();
         pagination.put("offset", offset);
         pagination.put("limit", limit);
-        pagination.put("totalItems", page.getTotalElements());
-        pagination.put("totalPages", page.getTotalPages());
-        pagination.put("currentPage", page.getNumber() + 1);
+        pagination.put("totalItems", filtered.size());
+        pagination.put("totalPages", (int) Math.ceil((double) filtered.size() / limit));
+        pagination.put("currentPage", (offset / limit) + 1);
 
         response.put("pagination", pagination);
-
         return response;
     }
+
 
     @Transactional
     public ComputerRecommendationResponseDto update(
