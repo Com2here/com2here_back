@@ -72,7 +72,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/v1/oauth/") ||
+        return path.startsWith("/uploads/") ||
+                path.startsWith("/api/v1/oauth/") ||
                 path.startsWith("/api/v1/email/") ||
                 path.equals("/api/v1/user/login") ||
                 path.equals("/api/v1/user/register");
