@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/recommend")
+@RequestMapping("/api/v1/recommend")
 @RequiredArgsConstructor
 public class PcRecommendationController {
 
