@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "`user`")
 public class User {
 
     @Id
@@ -21,7 +22,7 @@ public class User {
     @Column(nullable = false)
     private String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(nullable = true)
