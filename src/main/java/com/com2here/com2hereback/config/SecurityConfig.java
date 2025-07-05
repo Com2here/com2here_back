@@ -23,13 +23,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final TokenProvider tokenProvider;
-    private final AuthorizationExtractor authExtractor;
 
     public SecurityConfig(TokenProvider tokenProvider,
                           AuthorizationExtractor authExtractor) {
-        this.tokenProvider = tokenProvider;
-        this.authExtractor = authExtractor;
         this.jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider, authExtractor);
     }
 
@@ -49,7 +45,8 @@ public class SecurityConfig {
                                 "/api/v1/email/**",
                                 "/api/v1/oauth/*",
                                 "/api/v1/user/register",
-                                "/api/v1/user/login"
+                                "/api/v1/user/login",
+                                "/api/v1/recommend"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -61,14 +58,18 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173"); // 프론트엔드 주소
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
-        configuration.setExposedHeaders(List.of("Authorization"));
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",          // 개발용
+            "https://comhere.site",           // 운영용
+            "https://www.comhere.site"        // 운영용
+        ));
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+        config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
