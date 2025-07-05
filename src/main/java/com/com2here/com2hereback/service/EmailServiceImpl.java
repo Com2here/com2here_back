@@ -27,7 +27,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Transactional
 public class EmailServiceImpl implements EmailService {
 
-    private static final String senderEmail = "lysfox01@gmail.com";
+    private static final String senderEmail = "comhere@comhere.site";
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
