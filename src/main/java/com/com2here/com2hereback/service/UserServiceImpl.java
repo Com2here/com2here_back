@@ -15,7 +15,6 @@ import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -159,7 +158,7 @@ public class UserServiceImpl implements UserService {
             .role(user.getRole())
             .profileImageUrl(user.getProfileImageUrl())
             .refreshToken(refreshToken)
-            .createdAt(user.getCreatedAt())               // 유지
+            .createdAt(user.getCreatedAt())
             .lastLoginAt(LocalDateTime.now())
             .build();
 
