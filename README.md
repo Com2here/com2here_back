@@ -1,116 +1,41 @@
-1. 클론할 폴더 생성
-2. bash로 생성한 폴더로 이동 후 git clone giturl
-3. com2here_back\src\main\resources 에 application.properties 생성
+# 컴히얼 BE
 
-application.properties :
-```
-# Spring Application Name
-spring.application.name=com2hereback
 
-spring.config.import=optional:file:../../.env[.properties]
-# 데이터베이스 설정
-spring.datasource.url=${SPRING_DATASOURCE_URL}
-spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
-spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+## 커밋 컨벤션
+| 타입           | 설명
+| ------------ | -----------------------------------------------------------------
+| **feat**     | 기능 구현
+| **fix**      | 버그 수정
+| **perf**     | 성능 최적화
+| **refactor** | 코드 구조 개선
+| **style**    | 코드 포맷팅
+| **docs**     | 문서 추가·수정
+| **test**     | 테스트 코드 추가·수정
+| **build**    | Gradle/Maven 의존성, 플러그인, 빌드 스크립트 **변경**
+| **ci**       | CI 설정 추가/수정
+| **infra**    | 인프라 코드
+| **config**   | 환경·설정 파일 수정
+| **security** | 보안 관련 변경
+| **db**       | 데이터베이스 관련 작업
+| **chore**    | 잡무
+| **rename**   | 파일·폴더명 이동/변경
+| **remove**   | 파일 삭제
+| **revert**   | 이전 커밋 되돌리기
 
-# JPA 설정
-spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.properties.hibernate.format_sql=true
 
-# JWT 설정
-jwt.secret=${JWT_SECRET}
-jwt.access-token-expiration-time=${JWT_ACCESS_TOKEN_EXPIRATION_TIME}
-jwt.refresh-token-expiration-time=${JWT_REFRESH_TOKEN_EXPIRATION_TIME}
 
-# 이메일 설정
-spring.mail.host=${SPRING_MAIL_HOST}
-spring.mail.port=${SPRING_MAIL_PORT}
-spring.mail.username=${SPRING_MAIL_USERNAME}
-spring.mail.password=${SPRING_MAIL_PASSWORD}
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.starttls.required=true
-spring.mail.properties.mail.smtp.connectiontimeout=5000
-spring.mail.properties.mail.smtp.timeout=5000
-spring.mail.properties.mail.smtp.writetimeout=5000
-spring.mail.auth-code-expiration-millis=1800000  # 30분
+## ER 다이어그램
+![image](https://github.com/user-attachments/assets/ff5b445d-cc00-47b2-a18e-9a3991c01441)
 
-# Redis 설정
-spring.data.redis.host=${SPRING_DATA_REDIS_HOST}
-spring.data.redis.port=${SPRING_DATA_REDIS_PORT}
-spring.data.redis.password=${SPRING_DATA_REDIS_PASSWORD}
 
-spring.session.store-type=
+## 시스템 아키텍쳐
+(사진)
 
-server.servlet.session.timeout=
-spring.session.redis.namespace=
+## BE 기술
+ ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![SpringBoot](https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![SpringSecurity](https://img.shields.io/badge/springsecurity-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) ![JPA](https://img.shields.io/badge/JPA-%2334E27A?style=for-the-badge&logo=JPA&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-%23E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![DockerCompose](https://img.shields.io/badge/dockercompose-%232496ED?style=for-the-badge&logo=dockercompose&logoColor=white) <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+ 
+## 링크
+https://comhere.site/
 
-# Server Configuration
-server.port=3000
-
-# Kakao Configuration
-kakao.authUrl=
-kakao.userApiUrl=
-kakao.restapiKey=${KAKAO_RESTAPI_KEY}
-# 리다이렉트될 URL
-kakao.redirectUrl=
-
-# Google Configuration
-google.authUrl=
-google.tokenUrl=
-google.userApiUrl=
-google.restapiKey=${GOOGLE_RESTAPI_KEY}
-# 리다이렉트될 URL
-google.redirectUrl=
-google.client-secret=${GOOGLE_CLIENT_SECRET}
-google.scope=
-
-# Naver Configuration
-naver.authUrl=
-naver.tokenUrl=
-naver.userApiUrl=
-naver.restapiKey=${NAVER_RESTAPI_KEY}
-naver.client-secret=${NAVER_CLIENT_SECRET}
-# 리다이렉트될 URL
-naver.redirectUrl=
-
-# Logging Configuration
-logging.level.root=INFO
-# logging.level.com.com2here.com2hereback=DEBUG
-
-spring.main.allow-bean-definition-overriding=true
-
-```
-src와 동일한 레벨에서 .env 파일 생성
-.env :
-```
-# DB 설정
-SPRING_DATASOURCE_URL=
-SPRING_DATASOURCE_USERNAME=
-SPRING_DATASOURCE_PASSWORD=
-
-# JWT 설정
-JWT_SECRET=
-JWT_ACCESS_TOKEN_EXPIRATION_TIME=
-JWT_REFRESH_TOKEN_EXPIRATION_TIME=
-
-# MAIL 설정
-SPRING_MAIL_HOST=
-SPRING_MAIL_PORT=
-SPRING_MAIL_USERNAME=
-SPRING_MAIL_PASSWORD=
-
-# Redis 설정
-SPRING_DATA_REDIS_HOST=localhost
-SPRING_DATA_REDIS_PORT=6379
-SPRING_DATA_REDIS_PASSWORD=
-
-# 소셜 KEY
-KAKAO_RESTAPI_KEY=
-GOOGLE_RESTAPI_KEY=
-GOOGLE_CLIENT_SECRET=
-NAVER_RESTAPI_KEY=
-NAVER_CLIENT_SECRET=
-```
+## 담당
+- 동혁: 서버배포, 로그인(+소셜 로그인)/회원가입API, 마이페이지API, DB설계, 상품API
