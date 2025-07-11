@@ -1,5 +1,5 @@
 HELP.md  
-*.yml  
+# *.yml  
 .gradle  
 build/  
 !gradle/wrapper/gradle-wrapper.jar  
@@ -21,6 +21,8 @@ bin/
 ### IntelliJ IDEA ###  
 application.properties
 .env
+comhere.jar
+Dockerfile
 .idea  
 *.iws  
 *.iml  

@@ -1,5 +1,6 @@
 package com.com2here.com2hereback.dto;
 
+import com.com2here.com2hereback.domain.User;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,13 +11,21 @@ public class UserLoginResponseDto {
     private String refreshToken;
     private String nickname;
     private String email;
+    private boolean isEmailVerified;
+    private String profileImageUrl;
+    private String role;
+    private String provider;
 
-    public static UserLoginResponseDto entityToDto(String accessToken, String refreshToken, String nickname, String email) {
+    public static UserLoginResponseDto entityToDto(User user, String accessToken, String refreshToken, String provider) {
         return UserLoginResponseDto.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
-            .nickname(nickname)
-            .email(email)
+            .nickname(user.getNickname())
+            .email(user.getEmail())
+            .isEmailVerified(user.isEmailVerified())
+            .profileImageUrl(user.getProfileImageUrl())
+            .role(user.getRole().name())
+            .provider(provider)
             .build();
     }
 }

@@ -1,10 +1,13 @@
 package com.com2here.com2hereback.config.jwt;
 
+import com.com2here.com2hereback.domain.User;
+import com.com2here.com2hereback.repository.UserRepository;
 import io.jsonwebtoken.io.Decoders;
-import java.security.Key;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
+
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,19 +19,18 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class TokenProvider {
 
-    // 비밀키 생성 (실제 운영환경에서는 설정 파일에서 관리하는 것을 권장)
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final SecretKey signingKey;
+    private final UserRepository userRepository;
 
-    // Access Token과 Refresh Token의 유효기간을 각각 설정
+    @Getter
+    private final SecretKey signingKey;
     private final long accessTokenExpirationTime;
     private final long refreshTokenExpirationTime;
 
-    // application.properties에서 값을 가져옴
-    public TokenProvider(@Value("${jwt.secret}") String secretKey,
+    public TokenProvider(UserRepository userRepository, @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-expiration-time}") long accessTokenExpirationTime,
             @Value("${jwt.refresh-token-expiration-time}") long refreshTokenExpirationTime) {
         secretKey = secretKey.replaceAll("\\s+", "");
+        this.userRepository = userRepository;
         this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
         this.accessTokenExpirationTime = accessTokenExpirationTime;
         this.refreshTokenExpirationTime = refreshTokenExpirationTime;
@@ -43,59 +45,46 @@ public class TokenProvider {
     }
 
     private String createToken(String uuid, long expirationTime) {
+        User user = userRepository.findByUuid(uuid);
+        String role = user.getRole().name();
+
         Date expiryDate = new Date(System.currentTimeMillis() + expirationTime);
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(uuid)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // 토큰 유효시간 검증 메서드
-    public boolean validateAccessToken(String token) {
-        return validateToken(token);
-    }
-
-    public boolean validateRefreshToken(String token) {
-        return validateToken(token);
-    }
-
-    private boolean validateToken(String token) {
+    public boolean validateToken(String token, String tokenType) {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(signingKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return claims.getExpiration().after(new Date());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String getUuidFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getSubject();
+            if (!claims.getExpiration().after(new Date())) {
+                return false;
+            }
+
+            if (tokenType.equals("refresh")) {
+                String uuid = claims.getSubject();
+                User user = userRepository.findByUuid(uuid);
+                if (user == null || !user.getRefreshToken().equals(token)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    // JWT 디코딩 메서드
-    public Claims decodeToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody(); // 클레임 반환
-    }
-
-    // 토큰에서 값 추출
     public String getSubject(String token) {
         String subject = Jwts.parser()
                 .setSigningKey(signingKey)
@@ -103,10 +92,6 @@ public class TokenProvider {
                 .getBody()
                 .getSubject();
 
-        try {
-            return subject;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid subject format: " + subject, e);
-        }
+        return subject;
     }
 }

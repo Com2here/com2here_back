@@ -2,14 +2,15 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.OauthRequestDto;
 import com.com2here.com2hereback.dto.OauthResponseDto;
-import com.com2here.com2hereback.service.oauthservice.OauthService;
+import com.com2here.com2hereback.dto.SocialLoginRequestDto;
+import com.com2here.com2hereback.dto.UserLoginResponseDto;
+import com.com2here.com2hereback.service.OauthService;
+import com.com2here.com2hereback.service.UserService;
 import com.com2here.com2hereback.vo.OauthResponseVo;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/oauth")
 public class OauthController {
     private final OauthService oauthService;
+    private final UserService userService;
 
     @GetMapping("/{provider}")
     public CMResponse<String> getOauthLoginUrl(@PathVariable String provider) {
@@ -78,5 +80,25 @@ public class OauthController {
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/social-login")
+    public CMResponse<UserLoginResponseDto> socialLogin(@RequestBody SocialLoginRequestDto requestDto) {
+        try {
+            UserLoginResponseDto responseDto = userService.registerOrLoginSocialUser(
+                    requestDto.getEmail(),
+                    requestDto.getNickname(),
+                    requestDto.getProvider(),
+                    requestDto.getOauthId(),
+                    requestDto.getProfileImageUrl()
+            );
+            return CMResponse.success(BaseResponseStatus.SUCCESS, responseDto);
+        } catch (BaseException e) {
+            return CMResponse.fail(e.getErrorCode());
+        } catch (Exception e) {
+            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }

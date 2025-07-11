@@ -1,8 +1,7 @@
-package com.com2here.com2hereback.service.oauthservice;
+package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
-import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.exception.BaseException;
+import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.OauthResponseDto;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;
@@ -100,7 +99,8 @@ public class OauthServiceImpl implements OauthService {
             + "&include_granted_scopes=true"
             + "&response_type=code"
             + "&redirect_uri=" + googleRedirectUrl
-            + "&client_id=" + googleRestapiKey;
+            + "&client_id=" + googleRestapiKey
+            + "&state=google";
 
         return url;
     }
@@ -179,15 +179,13 @@ public class OauthServiceImpl implements OauthService {
         return googleInfo;
     }
 
-
-    // 카카오 로그인 주소 생성 메소드
     @Override
     public String createKakaoOauthUrl() {
         String url = kakaoAuthUrl
             + "?response_type=code"
             + "&client_id=" + kakaoRestapiKey
-            + "&redirect_uri=" + kakaorRedirectUri;
-
+            + "&redirect_uri=" + kakaorRedirectUri
+            + "&state=kakao";
         return url;
     }
 
@@ -277,7 +275,8 @@ public class OauthServiceImpl implements OauthService {
             + "?response_type=code"
             // + "&state=STATE_STRING"
             + "&client_id=" + naverRestapiKey
-            + "&redirect_uri=" + naverRedirectUri;
+            + "&redirect_uri=" + naverRedirectUri
+            + "&state=naver";
 
         return url;
     }
