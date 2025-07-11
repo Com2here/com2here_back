@@ -22,7 +22,6 @@ bin/
 application.properties
 .env
 comhere.jar
-Dockerfile
 .idea  
 *.iws  
 *.iml  
