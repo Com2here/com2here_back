@@ -1,13 +1,13 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.domain.ComputerRecommendation;
+import com.com2here.com2hereback.domain.Program;
 import com.com2here.com2hereback.domain.ProgramPurpose;
-import com.com2here.com2hereback.dto.ComputerRecommendationRequestDto;
-import com.com2here.com2hereback.dto.ComputerRecommendationResponseDto;
-import com.com2here.com2hereback.repository.ComputerRecommendationRepository;
-import jakarta.transaction.Transactional;
+import com.com2here.com2hereback.dto.ProgramRequestDto;
+import com.com2here.com2hereback.dto.ProgramResponseDto;
+import com.com2here.com2hereback.repository.ProgramRepository;
+//import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,15 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ComputerRecommendationService {
+public class ProgramService {
 
-    private final ComputerRecommendationRepository repository;
+    private final ProgramRepository repository;
 
-    public ComputerRecommendationResponseDto create(ComputerRecommendationRequestDto dto) {
+    @Transactional
+    public ProgramResponseDto create(ProgramRequestDto dto) {
         if (dto.getPurpose() == null || dto.getMainProgram() == null
                 || dto.getRecommendedSpec() == null || dto.getMinimumSpec() == null) {
             throw new IllegalArgumentException("모든 필드는 필수입니다.");
@@ -39,8 +39,8 @@ public class ComputerRecommendationService {
             throw new IllegalArgumentException("유효하지 않은 용도입니다. [게임용, 작업용, 사무용, 개발용] 중 하나여야 합니다.");
         }
 
-        ComputerRecommendation saved = repository.save(
-                ComputerRecommendation.builder()
+        Program saved = repository.save(
+                Program.builder()
                         .mainProgram(dto.getMainProgram())
                         .purpose(validatedPurpose)
                         .recommendedSpec(dto.getRecommendedSpec())
@@ -50,7 +50,7 @@ public class ComputerRecommendationService {
                         .build()
         );
 
-        return ComputerRecommendationResponseDto.builder()
+        return ProgramResponseDto.builder()
                 .id(saved.getComputer_id())
                 .mainProgram(saved.getMainProgram())
                 .purpose(saved.getPurpose().name())
@@ -64,10 +64,10 @@ public class ComputerRecommendationService {
     public Map<String, Object> findAllWithPagination(int offset, int limit, String search, String purpose) {
         Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by("createdAt").descending());
 
-        List<ComputerRecommendation> all = repository.findAll(); // 임시
+        List<Program> all = repository.findAll(); // 임시
 
         // 필터링 적용
-        List<ComputerRecommendation> filtered = all.stream()
+        List<Program> filtered = all.stream()
                 .filter(r -> {
                     boolean matchesSearch = (search == null || search.isBlank()) ||
                             r.getMainProgram().contains(search) ||
@@ -82,10 +82,10 @@ public class ComputerRecommendationService {
         // 페이징 수동 처리
         int fromIndex = Math.min(offset, filtered.size());
         int toIndex = Math.min(offset + limit, filtered.size());
-        List<ComputerRecommendation> pageContent = filtered.subList(fromIndex, toIndex);
+        List<Program> pageContent = filtered.subList(fromIndex, toIndex);
 
-        List<ComputerRecommendationResponseDto> data = pageContent.stream()
-                .map(entity -> ComputerRecommendationResponseDto.builder()
+        List<ProgramResponseDto> data = pageContent.stream()
+                .map(entity -> ProgramResponseDto.builder()
                         .id(entity.getComputer_id())
                         .mainProgram(entity.getMainProgram())
                         .purpose(entity.getPurpose().name())
@@ -112,14 +112,14 @@ public class ComputerRecommendationService {
 
 
     @Transactional
-    public ComputerRecommendationResponseDto update(
+    public ProgramResponseDto update(
             Long id,
             String mainProgram,
             String recommendedSpec,
             String minimumSpec,
             String purpose
     ) {
-        ComputerRecommendation entity = repository.findById(id)
+        Program entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 추천 항목을 찾을 수 없습니다."));
 
         if ((mainProgram == null || mainProgram.isBlank()) &&
@@ -149,7 +149,7 @@ public class ComputerRecommendationService {
 
         entity.setUpdatedAt(LocalDateTime.now());
 
-        return ComputerRecommendationResponseDto.builder()
+        return ProgramResponseDto.builder()
                 .id(entity.getComputer_id())
                 .mainProgram(entity.getMainProgram())
                 .purpose(entity.getPurpose().name())
@@ -162,7 +162,7 @@ public class ComputerRecommendationService {
 
     @Transactional
     public void delete(Long id) {
-        ComputerRecommendation entity = repository.findById(id)
+        Program entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 추천 항목을 찾을 수 없습니다."));
         repository.delete(entity);
     }

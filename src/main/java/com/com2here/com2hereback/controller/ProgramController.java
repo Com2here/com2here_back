@@ -1,10 +1,10 @@
 package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.ApiResponse;
-import com.com2here.com2hereback.dto.ComputerRecommendationRequestDto;
-import com.com2here.com2hereback.dto.ComputerRecommendationResponseDto;
+import com.com2here.com2hereback.dto.ProgramRequestDto;
+import com.com2here.com2hereback.dto.ProgramResponseDto;
 import com.com2here.com2hereback.dto.UpdateRecommendationRequestDto;
-import com.com2here.com2hereback.service.ComputerRecommendationService;
+import com.com2here.com2hereback.service.ProgramService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,19 +13,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/computers")
-public class ComputerRecommendationController {
+public class ProgramController {
 
-    private final ComputerRecommendationService service;
+    private final ProgramService service;
 
     @Data
     @NoArgsConstructor
@@ -38,11 +36,11 @@ public class ComputerRecommendationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
-    public ResponseEntity<?> addComputerRecommendation(
-            @RequestBody @Valid ComputerRecommendationRequestDto dto
+    public ResponseEntity<?> addProgram(
+            @RequestBody @Valid ProgramRequestDto dto
     ) {
         try {
-            ComputerRecommendationResponseDto result = service.create(dto);
+            ProgramResponseDto result = service.create(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(201, "추천 항목이 성공적으로 등록되었습니다.", result));
         } catch (IllegalArgumentException e) {
@@ -56,12 +54,12 @@ public class ComputerRecommendationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateComputerRecommendation(
+    public ResponseEntity<?> updateProgram(
             @PathVariable Long id,
             @RequestBody UpdateRecommendationRequestDto request
     ) {
         try {
-            ComputerRecommendationResponseDto updated = service.update(
+            ProgramResponseDto updated = service.update(
                     id,
                     request.getMainProgram(),
                     request.getRecommendedSpec(),
@@ -83,7 +81,7 @@ public class ComputerRecommendationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/show")
-    public ResponseEntity<?> getRecommendations(
+    public ResponseEntity<?> getProgram(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) String search,
@@ -114,7 +112,7 @@ public class ComputerRecommendationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteComputerRecommendation(@PathVariable Long id) {
+    public ResponseEntity<?> deleteProgram(@PathVariable Long id) {
         try {
             service.delete(id);
             return ResponseEntity.ok(new ApiResponse<>(204, "삭제에 성공했습니다.", null));

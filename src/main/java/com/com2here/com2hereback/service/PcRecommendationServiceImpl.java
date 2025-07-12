@@ -1,13 +1,13 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.domain.ComputerRecommendation;
-import com.com2here.com2hereback.domain.CpuDetailedMatches;
-import com.com2here.com2hereback.domain.GpuDetailedMatches;
+import com.com2here.com2hereback.domain.Program;
+import com.com2here.com2hereback.domain.Cpu;
+import com.com2here.com2hereback.domain.Gpu;
 import com.com2here.com2hereback.domain.ProgramPurpose;
 import com.com2here.com2hereback.dto.ProductResponseDto;
-import com.com2here.com2hereback.repository.ComputerRecommendationRepository;
-import com.com2here.com2hereback.repository.CpuDetailedMatchesRepository;
-import com.com2here.com2hereback.repository.GpuDetailedMatchesRepository;
+import com.com2here.com2hereback.repository.ProgramRepository;
+import com.com2here.com2hereback.repository.CpuRepository;
+import com.com2here.com2hereback.repository.GpuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +19,9 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class PcRecommendationServiceImpl implements PcRecommendationService {
 
-    private final ComputerRecommendationRepository recommendationRepository;
-    private final CpuDetailedMatchesRepository cpuRepository;
-    private final GpuDetailedMatchesRepository gpuRepository;
+    private final ProgramRepository programRepository;
+    private final CpuRepository cpuRepository;
+    private final GpuRepository gpuRepository;
     private final NaverShoppingService naverShoppingService;
 
     @Override
@@ -32,10 +32,10 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
 
 
         for (String program : programs) {
-            Optional<ComputerRecommendation> optional = recommendationRepository
+            Optional<Program> optional = programRepository
                 .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
             if (optional.isPresent()) {
-                ComputerRecommendation rec = optional.get();
+                Program rec = optional.get();
                 SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
 
 //                String parsedCpu = extractCpuKeyword(spec.cpu());
@@ -53,13 +53,13 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
             return Collections.emptyList(); // 예외처리
         }
 
-        List<CpuDetailedMatches> cpus = cpuRepository.findByModelIn(cpuKeywords);
-        List<GpuDetailedMatches> gpus = gpuRepository.findByChipsetIn(gpuKeywords);
+        List<Cpu> cpus = cpuRepository.findByModelIn(cpuKeywords);
+        List<Gpu> gpus = gpuRepository.findByChipsetIn(gpuKeywords);
 
         List<String> queries = new ArrayList<>();
-        for (GpuDetailedMatches gpu : gpus) {
+        for (Gpu gpu : gpus) {
             String gpuKeyword = extractGpuKeyword(gpu.getChipset());
-            for (CpuDetailedMatches cpu : cpus) {
+            for (Cpu cpu : cpus) {
                 String cpuKeyword = extractCpuKeyword(cpu.getModel());
                 queries.add(gpuKeyword + " " + cpuKeyword);
                 System.out.println(gpuKeyword + " " + cpuKeyword);

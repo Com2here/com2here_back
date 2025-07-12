@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ComputerRecommendationRequestDto {
+public class ProgramRequestDto {
     private String mainProgram;
     private String purpose;
     private String recommendedSpec;
