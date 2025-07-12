@@ -15,14 +15,18 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Decode application.properties from secret
+        run: |
+          echo "${{ secrets.APP_PROPERTIES_BASE64 }}" | base64 --decode > src/main/resources/application.properties
+
+      - run: ./gradlew bootJar --no-daemon
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
-
-      - run: ./gradlew bootJar --no-daemon
 
       - uses: docker/build-push-action@v5
         with:
