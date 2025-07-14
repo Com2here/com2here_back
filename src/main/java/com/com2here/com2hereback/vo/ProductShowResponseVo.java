@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class ProductShowResponseVo {
-    private Long id;
+    private Long productId;
     private String image;
     private SpecInfo specs;
     private int price;
@@ -34,19 +34,19 @@ public class ProductShowResponseVo {
     }
 
     @Builder
-    public ProductShowResponseVo(Long id, String image, SpecInfo specs, int price) {
-        this.id = id;
+    public ProductShowResponseVo(Long productId, String image, SpecInfo specs, int price) {
+        this.productId = productId;
         this.image = image;
         this.specs = specs;
         this.price = price;
     }
 
-    public static ProductShowResponseVo dtoToVo(ProductShowResponseDto dto) {
+    public static ProductShowResponseVo dtoToVo(ProductShowResponseDto productShowRespDto) {
         return ProductShowResponseVo.builder()
-            .id(dto.getProduct_id())
-            .image(dto.getImage())
-            .specs(new SpecInfo(dto.getSpec()))
-            .price(dto.getPrice())
+            .productId(productShowRespDto.getProductId())
+            .image(productShowRespDto.getImage())
+            .specs(new SpecInfo(productShowRespDto.getSpec()))
+            .price(productShowRespDto.getPrice())
             .build();
     }
 }

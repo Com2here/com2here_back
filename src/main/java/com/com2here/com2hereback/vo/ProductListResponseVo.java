@@ -20,14 +20,14 @@ public class ProductListResponseVo {
     @Getter
     @NoArgsConstructor
     public static class ProductInfo {
-        private Long id;
+        private Long productId;
         private String image;
         private SpecInfo specs;
         private int price;
 
         @Builder
-        public ProductInfo(Long id, String image, SpecInfo specs, int price) {
-            this.id = id;
+        public ProductInfo(Long productId, String image, SpecInfo specs, int price) {
+            this.productId = productId;
             this.image = image;
             this.specs = specs;
             this.price = price;
@@ -66,7 +66,7 @@ public class ProductListResponseVo {
     public static ProductListResponseVo dtoToVo(ProductListResponseDto dto) {
         List<ProductInfo> productInfoList = dto.getProducts().stream()
             .map(product -> ProductInfo.builder()
-                .id(product.getProduct_id())
+                .productId(product.getProductId())
                 .image(product.getImage())
                 .specs(new SpecInfo(product.getSpec()))
                 .price(product.getPrice())

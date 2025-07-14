@@ -1,4 +1,4 @@
-package com.com2here.com2hereback.domain;
+package com.com2here.com2hereback.common;
 
 public enum Role {
     USER,

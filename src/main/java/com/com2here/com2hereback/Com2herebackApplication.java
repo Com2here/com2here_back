@@ -1,6 +1,6 @@
 package com.com2here.com2hereback;
 
-//import com.com2here.com2hereback.domain.Role;
+//import com.com2here.com2hereback.common.Role;
 //import com.com2here.com2hereback.domain.User;
 //import com.com2here.com2hereback.repository.UserRepository;
 //import org.springframework.boot.CommandLineRunner;

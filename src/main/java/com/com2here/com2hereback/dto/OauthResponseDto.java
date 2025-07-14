@@ -1,6 +1,6 @@
 package com.com2here.com2hereback.dto;
 
-import com.com2here.com2hereback.domain.Role;
+import com.com2here.com2hereback.common.Role;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;
 import com.com2here.com2hereback.dto.oauth.KakaoInfo;

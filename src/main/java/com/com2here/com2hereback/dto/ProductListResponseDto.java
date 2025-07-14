@@ -23,14 +23,14 @@ public class ProductListResponseDto {
     @Getter
     @NoArgsConstructor
     public static class ProductInfo {
-        private Long product_id;
+        private Long productId;
         private String image;
         private Spec spec;
         private int price;
 
         @Builder
-        public ProductInfo(Long product_id, String image, Spec spec, int price) {
-            this.product_id = product_id;
+        public ProductInfo(Long productId, String image, Spec spec, int price) {
+            this.productId = productId;
             this.image = image;
             this.spec = spec;
             this.price = price;
@@ -43,7 +43,7 @@ public class ProductListResponseDto {
 
         List<ProductInfo> productInfoList = products.stream()
             .map(product -> ProductInfo.builder()
-                .product_id(product.getProduct_id())
+                .productId(product.getProductId())
                 .image(product.getImage())
                 .spec(product.getSpec())
                 .price(product.getPrice())

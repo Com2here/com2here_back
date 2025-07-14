@@ -3,7 +3,7 @@ package com.com2here.com2hereback.service;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.domain.OauthAccount;
-import com.com2here.com2hereback.domain.Role;
+import com.com2here.com2hereback.common.Role;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
@@ -64,13 +64,15 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
         }
 
+        System.out.println(userRequestDto.getEmail());
+
         User user = User.builder()
             .nickname(userRequestDto.getNickname())
             .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
             .email(userRequestDto.getEmail())
             .uuid(null)
             .isEmailVerified(false)
-            .role(Role.USER)
+            .role(Role.ADMIN)
             .profileImageUrl(null)
             .createdAt(LocalDateTime.now())
             .build();
@@ -81,53 +83,61 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserLoginResponseDto registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl) {
-        // 1. 이미 oauth_id + provider로 등록된 유저가 있는지 확인
         Optional<OauthAccount> existingOauth = oauthAccountRepository.findByProviderAndOauthId(provider, oauthId);
         User user;
+
         if (existingOauth.isPresent()) {
-            // 기존 회원이면 해당 user 가져오기
             user = existingOauth.get().getUser();
         } else {
-            // 2. 중복 이메일 확인
             if (userRepository.existsByEmail(email)) {
                 throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
             }
 
-            // 3. 신규 User 생성
             user = User.builder()
-                    .nickname(nickname)
-                    .email(email)
-                    .password(null)
-                    .uuid(UUID.randomUUID().toString())
-                    .isEmailVerified(true)
-                    .role(Role.SOCIAL)
-                    .profileImageUrl(profileImageUrl)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+                .nickname(nickname)
+                .email(email)
+                .password(null)
+                .uuid(UUID.randomUUID().toString())
+                .isEmailVerified(true)
+                .role(Role.SOCIAL)
+                .profileImageUrl(profileImageUrl)
+                .createdAt(LocalDateTime.now())
+                .refreshToken(null) // 초기에는 null
+                .build();
 
-            userRepository.save(user);
+            user = userRepository.save(user);
 
-            // 4. OauthAccount 저장
             OauthAccount oauthAccount = OauthAccount.builder()
-                    .user(user)
-                    .provider(provider)
-                    .oauthId(oauthId)
-                    .build();
+                .user(user)
+                .provider(provider)
+                .oauthId(oauthId)
+                .build();
 
             oauthAccountRepository.save(oauthAccount);
         }
 
-        // 5. 토큰 발급
         String accessToken = tokenProvider.createAccessToken(user.getUuid());
         String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
-        // 6. 리프레시 토큰 저장
-        user.setRefreshToken(refreshToken);
-        userRepository.save(user);
+        // User 객체 새로 복사 + 갱신 (immutable style)
+        User updatedUser = User.builder()
+            .userId(user.getUserId())
+            .nickname(user.getNickname())
+            .email(user.getEmail())
+            .password(user.getPassword())
+            .uuid(user.getUuid())
+            .isEmailVerified(user.isEmailVerified())
+            .role(user.getRole())
+            .profileImageUrl(user.getProfileImageUrl())
+            .createdAt(user.getCreatedAt())
+            .refreshToken(refreshToken)
+            .build();
 
-        // 7. DTO 반환
-        return UserLoginResponseDto.entityToDto(user, accessToken, refreshToken, user.getRole().name());
+        userRepository.save(updatedUser);
+
+        return UserLoginResponseDto.entityToDto(updatedUser, accessToken, refreshToken, updatedUser.getRole().name());
     }
+
 
 
     @Override
@@ -149,7 +159,7 @@ public class UserServiceImpl implements UserService {
         String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
         User updateUser = User.builder()
-            .user_id(user.getUser_id())
+            .userId(user.getUserId())
             .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
@@ -211,7 +221,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User updatedUser = User.builder()
-                .user_id(user.getUser_id())
+                .userId(user.getUserId())
                 .nickname(nickname != null ? nickname : user.getNickname())
                 .email(email != null ? email : user.getEmail())
                 .profileImageUrl(newProfileImageUrl)
@@ -286,7 +296,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user = User.builder()
-            .user_id(user.getUser_id())
+            .userId(user.getUserId())
             .nickname(user.getNickname())
             .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
             .email(user.getEmail())
@@ -314,7 +324,7 @@ public class UserServiceImpl implements UserService {
         String newRefreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
         User updatedUser = User.builder()
-            .user_id(user.getUser_id())
+            .userId(user.getUserId())
             .nickname(user.getNickname())
             .email(user.getEmail())
             .password(user.getPassword())
