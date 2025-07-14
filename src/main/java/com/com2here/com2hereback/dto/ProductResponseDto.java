@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductResponseDto {
-    private String title;     // 상품 이름 (ex: "게이밍PC RTX 5060 + Ryzen5")
-    private String link;      // 상품 링크 URL
-    private String image;     // 썸네일 이미지 URL
-    private int price;        // 최저가 (lprice)
-    private String mall;      // 판매처 이름
+    private String title;
+    private String link;
+    private String image;
+    private int price;
+    private String mall;
 }

@@ -9,14 +9,14 @@ import lombok.Data;
 @Builder
 public class ProductShowResponseDto {
 
-    private Long product_id;
+    private Long productId;
     private String image;
     private Spec spec;
     private int price;
 
     public static ProductShowResponseDto entityToDto(Product product) {
         return ProductShowResponseDto.builder()
-            .product_id(product.getProduct_id())
+            .productId(product.getProductId())
             .image(product.getImage())
             .spec(product.getSpec())
             .price(product.getPrice())

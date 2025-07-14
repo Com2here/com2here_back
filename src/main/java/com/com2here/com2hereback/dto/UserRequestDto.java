@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class UserRequestDto {
 
-    private int user_id;
+    private Long userId;
     private String nickname;
     private String email;
     private String profileImageUrl;
@@ -20,8 +20,8 @@ public class UserRequestDto {
     private String token;
 
     @Builder
-    public UserRequestDto(int user_id, String nickname, String email, String profileImageUrl, String password,String confirmPassword, String token) {
-        this.user_id = user_id;
+    public UserRequestDto(Long userId, String nickname, String email, String profileImageUrl, String password,String confirmPassword, String token) {
+        this.userId = userId;
         this.nickname = nickname;
         this.email = email;
         this.profileImageUrl = profileImageUrl;

@@ -1,9 +1,7 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.domain.Program;
 import com.com2here.com2hereback.domain.Cpu;
 import com.com2here.com2hereback.domain.Gpu;
-import com.com2here.com2hereback.domain.ProgramPurpose;
 import com.com2here.com2hereback.dto.ProductResponseDto;
 import com.com2here.com2hereback.repository.ProgramRepository;
 import com.com2here.com2hereback.repository.CpuRepository;
@@ -29,25 +27,17 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
         Set<String> cpuKeywords = new HashSet<>();
         Set<String> gpuKeywords = new HashSet<>();
 
-
-
-        for (String program : programs) {
-            Optional<Program> optional = programRepository
-                .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
-            if (optional.isPresent()) {
-                Program rec = optional.get();
-                SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
-
-//                String parsedCpu = extractCpuKeyword(spec.cpu());
-//                String parsedGpu = extractGpuKeyword(spec.gpu());
-
+//        for (String program : programs) {
+//            Optional<Program> optional = programRepository
+//                .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
+//            if (optional.isPresent()) {
+//                Program rec = optional.get();
+//                SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
 //
-//                if (!parsedCpu.isEmpty()) cpuKeywords.add(parsedCpu);
-//                if (!parsedGpu.isEmpty()) gpuKeywords.add(parsedGpu);
-                if (!spec.cpu().isEmpty()) cpuKeywords.add(spec.cpu());
-                if (!spec.gpu().isEmpty()) gpuKeywords.add(spec.gpu());
-            }
-        }
+//                if (!spec.cpu().isEmpty()) cpuKeywords.add(spec.cpu());
+//                if (!spec.gpu().isEmpty()) gpuKeywords.add(spec.gpu());
+//            }
+//        }
 
         if (cpuKeywords.isEmpty() || gpuKeywords.isEmpty()) {
             return Collections.emptyList(); // 예외처리

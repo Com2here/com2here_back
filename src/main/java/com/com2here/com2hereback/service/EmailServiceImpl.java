@@ -133,7 +133,7 @@ public class EmailServiceImpl implements EmailService {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
         user = User.builder()
-            .user_id(user.getUser_id())
+            .userId(user.getUserId())
             .nickname(user.getNickname())
             .password(user.getPassword())
             .email(user.getEmail())
@@ -166,7 +166,7 @@ public class EmailServiceImpl implements EmailService {
         String hashedPassword = bCryptPasswordEncoder.encode(resetPasswordRequestDto.getPassword());
 
         user = User.builder()
-            .user_id(user.getUser_id())
+            .userId(user.getUserId())
             .nickname(user.getNickname())
             .password(hashedPassword)
             .email(user.getEmail())
