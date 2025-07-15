@@ -33,20 +33,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info(">>> JwtAuthenticationFilter 호출: {}", request.getRequestURI());
-
         String path = request.getRequestURI();
+        log.info(">>> JwtAuthenticationFilter 호출: {}", path);
 
         if (shouldSkipFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = path.equals("/api/v1/token/rotate")
-                ? authExtractor.extractRefreshToken(request)
-                : authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
+        String token;
+        String tokenType;
 
-        String tokenType = path.equals("/api/v1/token/rotate") ? "refresh" : "access";
+        if ("/api/v1/token/rotate".equals(path)) {
+            token = authExtractor.extractRefreshToken(request);
+            tokenType = "refresh";
+        } else {
+            token = authExtractor.extract(request, "Bearer").replaceAll("\\s+", "");
+            tokenType = "access";
+        }
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token, tokenType)) {
             Claims claims = Jwts.parserBuilder()
@@ -59,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = claims.get("role", String.class).toUpperCase();
 
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-            System.out.println("권한 확인: " + authorities);
+            log.info("권한 확인: {}", authorities);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(uuid, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -69,7 +73,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             BaseException.sendErrorResponse(response, BaseResponseStatus.TOKEN_EXPIRED);
         }
     }
-
     private boolean shouldSkipFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/uploads/") ||

@@ -309,36 +309,4 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
     }
-
-    public UserTokenResponseDto rotateToken() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uuid = (String) authentication.getPrincipal();
-
-        User user = userRepository.findByUuid(uuid);
-
-        if (user == null) {
-            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
-        }
-        String newAccessToken = tokenProvider.createAccessToken(user.getUuid());
-        String newRefreshToken = tokenProvider.createRefreshToken(user.getUuid());
-
-        User updatedUser = User.builder()
-            .userId(user.getUserId())
-            .nickname(user.getNickname())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .uuid(user.getUuid())
-            .role(user.getRole())
-            .profileImageUrl(user.getProfileImageUrl())
-            .refreshToken(newRefreshToken)
-            .build();
-
-        userRepository.save(updatedUser);
-
-        UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(
-            newAccessToken,
-            newRefreshToken);
-        return userTokenResponseDto;
-    }
 }

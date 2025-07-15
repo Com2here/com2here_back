@@ -1,3 +1,16 @@
+# gradlew 스크립트 Unix
 /gradlew text eol=lf
+
+# Windows .bat CRLF
 *.bat text eol=crlf
+
+# jar 바이너리 파일
 *.jar binary
+
+# Java LF
+*.java text eol=lf
+
+# Markdown, YAML LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
