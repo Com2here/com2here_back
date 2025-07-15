@@ -63,6 +63,7 @@ public enum BaseResponseStatus {
     INVALID_PURPOSE(HttpStatus.BAD_REQUEST, false, 4000, "유효하지 않은 용도입니다. [게임용, 작업용, 사무용, 개발용] 중 하나여야 합니다."),
     NO_EXIST_PROGRAM(HttpStatus.BAD_REQUEST, false, 4001, "해당 ID의 프로그램을 찾을 수 없습니다."),
 
+    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, false, 5000, "파일 업로드에 실패하였습니다."),
     /**
      * 400 : security 에러
      */

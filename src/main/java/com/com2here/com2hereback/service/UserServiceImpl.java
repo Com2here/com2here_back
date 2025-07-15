@@ -9,7 +9,7 @@ import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
 import com.com2here.com2hereback.dto.ShowUserResponseDto;
 import com.com2here.com2hereback.dto.UserLoginResponseDto;
 import com.com2here.com2hereback.dto.UserRequestDto;
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
+import com.com2here.com2hereback.dto.UserUpdateDto;
 import com.com2here.com2hereback.repository.OauthAccountRepository;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final OauthAccountRepository oauthAccountRepository;
-    private final FileUploadService fileUploadService;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
@@ -197,11 +197,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(String nickname, String email, MultipartFile profileImage) {
-//        System.out.println("[디버깅] nickname: " + nickname);
-//        System.out.println("[디버깅] email: " + email);
-//        System.out.println("[디버깅] profileImage: " + (profileImage != null ? profileImage.getOriginalFilename() : "null"));
-//        System.out.println("[서비스] profileImage.getSize(): " + (profileImage != null ? profileImage.getSize() : -1));
+    public void updateUser(UserUpdateDto userUpdateDto) {
+
+        String nickname = userUpdateDto.getNickname();
+        String email = userUpdateDto.getEmail();
+        MultipartFile profileImage = userUpdateDto.getProfileImage();
 
         if (nickname == null && email == null && (profileImage == null || profileImage.isEmpty())) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
@@ -215,16 +215,16 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
-        String newProfileImageUrl = user.getProfileImageUrl();
-        if (profileImage != null) {
-            newProfileImageUrl = fileUploadService.upload(profileImage);
+        String updatedProfileImageUrl = user.getProfileImageUrl();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            updatedProfileImageUrl = fileStorageService.upload(profileImage);
         }
 
         User updatedUser = User.builder()
                 .userId(user.getUserId())
                 .nickname(nickname != null ? nickname : user.getNickname())
                 .email(email != null ? email : user.getEmail())
-                .profileImageUrl(newProfileImageUrl)
+                .profileImageUrl(updatedProfileImageUrl)
                 .password(user.getPassword())
                 .uuid(user.getUuid())
                 .role(user.getRole())
@@ -233,8 +233,6 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updatedUser);
     }
-
-
 
     @Override
     @Transactional
