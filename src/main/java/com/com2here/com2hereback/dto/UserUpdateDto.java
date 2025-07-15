@@ -9,13 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserProfileUpdateDto {
+public class UserUpdateDto {
     private String nickname;
     private String email;
     private MultipartFile profileImage;
 
     @Builder
-    public UserProfileUpdateDto(String nickname, String email, MultipartFile profileImage) {
+    public UserUpdateDto(String nickname, String email, MultipartFile profileImage) {
         this.nickname = nickname;
         this.email = email;
         this.profileImage = profileImage;
