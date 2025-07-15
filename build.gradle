@@ -24,55 +24,69 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'                    // Spring Boot 기본 스타터
+    implementation 'org.springframework.boot:spring-boot-starter-web'                // Spring MVC (REST API)
+    implementation 'org.springframework.boot:spring-boot-starter-security'           // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'           // Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'               // Spring JDBC
+    implementation 'org.springframework.boot:spring-boot-starter-validation'         // Bean Validation
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // JPA 의존성 추가
-    implementation 'org.springframework.boot:spring-boot-starter'
+    // Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'           // Thymeleaf + Spring Security integration
+
+    // MyBatis
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5' // JWT Implementation
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JWT Jackson
-
-    // Swagger 3.0 의존성 추가
+    // Swagger
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.11'
 
+    // Lombok (컴파일 타임 코드 생성)
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // 개발 편의
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Database Connector
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Spring Cloud OpenFeign (HTTP client)
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:3.1.0'
+
+    // OGNL (Expression Language 지원 라이브러리)
+    implementation 'ognl:ognl:3.3.4'
+
+    // Cloudflare R2 (S3 API compatible → AWS SDK v2)
+    implementation platform('software.amazon.awssdk:bom:2.25.22')                    // AWS SDK BOM for dependency version alignment
+    implementation 'software.amazon.awssdk:s3'                                       // AWS SDK S3 client (Cloudflare R2 대응)
+
+    // Spring Mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'         // Spring Data Redis
+    implementation 'org.springframework.session:spring-session-data-redis'           // Spring Session Redis 통합
+    implementation 'redis.clients:jedis:5.2.0'                                       // Redis client (Jedis)
+    implementation 'org.apache.commons:commons-pool2:2.11.1'                         // Commons Pool (Jedis 연결 풀)
+    implementation 'ru.zinin:tomcat-redis-session:0.8'                               // Tomcat Redis Session 관리
+    implementation 'org.springframework.data:spring-data-redis:2.7.5'                // Spring Data Redis
+    implementation 'io.lettuce:lettuce-core:6.2.1.RELEASE'                           // Lettuce client
+
+    // Spring Boot Configuration Processor
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation "org.springframework.cloud:spring-cloud-starter-openfeign:3.1.0"
-    implementation 'ognl:ognl:3.3.4'
-
-
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-
-    // redis
-    implementation group: 'redis.clients', name: 'jedis', version: '5.2.0'
-    implementation 'org.springframework.session:spring-session-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation group: 'ru.zinin', name: 'tomcat-redis-session', version: '0.8'
-    implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
-
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.springframework.data:spring-data-redis:2.7.5'
-    implementation 'io.lettuce:lettuce-core:6.2.1.RELEASE'
 }
 
 tasks.named('test') {

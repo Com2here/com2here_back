@@ -1,8 +1,6 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 public interface EmailService {

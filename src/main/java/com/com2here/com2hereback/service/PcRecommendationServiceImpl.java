@@ -1,13 +1,11 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.domain.ComputerRecommendation;
-import com.com2here.com2hereback.domain.CpuDetailedMatches;
-import com.com2here.com2hereback.domain.GpuDetailedMatches;
-import com.com2here.com2hereback.domain.ProgramPurpose;
+import com.com2here.com2hereback.domain.Cpu;
+import com.com2here.com2hereback.domain.Gpu;
 import com.com2here.com2hereback.dto.ProductResponseDto;
-import com.com2here.com2hereback.repository.ComputerRecommendationRepository;
-import com.com2here.com2hereback.repository.CpuDetailedMatchesRepository;
-import com.com2here.com2hereback.repository.GpuDetailedMatchesRepository;
+import com.com2here.com2hereback.repository.ProgramRepository;
+import com.com2here.com2hereback.repository.CpuRepository;
+import com.com2here.com2hereback.repository.GpuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +17,9 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class PcRecommendationServiceImpl implements PcRecommendationService {
 
-    private final ComputerRecommendationRepository recommendationRepository;
-    private final CpuDetailedMatchesRepository cpuRepository;
-    private final GpuDetailedMatchesRepository gpuRepository;
+    private final ProgramRepository programRepository;
+    private final CpuRepository cpuRepository;
+    private final GpuRepository gpuRepository;
     private final NaverShoppingService naverShoppingService;
 
     @Override
@@ -29,37 +27,29 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
         Set<String> cpuKeywords = new HashSet<>();
         Set<String> gpuKeywords = new HashSet<>();
 
-
-
-        for (String program : programs) {
-            Optional<ComputerRecommendation> optional = recommendationRepository
-                .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
-            if (optional.isPresent()) {
-                ComputerRecommendation rec = optional.get();
-                SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
-
-//                String parsedCpu = extractCpuKeyword(spec.cpu());
-//                String parsedGpu = extractGpuKeyword(spec.gpu());
-
+//        for (String program : programs) {
+//            Optional<Program> optional = programRepository
+//                .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
+//            if (optional.isPresent()) {
+//                Program rec = optional.get();
+//                SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
 //
-//                if (!parsedCpu.isEmpty()) cpuKeywords.add(parsedCpu);
-//                if (!parsedGpu.isEmpty()) gpuKeywords.add(parsedGpu);
-                if (!spec.cpu().isEmpty()) cpuKeywords.add(spec.cpu());
-                if (!spec.gpu().isEmpty()) gpuKeywords.add(spec.gpu());
-            }
-        }
+//                if (!spec.cpu().isEmpty()) cpuKeywords.add(spec.cpu());
+//                if (!spec.gpu().isEmpty()) gpuKeywords.add(spec.gpu());
+//            }
+//        }
 
         if (cpuKeywords.isEmpty() || gpuKeywords.isEmpty()) {
             return Collections.emptyList(); // 예외처리
         }
 
-        List<CpuDetailedMatches> cpus = cpuRepository.findByModelIn(cpuKeywords);
-        List<GpuDetailedMatches> gpus = gpuRepository.findByChipsetIn(gpuKeywords);
+        List<Cpu> cpus = cpuRepository.findByModelIn(cpuKeywords);
+        List<Gpu> gpus = gpuRepository.findByChipsetIn(gpuKeywords);
 
         List<String> queries = new ArrayList<>();
-        for (GpuDetailedMatches gpu : gpus) {
+        for (Gpu gpu : gpus) {
             String gpuKeyword = extractGpuKeyword(gpu.getChipset());
-            for (CpuDetailedMatches cpu : cpus) {
+            for (Cpu cpu : cpus) {
                 String cpuKeyword = extractCpuKeyword(cpu.getModel());
                 queries.add(gpuKeyword + " " + cpuKeyword);
                 System.out.println(gpuKeyword + " " + cpuKeyword);

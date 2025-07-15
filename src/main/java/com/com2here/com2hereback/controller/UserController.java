@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -63,13 +62,14 @@ public class UserController {
 
     // 유저 정보 수정 API
     @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public CMResponse<Void> updateUser(@ModelAttribute UserProfileUpdateDto dto) {
+    public CMResponse<Void> updateUser(@ModelAttribute UserUpdateDto userUpdateDto) {
         try {
-            userService.updateUser(dto.getNickname(), dto.getEmail(), dto.getProfileImage());
+            userService.updateUser(userUpdateDto);
             return CMResponse.success(BaseResponseStatus.SUCCESS);
         } catch (BaseException e) {
             return CMResponse.fail(e.getErrorCode());
         } catch (Exception e) {
+            e.printStackTrace();
             return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
