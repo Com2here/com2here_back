@@ -27,35 +27,34 @@ public class ProgramService {
 
     @Transactional
     public ProgramResponseDto create(ProgramRequestDto dto) {
-        if (dto.getPurpose() == null || dto.getMainProgram() == null
-                || dto.getRecommendedSpec() == null || dto.getMinimumSpec() == null) {
+        if (dto.getPurpose() == null || dto.getProgram() == null || dto.getSpecLevel() == null) {
             throw new IllegalArgumentException("모든 필드는 필수입니다.");
         }
 
         ProgramPurpose validatedPurpose;
         try {
-            validatedPurpose = ProgramPurpose.valueOf(dto.getPurpose());
+            validatedPurpose = dto.getPurpose();
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("유효하지 않은 용도입니다. [게임용, 작업용, 사무용, 개발용] 중 하나여야 합니다.");
         }
 
         Program saved = repository.save(
                 Program.builder()
-                        .mainProgram(dto.getMainProgram())
+                        .program(dto.getProgram())
+                        .specLevel(dto.getSpecLevel())
                         .purpose(validatedPurpose)
-                        .recommendedSpec(dto.getRecommendedSpec())
-                        .minimumSpec(dto.getMinimumSpec())
+                        .pmSpec(dto.getPmSpec()) // FK
+                        .prSpec(dto.getPrSpec()) // FK
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
                         .build()
         );
 
         return ProgramResponseDto.builder()
-                .id(saved.getComputer_id())
-                .mainProgram(saved.getMainProgram())
+                .id(saved.getProgramId())
+                .program(saved.getProgram())
                 .purpose(saved.getPurpose().name())
-                .recommendedSpec(saved.getRecommendedSpec())
-                .minimumSpec(saved.getMinimumSpec())
+                .specLevel(saved.getSpecLevel())
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .build();
@@ -70,9 +69,8 @@ public class ProgramService {
         List<Program> filtered = all.stream()
                 .filter(r -> {
                     boolean matchesSearch = (search == null || search.isBlank()) ||
-                            r.getMainProgram().contains(search) ||
-                            r.getRecommendedSpec().contains(search) ||
-                            r.getMinimumSpec().contains(search);
+                            r.getProgram().contains(search) ||
+                            r.getSpecLevel().contains(search);
                     boolean matchesPurpose = (purpose == null || purpose.isBlank()) ||
                             r.getPurpose().name().equalsIgnoreCase(purpose);
                     return matchesSearch && matchesPurpose;
@@ -86,15 +84,15 @@ public class ProgramService {
 
         List<ProgramResponseDto> data = pageContent.stream()
                 .map(entity -> ProgramResponseDto.builder()
-                        .id(entity.getComputer_id())
-                        .mainProgram(entity.getMainProgram())
+                        .id(entity.getProgramId())
+                        .program(entity.getProgram())
                         .purpose(entity.getPurpose().name())
-                        .recommendedSpec(entity.getRecommendedSpec())
-                        .minimumSpec(entity.getMinimumSpec())
+                        .specLevel(entity.getSpecLevel())
                         .createdAt(entity.getCreatedAt())
                         .updatedAt(entity.getUpdatedAt())
                         .build())
                 .collect(Collectors.toList());
+
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("data", data);
@@ -112,31 +110,21 @@ public class ProgramService {
 
 
     @Transactional
-    public ProgramResponseDto update(
-            Long id,
-            String mainProgram,
-            String recommendedSpec,
-            String minimumSpec,
-            String purpose
-    ) {
+    public ProgramResponseDto update(Long id, String program, String specLevel, String purpose) {
         Program entity = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 추천 항목을 찾을 수 없습니다."));
 
-        if ((mainProgram == null || mainProgram.isBlank()) &&
-                (recommendedSpec == null || recommendedSpec.isBlank()) &&
-                (minimumSpec == null || minimumSpec.isBlank()) &&
+        if ((program == null || program.isBlank()) &&
+                (specLevel == null || specLevel.isBlank()) &&
                 (purpose == null || purpose.isBlank())) {
             throw new IllegalStateException("수정할 데이터가 전달되지 않았습니다.");
         }
 
-        if (mainProgram != null && !mainProgram.isBlank()) {
-            entity.setMainProgram(mainProgram);
+        if (program != null && !program.isBlank()) {
+            entity.setProgram(program);
         }
-        if (recommendedSpec != null && !recommendedSpec.isBlank()) {
-            entity.setRecommendedSpec(recommendedSpec);
-        }
-        if (minimumSpec != null && !minimumSpec.isBlank()) {
-            entity.setMinimumSpec(minimumSpec);
+        if (specLevel != null && !specLevel.isBlank()) {
+            entity.setSpecLevel(specLevel);
         }
         if (purpose != null && !purpose.isBlank()) {
             try {
@@ -150,15 +138,15 @@ public class ProgramService {
         entity.setUpdatedAt(LocalDateTime.now());
 
         return ProgramResponseDto.builder()
-                .id(entity.getComputer_id())
-                .mainProgram(entity.getMainProgram())
+                .id(entity.getProgramId())
+                .program(entity.getProgram())
                 .purpose(entity.getPurpose().name())
-                .recommendedSpec(entity.getRecommendedSpec())
-                .minimumSpec(entity.getMinimumSpec())
+                .specLevel(entity.getSpecLevel())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
+
 
     @Transactional
     public void delete(Long id) {

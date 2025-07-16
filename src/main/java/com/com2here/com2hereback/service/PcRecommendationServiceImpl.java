@@ -5,15 +5,18 @@ import com.com2here.com2hereback.domain.Cpu;
 import com.com2here.com2hereback.domain.Gpu;
 import com.com2here.com2hereback.domain.ProgramPurpose;
 import com.com2here.com2hereback.dto.ProductResponseDto;
+import com.com2here.com2hereback.dto.RecommendRequestDto;
 import com.com2here.com2hereback.repository.ProgramRepository;
 import com.com2here.com2hereback.repository.CpuRepository;
 import com.com2here.com2hereback.repository.GpuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.com2here.com2hereback.util.Pair;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,105 +28,118 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
     private final NaverShoppingService naverShoppingService;
 
     @Override
-    public List<ProductResponseDto> recommendPc(String purpose, List<String> programs, int budget) {
-        Set<String> cpuKeywords = new HashSet<>();
-        Set<String> gpuKeywords = new HashSet<>();
+    public List<ProductResponseDto> recommendPc(RecommendRequestDto request) {
+        System.out.println("▶ recommendPc() 호출됨");
+        // 1. 입력된 프로그램들에 대해 최대 요구 사양 라인 구하기
+        List<Program> programList = programRepository.findAll().stream()
+                .filter(p -> request.getPrograms().stream()
+                        .anyMatch(name -> p.getProgram().contains(name)))
+                .toList();
 
+        System.out.println("▶ 프로그램 목록 조회 완료: " + programList.size());
 
+        String maxLine = programList.stream()
+                .map(Program::getSpecLevel)
+                .map(this::extractLineFromSpec) // 예: "LINE: 하이엔드"
+                .filter(line -> !line.isEmpty())
+                .max(Comparator.comparingInt(this::getLinePriority))
+                .orElse("로우엔드");
 
-        for (String program : programs) {
-            Optional<Program> optional = programRepository
-                .findByMainProgramIgnoreCaseAndPurpose(program, ProgramPurpose.valueOf(purpose));
-            if (optional.isPresent()) {
-                Program rec = optional.get();
-                SpecKeyword spec = parseSpec(rec.getRecommendedSpec());
+        System.out.println("▶ 최대 요구 라인: " + maxLine);
 
-//                String parsedCpu = extractCpuKeyword(spec.cpu());
-//                String parsedGpu = extractGpuKeyword(spec.gpu());
+        // 2. maxLine 이상인 CPU, GPU 필터링
+        List<Cpu> cpus = cpuRepository.findAll().stream()
+                .filter(cpu -> isLineGreaterThanEqual(cpu.getLine(), maxLine))
+                .toList();
 
-//
-//                if (!parsedCpu.isEmpty()) cpuKeywords.add(parsedCpu);
-//                if (!parsedGpu.isEmpty()) gpuKeywords.add(parsedGpu);
-                if (!spec.cpu().isEmpty()) cpuKeywords.add(spec.cpu());
-                if (!spec.gpu().isEmpty()) gpuKeywords.add(spec.gpu());
+        System.out.println("▶ 필터링된 CPU 개수: " + cpus.size());
+
+        List<Gpu> gpus = gpuRepository.findAll().stream()
+                .filter(gpu -> isLineGreaterThanEqual(gpu.getLine(), maxLine))
+                .toList();
+
+        System.out.println("▶ 필터링된 GPU 개수: " + gpus.size());
+        List<ProductResponseDto> results = new ArrayList<>();
+
+        // 3. 동일 라인 조합만 추천
+        List<Pair<Cpu, Gpu>> topPairs = new ArrayList<>();
+
+        for (Cpu cpu : cpus) {
+            for (Gpu gpu : gpus) {
+                if (!cpu.getLine().equals(gpu.getLine())) continue;
+                int totalPrice = cpu.getPrice() + gpu.getPrice();
+                if (totalPrice > request.getBudget()) continue;
+                topPairs.add(new Pair<>(cpu, gpu));
             }
         }
 
-        if (cpuKeywords.isEmpty() || gpuKeywords.isEmpty()) {
-            return Collections.emptyList(); // 예외처리
-        }
+        // top N개 조합만 API 요청
+        for (int i = 0; i < Math.min(topPairs.size(), 10); i++) {
+            Cpu cpu = topPairs.get(i).getFirst();
+            Gpu gpu = topPairs.get(i).getSecond();
 
-        List<Cpu> cpus = cpuRepository.findByModelIn(cpuKeywords);
-        List<Gpu> gpus = gpuRepository.findByChipsetIn(gpuKeywords);
+            String query = extractGpuKeyword(gpu.getChipset()) + " " + extractCpuKeyword(cpu.getModel());
+            System.out.println("💡 네이버 API 호출 시작: " + query);
+            List<ProductResponseDto> products = naverShoppingService.searchFilteredProducts(query, request.getBudget());
 
-        List<String> queries = new ArrayList<>();
-        for (Gpu gpu : gpus) {
-            String gpuKeyword = extractGpuKeyword(gpu.getChipset());
-            for (Cpu cpu : cpus) {
-                String cpuKeyword = extractCpuKeyword(cpu.getModel());
-                queries.add(gpuKeyword + " " + cpuKeyword);
-                System.out.println(gpuKeyword + " " + cpuKeyword);
+            for (ProductResponseDto product : products) {
+                if (product.getPrice() < 100000) continue;
+                results.add(ProductResponseDto.builder()
+                        .cpu(cpu.getModel())
+                        .gpu(gpu.getChipset())
+                        .line(cpu.getLine())
+                        .totalScores(cpu.getTotalScore() + gpu.getTotalScore())
+                        .totalPrice(cpu.getPrice() + gpu.getPrice())
+                        .title(product.getTitle())
+                        .link(product.getLink())
+                        .image(product.getImage())
+                        .price(product.getPrice())
+                        .mall(product.getMall())
+                        .build());
             }
         }
 
-        List<ProductResponseDto> result = new ArrayList<>();
-        for (String query : queries) {
-            result.addAll(naverShoppingService.searchFilteredProducts(query, budget));
-        }
-
-
-        System.out.println("Programs: " + programs);
-        System.out.println("CPU Keywords: " + cpuKeywords);
-        System.out.println("GPU Keywords: " + gpuKeywords);
-        System.out.println("Generated Queries: " + queries);
-
-        return result;
+        return results;
     }
 
-    // "GeForce RTX 4080" → "rtx 4080"
+    // 예: "CPU: 123, GPU: RTX 3060, LINE: 하이엔드" → "하이엔드"
+    private String extractLineFromSpec(String specText) {
+        return specText == null ? "" : specText.trim();
+    }
+
+    private int getLinePriority(String line) {
+        if (line == null || line.isBlank()) return 0;
+        return switch (line.trim()) {
+            case "하이엔드" -> 4;
+            case "퍼포먼스" -> 3;
+            case "메인스트림" -> 2;
+            case "로우엔드" -> 1;
+            default -> 0;
+        };
+    }
+
+    private boolean isLineGreaterThanEqual(String targetLine, String baseLine) {
+        System.out.println("Comparing target: " + targetLine + " vs base: " + baseLine);
+        if (targetLine == null || baseLine == null) return false;
+        return getLinePriority(targetLine) >= getLinePriority(baseLine);
+    }
+
     private String extractGpuKeyword(String raw) {
         if (raw == null) return "";
-        return raw
-            .replaceAll("(?i)geforce", "")
-            .replaceAll("(?i)radeon", "")
-            .trim()
-            .toLowerCase();
+        return raw.replaceAll("(?i)geforce", "")
+                .replaceAll("(?i)radeon", "")
+                .trim().toLowerCase();
     }
 
-    // "AMD Ryzen 5 7600" → "7600"
     private String extractCpuKeyword(String raw) {
         if (raw == null) return "";
         String[] tokens = raw.trim().split("\\s+");
         for (int i = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].matches("\\d+")) {
-                return tokens[i]; // 마지막 숫자 토큰
+                return tokens[i];
             }
         }
         return "";
     }
-
-
-    /**
-     * recommended_spec 문자열에서 CPU / GPU 추출
-     * 예: "CPU: Ryzen 5 7600, GPU: GeForce RTX 4070"
-     */
-    private SpecKeyword parseSpec(String specText) {
-        if (specText == null || specText.isBlank()) return new SpecKeyword("", "");
-
-        Pattern pattern = Pattern.compile("CPU:\\s*(.*?),\\s*GPU:\\s*(.*)", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(specText);
-
-        if (matcher.find()) {
-            String cpu = matcher.group(1).trim();
-            String gpu = matcher.group(2).trim();
-            return new SpecKeyword(cpu, gpu);
-        }
-
-        return new SpecKeyword("", "");
-    }
-
-    /**
-     * 사양 키워드 보관 클래스 (Java 16+ record 문법)
-     */
-    private record SpecKeyword(String cpu, String gpu) {}
 }
+

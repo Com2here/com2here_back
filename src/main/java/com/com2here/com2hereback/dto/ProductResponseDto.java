@@ -1,16 +1,26 @@
 package com.com2here.com2hereback.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductResponseDto {
-    private String title;     // 상품 이름 (ex: "게이밍PC RTX 5060 + Ryzen5")
-    private String link;      // 상품 링크 URL
-    private String image;     // 썸네일 이미지 URL
-    private int price;        // 최저가 (lprice)
-    private String mall;      // 판매처 이름
+    // 알고리즘 결과
+    private String cpu;
+    private String gpu;
+    private String line;
+    private double totalScores;
+    private int totalPrice;
+
+    // 네이버 상품 정보
+    private String title;
+    private String link;
+    private String image;
+    private int price;
+    private String mall;
 }

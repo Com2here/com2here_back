@@ -1,9 +1,6 @@
 package com.com2here.com2hereback.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,12 +8,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class ProgramResponseDto {
     private Long id;
-    private String mainProgram;
+    private String program;
+    private String specLevel;
     private String purpose;
-    private String recommendedSpec;
-    private String minimumSpec;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

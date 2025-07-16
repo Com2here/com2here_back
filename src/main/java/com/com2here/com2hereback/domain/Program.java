@@ -16,25 +16,40 @@ public class Program {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long computer_id;
+    @Column(name = "program_id")
+    private Long programId;
 
     @Column(nullable = false)
-    private String mainProgram;
+    private String program;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProgramPurpose purpose;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String recommendedSpec;
+    @Column(nullable = false, name = "spec_level")
+    private String specLevel;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String minimumSpec;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "p_m_spec_id", nullable = false)
+    private ProgramMSpec pmSpec;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "p_r_spec_id", nullable = false)
+    private ProgramRSpec prSpec;
+
+    @Column(nullable = false, name = "created_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "updated_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

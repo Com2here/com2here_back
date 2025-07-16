@@ -20,8 +20,7 @@ public class PcRecommendationController {
 
     @PostMapping
     public ResponseEntity<List<ProductResponseDto>> recommend(@RequestBody RecommendRequestDto request) {
-        List<ProductResponseDto> result = pcRecommendationService.recommendPc(
-            request.getPurpose(), request.getPrograms(), request.getBudget());
+        List<ProductResponseDto> result = pcRecommendationService.recommendPc(request);
         return ResponseEntity.ok(result);
     }
 }

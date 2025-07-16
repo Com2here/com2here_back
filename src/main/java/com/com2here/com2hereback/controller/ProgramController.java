@@ -29,9 +29,9 @@ public class ProgramController {
     @NoArgsConstructor
     @AllArgsConstructor
     class UpdateRecommendationRequest {
-        private String mainProgram;
-        private String recommendedSpec;
-        private String minimumSpec;
+        private String program;
+        private String specLevel;
+        private String purpose;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -61,9 +61,8 @@ public class ProgramController {
         try {
             ProgramResponseDto updated = service.update(
                     id,
-                    request.getMainProgram(),
-                    request.getRecommendedSpec(),
-                    request.getMinimumSpec(),
+                    request.getProgram(),
+                    request.getSpecLevel(),
                     request.getPurpose()
             );
             return ResponseEntity.ok(new ApiResponse<>(200, "추천 항목이 성공적으로 수정되었습니다.", updated));

@@ -62,14 +62,41 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 // HTML 태그 제거 (ex: <b>조립PC</b>)
                 String cleanTitle = item.path("title").asText().replaceAll("<[^>]*>", "");
 
-                result.add(new ProductResponseDto(
-                    cleanTitle,
-                    item.path("link").asText(),
-                    item.path("image").asText(),
-                    price,
-                    item.path("mallName").asText()
-                ));
+                result.add(ProductResponseDto.builder()
+                        .title(cleanTitle)
+                        .link(item.path("link").asText())
+                        .image(item.path("image").asText())
+                        .price(price)
+                        .mall(item.path("mallName").asText())
+                        .build());
             }
+
+//            for (JsonNode item : root.path("items")) {
+//                String title = item.path("title").asText().replaceAll("<[^>]*>", "").toLowerCase();
+//
+//                // 1. 렌탈 상품 제외
+//                if (title.contains("렌탈") || title.contains("임대")) continue;
+//
+//                // 2. 카테고리 필터링
+//                String category1 = item.path("category1").asText("");
+//                String category2 = item.path("category2").asText("");
+//                if (!category1.contains("디지털") || !(category2.contains("PC") || category2.contains("조립"))) continue;
+//
+//                int price = item.path("lprice").asInt(0);
+//                if (price > budget || price == 0) continue;
+//
+//                String productId = item.path("productId").asText();
+//                if (seen.contains(productId)) continue;
+//                seen.add(productId);
+//
+//                result.add(ProductResponseDto.builder()
+//                        .title(title)
+//                        .link(item.path("link").asText())
+//                        .image(item.path("image").asText())
+//                        .price(price)
+//                        .mall(item.path("mallName").asText())
+//                        .build());
+//            }
 
             return result;
 

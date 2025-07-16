@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class UpdateRecommendationRequestDto {
-    private String mainProgram;
-    private String recommendedSpec;
-    private String minimumSpec;
+    private String Program;
+    private String SpecLevel;
     private String purpose;
 }
