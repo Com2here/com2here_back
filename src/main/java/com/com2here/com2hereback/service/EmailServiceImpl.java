@@ -13,6 +13,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +35,9 @@ public class EmailServiceImpl implements EmailService {
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Value("${mail.from-address}")
+    private String fromAddress;
 
     @Override
     public String createCode() {
@@ -82,12 +87,11 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            // true: multipart 형식으로 생성
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(email);
             helper.setSubject("컴히얼 인증코드 안내 메일");
-            helper.setText(emailContent, true); // HTML 적용
-            helper.setFrom("comhere@comhere.site", "ComHere");
+            helper.setText(emailContent, true); 
+            helper.setFrom(fromAddress, fromAddress);
         } catch (MessagingException e) {
             throw new RuntimeException("메일 생성 중 오류 발생", e);
         } catch (UnsupportedEncodingException e) {
