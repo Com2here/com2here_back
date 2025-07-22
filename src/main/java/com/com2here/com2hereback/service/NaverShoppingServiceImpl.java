@@ -28,15 +28,15 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
     public List<ProductResponseDto> searchFilteredProducts(String query, int budget) {
         try {
             String url = "https://openapi.naver.com/v1/search/shop.json" +
-                "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
-                "&display=100&exclude=rental";
+                    "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
+                    "&display=100&exclude=rental";
 
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("X-Naver-Client-Id", clientId)
-                .header("X-Naver-Client-Secret", clientSecret)
-                .GET()
-                .build();
+                    .uri(URI.create(url))
+                    .header("X-Naver-Client-Id", clientId)
+                    .header("X-Naver-Client-Secret", clientSecret)
+                    .GET()
+                    .build();
 
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -55,6 +55,12 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 int price = item.path("lprice").asInt(0);
                 if (price > budget || price == 0) continue;
 
+                String title = item.path("title").asText().replaceAll("<[^>]*>", "").toLowerCase();
+                String mallName = item.path("mallName").asText().toLowerCase();
+
+                // 해외 배송/직구 키워드 필터링
+                if (title.contains("해외") || title.contains("직구") || mallName.contains("해외") || mallName.contains("직구")) continue;
+
                 String productId = item.path("productId").asText();
                 if (seen.contains(productId)) continue;
                 seen.add(productId);
@@ -70,33 +76,6 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                         .mall(item.path("mallName").asText())
                         .build());
             }
-
-//            for (JsonNode item : root.path("items")) {
-//                String title = item.path("title").asText().replaceAll("<[^>]*>", "").toLowerCase();
-//
-//                // 1. 렌탈 상품 제외
-//                if (title.contains("렌탈") || title.contains("임대")) continue;
-//
-//                // 2. 카테고리 필터링
-//                String category1 = item.path("category1").asText("");
-//                String category2 = item.path("category2").asText("");
-//                if (!category1.contains("디지털") || !(category2.contains("PC") || category2.contains("조립"))) continue;
-//
-//                int price = item.path("lprice").asInt(0);
-//                if (price > budget || price == 0) continue;
-//
-//                String productId = item.path("productId").asText();
-//                if (seen.contains(productId)) continue;
-//                seen.add(productId);
-//
-//                result.add(ProductResponseDto.builder()
-//                        .title(title)
-//                        .link(item.path("link").asText())
-//                        .image(item.path("image").asText())
-//                        .price(price)
-//                        .mall(item.path("mallName").asText())
-//                        .build());
-//            }
 
             return result;
 
