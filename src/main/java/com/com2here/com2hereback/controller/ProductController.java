@@ -1,13 +1,12 @@
 package com.com2here.com2hereback.controller;
 
-import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.dto.ProductListResponseDto;
-import com.com2here.com2hereback.dto.ProductShowResponseDto;
+import com.com2here.com2hereback.dto.ProductListRespDto;
+import com.com2here.com2hereback.dto.ProductShowRespDto;
 import com.com2here.com2hereback.service.ProductService;
-import com.com2here.com2hereback.vo.ProductListResponseVo;
-import com.com2here.com2hereback.vo.ProductShowResponseVo;
+import com.com2here.com2hereback.vo.ProductListVO;
+import com.com2here.com2hereback.vo.ProductShowVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,66 +24,34 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // 상품 조회
     @GetMapping("/show/{product_id}")
-    public CMResponse<ProductShowResponseVo> showProduct(@PathVariable("product_id") Long productId) {
-        try {
-            ProductShowResponseDto product = productService.showProduct(productId);
-            ProductShowResponseVo productShowResponseVo = ProductShowResponseVo.dtoToVo(product);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, productShowResponseVo);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<ProductShowVO> showProduct(@PathVariable("product_id") Long productId) {
+        ProductShowRespDto product = productService.showProduct(productId);
+        ProductShowVO productShowVo = ProductShowVO.from(product);
+        return CMResponse.success(BaseResponseStatus.SUCCESS, productShowVo);
     }
 
-    // 상품 리스트 조회
     @GetMapping("/list")
-    public CMResponse<ProductListResponseVo> listProduct(
+    public CMResponse<ProductListVO> listProduct(
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "limit", defaultValue = "10") int limit) {
-        try {
-            ProductListResponseDto productListResponseDto = productService.listProduct(page, limit);
-            ProductListResponseVo productListResponseVo = ProductListResponseVo.dtoToVo(productListResponseDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, productListResponseVo);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+        ProductListRespDto productListRespDto = productService.listProduct(page, limit);
+        ProductListVO productListVo = ProductListVO.from(productListRespDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS, productListVo);
     }
 
-    // 관심상품 추가
     @PostMapping("/wish/add/{product_id}")
     public CMResponse<Void> addWishProduct(@PathVariable("product_id") Long productId) {
-        try {
-            productService.addWishProduct(productId);
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+        productService.addWishProduct(productId);
+        return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 
-    // 관심상품 리스트 조회
     @GetMapping("/wish/list")
-    public CMResponse<ProductListResponseVo> wishlistProduct(
+    public CMResponse<ProductListVO> wishlistProduct(
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "limit", defaultValue = "10") int limit) {
-        try {
-            ProductListResponseDto productListResponseDto =  productService.wishlistProduct(page, limit);
-            ProductListResponseVo productListResponseVo = ProductListResponseVo.dtoToVo(productListResponseDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, productListResponseVo);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+        ProductListRespDto productListRespDto =  productService.wishlistProduct(page, limit);
+        ProductListVO productListVo = ProductListVO.from(productListRespDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS, productListVo);
     }
 }

@@ -1,7 +1,7 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
+import com.com2here.com2hereback.dto.TokenRespDto;
 
 public interface TokenService {
-    UserTokenResponseDto rotateToken();
+    TokenRespDto rotateToken();
 }

@@ -4,11 +4,11 @@ import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.config.redis.RedisUtil;
 import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
+import com.com2here.com2hereback.dto.EmailAuthReqDto;
+import com.com2here.com2hereback.dto.ResetPasswordReqDto;
 import com.com2here.com2hereback.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMessage.RecipientType;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Transactional
 public class EmailServiceImpl implements EmailService {
 
-//    private static final String senderEmail = "comhere@comhere.site";
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
@@ -101,14 +100,11 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Override
-    public void sendEmail(String email) {
-        if (email == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+    public void sendEmail(EmailAuthReqDto emailAuthReqDto) {
+        if (redisUtil.existData(emailAuthReqDto.getEmail())) {
+            redisUtil.deleteData(emailAuthReqDto.getEmail());
         }
-        if (redisUtil.existData(email)) {
-            redisUtil.deleteData(email);
-        }
-        MimeMessage emailForm = createEmailForm(email);
+        MimeMessage emailForm = createEmailForm(emailAuthReqDto.getEmail());
         try {
             javaMailSender.send(emailForm);
         } catch (Exception e) {
@@ -149,20 +145,19 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
-    public void resetPassword(ResetPasswordRequestDto resetPasswordRequestDto) {
-        verifyCode(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode());
+    public void resetPassword(ResetPasswordReqDto resetPasswordRequestDto) {
+        verifyCode(resetPasswordRequestDto.getEmail(), resetPasswordRequestDto.getCode());
 
         if (!resetPasswordRequestDto.getPassword()
             .equals(resetPasswordRequestDto.getConfirmPassword())) {
             throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
-        User user = userRepository.findByEmail(resetPasswordRequestDto.getMail());
+        User user = userRepository.findByEmail(resetPasswordRequestDto.getEmail());
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
-        // 비밀번호 해싱
         String hashedPassword = bCryptPasswordEncoder.encode(resetPasswordRequestDto.getPassword());
 
         user = User.builder()
@@ -179,7 +174,7 @@ public class EmailServiceImpl implements EmailService {
 
         userRepository.save(user);
 
-        redisUtil.deleteData(resetPasswordRequestDto.getMail());
+        redisUtil.deleteData(resetPasswordRequestDto.getEmail());
     }
 
 }

@@ -2,7 +2,8 @@ package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.domain.Cpu;
 import com.com2here.com2hereback.domain.Gpu;
-import com.com2here.com2hereback.dto.ProductResponseDto;
+import com.com2here.com2hereback.dto.ProductRespDto;
+import com.com2here.com2hereback.dto.RecommendReqDto;
 import com.com2here.com2hereback.repository.ProgramRepository;
 import com.com2here.com2hereback.repository.CpuRepository;
 import com.com2here.com2hereback.repository.GpuRepository;
@@ -17,13 +18,16 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class PcRecommendationServiceImpl implements PcRecommendationService {
 
-    private final ProgramRepository programRepository;
     private final CpuRepository cpuRepository;
     private final GpuRepository gpuRepository;
     private final NaverShoppingService naverShoppingService;
 
     @Override
-    public List<ProductResponseDto> recommendPc(String purpose, List<String> programs, int budget) {
+    public List<ProductRespDto> recommendPc(RecommendReqDto recommendReqDto) {
+        String purpose = recommendReqDto.getPurpose();
+        List<String> programs = recommendReqDto.getPrograms();
+        int budget = recommendReqDto.getBudget();
+
         Set<String> cpuKeywords = new HashSet<>();
         Set<String> gpuKeywords = new HashSet<>();
 
@@ -56,7 +60,7 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
             }
         }
 
-        List<ProductResponseDto> result = new ArrayList<>();
+        List<ProductRespDto> result = new ArrayList<>();
         for (String query : queries) {
             result.addAll(naverShoppingService.searchFilteredProducts(query, budget));
         }
