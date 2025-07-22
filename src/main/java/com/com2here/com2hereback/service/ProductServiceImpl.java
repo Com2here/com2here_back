@@ -5,12 +5,11 @@ import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.domain.Product;
 import com.com2here.com2hereback.domain.User;
 import com.com2here.com2hereback.domain.Wishlist;
-import com.com2here.com2hereback.dto.ProductListResponseDto;
-import com.com2here.com2hereback.dto.ProductShowResponseDto;
+import com.com2here.com2hereback.dto.ProductListRespDto;
+import com.com2here.com2hereback.dto.ProductShowRespDto;
 import com.com2here.com2hereback.repository.ProductRepository;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.repository.WishlistRepository;
-import com.com2here.com2hereback.vo.ProductListResponseVo;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +56,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductShowResponseDto showProduct(Long productId) {
+    public ProductShowRespDto showProduct(Long productId) {
 
         if(productId == null) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
@@ -67,12 +66,12 @@ public class ProductServiceImpl implements ProductService {
             .orElseThrow(() -> new BaseException(
                 BaseResponseStatus.NO_EXIST_PRODUCT));
 
-        ProductShowResponseDto productShowResponseDto = ProductShowResponseDto.entityToDto(product);
+        ProductShowRespDto productShowResponseDto = ProductShowRespDto.entityToDto(product);
         return productShowResponseDto;
     }
 
     @Override
-    public ProductListResponseDto listProduct(int page, int limit) {
+    public ProductListRespDto listProduct(int page, int limit) {
         if(page == 0 || limit == 0) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
@@ -84,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BaseException(BaseResponseStatus.NO_EXIST_PRODUCT);
         }
 
-        ProductListResponseDto productListResponseDto = ProductListResponseDto.entityToDto(
+        ProductListRespDto productListResponseDto = ProductListRespDto.entityToDto(
             productPage,
             page
         );
@@ -93,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductListResponseDto wishlistProduct(int page, int limit) {
+    public ProductListRespDto wishlistProduct(int page, int limit) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = String.valueOf(UUID.fromString(authentication.getName()));
@@ -115,7 +114,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BaseException(BaseResponseStatus.NO_PRODUCT_FOUND);
         }
 
-        ProductListResponseDto productListResponseDto = ProductListResponseDto.entityToDto(
+        ProductListRespDto productListResponseDto = ProductListRespDto.entityToDto(
             productPage,
             page
         );

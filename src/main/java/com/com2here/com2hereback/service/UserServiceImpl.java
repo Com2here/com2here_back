@@ -5,11 +5,14 @@ import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.domain.OauthAccount;
 import com.com2here.com2hereback.common.Role;
 import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.ChgPasswordRequestDto;
-import com.com2here.com2hereback.dto.ShowUserResponseDto;
-import com.com2here.com2hereback.dto.UserLoginResponseDto;
-import com.com2here.com2hereback.dto.UserRequestDto;
-import com.com2here.com2hereback.dto.UserUpdateDto;
+import com.com2here.com2hereback.dto.ChgPasswordReqDto;
+import com.com2here.com2hereback.dto.SocialLoginReqDto;
+import com.com2here.com2hereback.dto.UserDeleteReqDto;
+import com.com2here.com2hereback.dto.UserLoginReqDto;
+import com.com2here.com2hereback.dto.UserShowRespDto;
+import com.com2here.com2hereback.dto.UserLoginRespDto;
+import com.com2here.com2hereback.dto.UserRegisterReqDto;
+import com.com2here.com2hereback.dto.UserUpdateReqDto;
 import com.com2here.com2hereback.repository.OauthAccountRepository;
 import com.com2here.com2hereback.repository.UserRepository;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
@@ -20,7 +23,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -40,36 +42,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void RegisterUser(UserRequestDto userRequestDto) {
-
-        // 400 : 데이터 누락
-        if (userRequestDto == null || userRequestDto.getPassword() == null
-            || userRequestDto.getEmail() == null || userRequestDto.getConfirmPassword() == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
-
-        // 2601 : 비밀번호 형식 불일치
-        if (!(userRequestDto.getPassword()).matches(
-            "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~]).{8,20}$")) {
-            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
-        }
+    public void RegisterUser(UserRegisterReqDto userRegisterReqDto) {
 
         // 2602 : 비밀번호 불일치
-        if (!userRequestDto.getPassword().equals(userRequestDto.getConfirmPassword())) {
+        if (!userRegisterReqDto.getPassword().equals(userRegisterReqDto.getConfirmPassword())) {
             throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
         // 2100 : 중복된 이메일
-        if (userRepository.existsByEmail(userRequestDto.getEmail())) {
+        if (userRepository.existsByEmail(userRegisterReqDto.getEmail())) {
             throw new BaseException(BaseResponseStatus.DUPLICATE_EMAIL);
         }
 
-        System.out.println(userRequestDto.getEmail());
+        System.out.println(userRegisterReqDto.getEmail());
 
         User user = User.builder()
-            .nickname(userRequestDto.getNickname())
-            .password(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
-            .email(userRequestDto.getEmail())
+            .nickname(userRegisterReqDto.getNickname())
+            .password(bCryptPasswordEncoder.encode(userRegisterReqDto.getPassword()))
+            .email(userRegisterReqDto.getEmail())
             .uuid(null)
             .isEmailVerified(false)
             .role(Role.ADMIN)
@@ -82,7 +72,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserLoginResponseDto registerOrLoginSocialUser(String email, String nickname, String provider, String oauthId, String profileImageUrl) {
+    public UserLoginRespDto registerOrLoginSocialUser(SocialLoginReqDto socialLoginReqDto) {
+        String email = socialLoginReqDto.getEmail();
+        String nickname = socialLoginReqDto.getNickname();
+        String provider = socialLoginReqDto.getProvider();
+        String oauthId = socialLoginReqDto.getOauthId();
+        String profileImageUrl = socialLoginReqDto.getProfileImageUrl();
+        
         Optional<OauthAccount> existingOauth = oauthAccountRepository.findByProviderAndOauthId(provider, oauthId);
         User user;
 
@@ -102,7 +98,7 @@ public class UserServiceImpl implements UserService {
                 .role(Role.SOCIAL)
                 .profileImageUrl(profileImageUrl)
                 .createdAt(LocalDateTime.now())
-                .refreshToken(null) // 초기에는 null
+                .refreshToken(null)
                 .build();
 
             user = userRepository.save(user);
@@ -119,7 +115,6 @@ public class UserServiceImpl implements UserService {
         String accessToken = tokenProvider.createAccessToken(user.getUuid());
         String refreshToken = tokenProvider.createRefreshToken(user.getUuid());
 
-        // User 객체 새로 복사 + 갱신 (immutable style)
         User updatedUser = User.builder()
             .userId(user.getUserId())
             .nickname(user.getNickname())
@@ -135,23 +130,18 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updatedUser);
 
-        return UserLoginResponseDto.entityToDto(updatedUser, accessToken, refreshToken, updatedUser.getRole().name());
+        return UserLoginRespDto.entityToDto(updatedUser, accessToken, refreshToken, updatedUser.getRole().name());
     }
 
 
 
     @Override
     @Transactional
-    public UserLoginResponseDto LoginUser(UserRequestDto userRequestDto) {
-
-        // 400 : 데이터 누락
-        if (userRequestDto.getEmail() == null || userRequestDto.getPassword() == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
+    public UserLoginRespDto LoginUser(UserLoginReqDto userLoginReqDto) {
 
         // 회원 존재 X 2106
-        User user = userRepository.findByEmail(userRequestDto.getEmail());
-        if (user == null || !bCryptPasswordEncoder.matches(userRequestDto.getPassword(),
+        User user = userRepository.findByEmail(userLoginReqDto.getEmail());
+        if (user == null || !bCryptPasswordEncoder.matches(userLoginReqDto.getPassword(),
             user.getPassword())) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
@@ -174,14 +164,14 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(updateUser);
 
-        UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.entityToDto(user,
+        UserLoginRespDto userLoginResponseDto = UserLoginRespDto.entityToDto(user,
             accessToken, refreshToken, user.getRole().name());
 
         return userLoginResponseDto;
     }
 
     @Override
-    public ShowUserResponseDto ShowUser() {
+    public UserShowRespDto ShowUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal();
@@ -191,21 +181,13 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
-        ShowUserResponseDto showUserResponseDto = ShowUserResponseDto.entityToDto(user);
+        UserShowRespDto showUserResponseDto = UserShowRespDto.entityToDto(user);
         return showUserResponseDto;
     }
 
     @Override
     @Transactional
-    public void updateUser(UserUpdateDto userUpdateDto) {
-
-        String nickname = userUpdateDto.getNickname();
-        String email = userUpdateDto.getEmail();
-        MultipartFile profileImage = userUpdateDto.getProfileImage();
-
-        if (nickname == null && email == null && (profileImage == null || profileImage.isEmpty())) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
+    public void updateUser(UserUpdateReqDto userUpdateReqDto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal();
@@ -216,14 +198,14 @@ public class UserServiceImpl implements UserService {
         }
 
         String updatedProfileImageUrl = user.getProfileImageUrl();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            updatedProfileImageUrl = fileStorageService.upload(profileImage);
+        if (userUpdateReqDto.getProfileImage() != null && !userUpdateReqDto.getProfileImage().isEmpty()) {
+            updatedProfileImageUrl = fileStorageService.upload(userUpdateReqDto.getProfileImage());
         }
 
         User updatedUser = User.builder()
                 .userId(user.getUserId())
-                .nickname(nickname != null ? nickname : user.getNickname())
-                .email(email != null ? email : user.getEmail())
+                .nickname(userUpdateReqDto.getNickname())
+                .email(userUpdateReqDto.getEmail())
                 .profileImageUrl(updatedProfileImageUrl)
                 .password(user.getPassword())
                 .uuid(user.getUuid())
@@ -236,9 +218,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(UserRequestDto userRequestDto) {
+    public void deleteUser(UserDeleteReqDto userDeleteReqDto) {
         // 400 : 데이터 누락
-        if (userRequestDto == null) {
+        if (userDeleteReqDto == null) {
             throw new BaseException(BaseResponseStatus.WRONG_PARAM);
         }
 
@@ -252,7 +234,7 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
         // 2202
-        if (!bCryptPasswordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(userDeleteReqDto.getPassword(), user.getPassword())) {
             throw new BaseException(BaseResponseStatus.PASSWORD_MISMATCH);
         }
         userRepository.delete(user);
@@ -260,43 +242,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void chgPassword(ChgPasswordRequestDto chgPasswordRequestDto) {
-        // 400 : 데이터 누락
-        if (chgPasswordRequestDto == null || chgPasswordRequestDto.getCurrentPassword() == null ||
-            chgPasswordRequestDto.getNewPassword() == null ||
-            chgPasswordRequestDto.getEmail() == null ||
-            chgPasswordRequestDto.getConfirmPassword() == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
+    public void chgPassword(ChgPasswordReqDto chgPasswordReqDto) {
 
         // 사용자 조회
-        User user = userRepository.findByEmail(chgPasswordRequestDto.getEmail());
+        User user = userRepository.findByEmail(chgPasswordReqDto.getEmail());
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
         // 현재 비밀번호 확인
-        if (!bCryptPasswordEncoder.matches(chgPasswordRequestDto.getCurrentPassword(),
+        if (!bCryptPasswordEncoder.matches(chgPasswordReqDto.getCurrentPassword(),
             user.getPassword())) {
             throw new BaseException(BaseResponseStatus.INVALID_CURRENT_PASSWORD);
         }
 
-        // 2601 : 비밀번호 형식 불일치
-        String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$";
-        if (!(chgPasswordRequestDto.getNewPassword()).matches(regex)) {
-            throw new BaseException(BaseResponseStatus.PASSWORD_FORMAT_INVALID);
-        }
-
         // 2602 : 비밀번호 불일치
-        if (!chgPasswordRequestDto.getNewPassword()
-            .equals(chgPasswordRequestDto.getConfirmPassword())) {
+        if (!chgPasswordReqDto.getNewPassword()
+            .equals(chgPasswordReqDto.getConfirmPassword())) {
             throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
         user = User.builder()
             .userId(user.getUserId())
             .nickname(user.getNickname())
-            .password(bCryptPasswordEncoder.encode(chgPasswordRequestDto.getNewPassword()))
+            .password(bCryptPasswordEncoder.encode(chgPasswordReqDto.getNewPassword()))
             .email(user.getEmail())
             .uuid(user.getUuid())
             .role(user.getRole())

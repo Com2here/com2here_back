@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 @Getter
 @Setter
 @Builder
-public class ProductListResponseDto {
+public class ProductListRespDto {
 
     private int totalElements;
     private int totalPages;
@@ -37,7 +37,7 @@ public class ProductListResponseDto {
         }
     }
 
-    public static ProductListResponseDto entityToDto(Page<Product> productPage, int page) {
+    public static ProductListRespDto entityToDto(Page<Product> productPage, int page) {
         List<Product> products = productPage.getContent();
         int totalElements = (int) productPage.getTotalElements();
 
@@ -52,7 +52,7 @@ public class ProductListResponseDto {
 
         int totalPages = (int) Math.ceil((double) totalElements / products.size());
 
-        return ProductListResponseDto.builder()
+        return ProductListRespDto.builder()
             .totalElements(totalElements)
             .totalPages(totalPages)
             .currentPage(page)

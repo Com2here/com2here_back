@@ -22,10 +22,10 @@ public class OauthAccount {
     private User user;
 
     @Column(name = "provider", nullable = false)
-    private String provider; // "kakao", "google", "naver"
+    private String provider;
 
     @Column(name = "oauth_id", nullable = false, unique = true)
-    private String oauthId;   // 소셜 플랫폼에서 제공하는 유저 고유 식별자
+    private String oauthId;
 
 
     @Builder

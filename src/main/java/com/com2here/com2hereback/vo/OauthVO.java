@@ -1,11 +1,12 @@
 package com.com2here.com2hereback.vo;
 
-import com.com2here.com2hereback.dto.OauthResponseDto;
+import com.com2here.com2hereback.dto.OauthRespDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Value;
 
-@Data
-public class OauthResponseVo {
+@Value
+public class OauthVO {
     private String email;
     private String nickname;
     private String accessToken;
@@ -15,7 +16,7 @@ public class OauthResponseVo {
     private String oauthId;
 
     @Builder
-    public OauthResponseVo(String email, String nickname, String accessToken, String refreshToken, String role, String provider, String oauthId) {
+    public OauthVO(String email, String nickname, String accessToken, String refreshToken, String role, String provider, String oauthId) {
         this.email = email;
         this.nickname = nickname;
         this.accessToken = accessToken;
@@ -25,8 +26,8 @@ public class OauthResponseVo {
         this.oauthId = oauthId;
     }
 
-    public static OauthResponseVo dtoToVo(OauthResponseDto dto) {
-        return OauthResponseVo.builder()
+    public static OauthVO dtoToVo(OauthRespDto dto) {
+        return OauthVO.builder()
             .email(dto.getEmail())
             .nickname(dto.getNickname())
             .accessToken(dto.getAccessToken())

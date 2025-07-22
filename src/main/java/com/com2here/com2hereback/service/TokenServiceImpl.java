@@ -4,7 +4,7 @@ import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.config.jwt.TokenProvider;
 import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.UserTokenResponseDto;
+import com.com2here.com2hereback.dto.TokenRespDto;
 import com.com2here.com2hereback.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class TokenServiceImpl implements TokenService{
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
 
-    public UserTokenResponseDto rotateToken() {
+    public TokenRespDto rotateToken() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String uuid = (String) authentication.getPrincipal();
@@ -48,7 +48,7 @@ public class TokenServiceImpl implements TokenService{
 
         userRepository.save(updatedUser);
 
-        UserTokenResponseDto userTokenResponseDto = UserTokenResponseDto.entityToDto(
+        TokenRespDto userTokenResponseDto = TokenRespDto.entityToDto(
             newAccessToken,
             newRefreshToken);
         return userTokenResponseDto;

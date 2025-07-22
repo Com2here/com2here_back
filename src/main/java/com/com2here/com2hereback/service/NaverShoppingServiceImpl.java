@@ -1,6 +1,6 @@
 package com.com2here.com2hereback.service;
 
-import com.com2here.com2hereback.dto.ProductResponseDto;
+import com.com2here.com2hereback.dto.ProductRespDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
     private String clientSecret;
 
 
-    public List<ProductResponseDto> searchFilteredProducts(String query, int budget) {
+    public List<ProductRespDto> searchFilteredProducts(String query, int budget) {
         try {
             String url = "https://openapi.naver.com/v1/search/shop.json" +
                 "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
@@ -45,7 +45,7 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
             JsonNode root = mapper.readTree(response.body());
 
             Set<String> seen = new HashSet<>();
-            List<ProductResponseDto> result = new ArrayList<>();
+            List<ProductRespDto> result = new ArrayList<>();
 
             for (JsonNode item : root.path("items")) {
                 // 필터 조건
@@ -62,7 +62,7 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 // HTML 태그 제거 (ex: <b>조립PC</b>)
                 String cleanTitle = item.path("title").asText().replaceAll("<[^>]*>", "");
 
-                result.add(new ProductResponseDto(
+                result.add(new ProductRespDto(
                     cleanTitle,
                     item.path("link").asText(),
                     item.path("image").asText(),

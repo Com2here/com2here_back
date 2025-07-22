@@ -6,8 +6,10 @@ import com.com2here.com2hereback.domain.Program;
 import com.com2here.com2hereback.domain.ProgramMSpec;
 import com.com2here.com2hereback.common.ProgramPurpose;
 import com.com2here.com2hereback.domain.ProgramRSpec;
-import com.com2here.com2hereback.dto.ProgramRequestDto;
-import com.com2here.com2hereback.dto.ProgramResponseDto;
+import com.com2here.com2hereback.dto.ProgramUpdateReqDto;
+import com.com2here.com2hereback.dto.ProgramAddReqDto;
+import com.com2here.com2hereback.dto.ProgramDeleteReqDto;
+import com.com2here.com2hereback.dto.ProgramRespDto;
 import com.com2here.com2hereback.repository.ProgramMSpecRepository;
 import com.com2here.com2hereback.repository.ProgramRSpecRepository;
 import com.com2here.com2hereback.repository.ProgramRepository;
@@ -34,36 +36,33 @@ public class ProgramServiceImpl implements ProgramService {
 
     @Override
     @Transactional
-    public void addProgram(ProgramRequestDto programReqDto) {
-        if (programReqDto.getProgram() == null || programReqDto.getPurpose() == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
+    public void addProgram(ProgramAddReqDto programAddReqDto) {
 
-        ProgramPurpose validatedPurpose = ProgramPurpose.from(programReqDto.getPurpose());
+        ProgramPurpose validatedPurpose = ProgramPurpose.from(programAddReqDto.getPurpose());
         if (validatedPurpose == null) {
             throw new BaseException(BaseResponseStatus.INVALID_PURPOSE);
         }
 
         ProgramMSpec mSpec = ProgramMSpec.builder()
-            .cpu(programReqDto.getMinSpec().getCpu())
-            .gpu(programReqDto.getMinSpec().getGpu())
-            .ram(programReqDto.getMinSpec().getRam())
-            .size(programReqDto.getMinSpec().getSize())
+            .cpu(programAddReqDto.getMinSpec().getCpu())
+            .gpu(programAddReqDto.getMinSpec().getGpu())
+            .ram(programAddReqDto.getMinSpec().getRam())
+            .size(programAddReqDto.getMinSpec().getSize())
             .build();
         programMSpecRepository.save(mSpec);
 
         ProgramRSpec rSpec = ProgramRSpec.builder()
-            .cpu(programReqDto.getRecSpec().getCpu())
-            .gpu(programReqDto.getRecSpec().getGpu())
-            .ram(programReqDto.getRecSpec().getRam())
-            .size(programReqDto.getRecSpec().getSize())
+            .cpu(programAddReqDto.getRecSpec().getCpu())
+            .gpu(programAddReqDto.getRecSpec().getGpu())
+            .ram(programAddReqDto.getRecSpec().getRam())
+            .size(programAddReqDto.getRecSpec().getSize())
             .build();
         programRSpecRepository.save(rSpec);
 
         Program program = Program.builder()
-            .program(programReqDto.getProgram())
+            .program(programAddReqDto.getProgram())
             .purpose(validatedPurpose)
-            .specLevel(programReqDto.getSpecLevel())
+            .specLevel(programAddReqDto.getSpecLevel())
             .rSpec(rSpec)
             .mSpec(mSpec)
             .createdAt(LocalDateTime.now())
@@ -81,12 +80,10 @@ public class ProgramServiceImpl implements ProgramService {
         if (purpose != null && !purpose.isBlank()) {
             programPurpose = ProgramPurpose.valueOf(purpose);
         }
-        System.out.println("1");
         Page<Program> page = programRepository.findPage(search, programPurpose, pageable);
-        System.out.println("24");
-        // Entity → DTO 변환
-        Page<ProgramResponseDto> dtoPage = page.map(ProgramResponseDto::new);
-        System.out.println("23");
+
+        Page<ProgramRespDto> dtoPage = page.map(ProgramRespDto::new);
+
         Map<String, Object> result = new HashMap<>();
         result.put("content", dtoPage.getContent());
         result.put("totalElements", dtoPage.getTotalElements());
@@ -94,72 +91,63 @@ public class ProgramServiceImpl implements ProgramService {
         result.put("pageNumber", dtoPage.getNumber());
         result.put("pageSize", dtoPage.getSize());
         result.put("isLast", dtoPage.isLast());
-        System.out.println("2");
         return result;
     }
 
     @Override
     @Transactional
-    public void updateProgram(ProgramRequestDto programReqDto) {
+    public void updateProgram(ProgramUpdateReqDto programUpdateReqDto) {
 
-        if (programReqDto == null || programReqDto.isAllFieldsBlank()) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
-
-        Program program = programRepository.findById(programReqDto.getProgramId())
+        Program program = programRepository.findById(programUpdateReqDto.getProgramId())
             .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_PROGRAM));
 
-        ProgramPurpose purpose = programReqDto.getPurpose() == null
+        ProgramPurpose purpose = programUpdateReqDto.getPurpose() == null
             ? program.getPurpose()
-            : ProgramPurpose.from(programReqDto.getPurpose());
+            : ProgramPurpose.from(programUpdateReqDto.getPurpose());
 
         if (purpose == null) {
             throw new BaseException(BaseResponseStatus.INVALID_PURPOSE);
         }
 
-        ProgramMSpec ogMSpec = program.getMSpec();
-        ProgramRSpec ogRSpec = program.getRSpec();
-
+        // 최소 사양 업데이트
         ProgramMSpec updateMSpec = ProgramMSpec.builder()
-            .pMSpecId(ogMSpec.getPMSpecId())
-            .cpu(programReqDto.getMinSpec() != null && programReqDto.getMinSpec().getCpu()  != null ? programReqDto.getMinSpec().getCpu()  : ogMSpec.getCpu())
-            .gpu(programReqDto.getMinSpec() != null && programReqDto.getMinSpec().getGpu()  != null ? programReqDto.getMinSpec().getGpu()  : ogMSpec.getGpu())
-            .ram(programReqDto.getMinSpec() != null && programReqDto.getMinSpec().getRam()  != 0   ? programReqDto.getMinSpec().getRam()  : ogMSpec.getRam())
-            .size(programReqDto.getMinSpec() != null && programReqDto.getMinSpec().getSize() != 0   ? programReqDto.getMinSpec().getSize() : ogMSpec.getSize())
+            .pMSpecId(program.getMSpec().getPMSpecId())
+            .cpu(programUpdateReqDto.getMinSpec().getCpu())
+            .gpu(programUpdateReqDto.getMinSpec().getGpu())
+            .ram(programUpdateReqDto.getMinSpec().getRam())
+            .size(programUpdateReqDto.getMinSpec().getSize())
             .build();
         programMSpecRepository.save(updateMSpec);
 
+        // 권장 사양 업데이트
         ProgramRSpec updateRSpec = ProgramRSpec.builder()
-            .pRSpecId(ogRSpec.getPRSpecId())
-            .cpu(programReqDto.getRecSpec() != null && programReqDto.getRecSpec().getCpu()  != null ? programReqDto.getRecSpec().getCpu()  : ogRSpec.getCpu())
-            .gpu(programReqDto.getRecSpec() != null && programReqDto.getRecSpec().getGpu()  != null ? programReqDto.getRecSpec().getGpu()  : ogRSpec.getGpu())
-            .ram(programReqDto.getRecSpec() != null && programReqDto.getRecSpec().getRam()  != 0   ? programReqDto.getRecSpec().getRam()  : ogRSpec.getRam())
-            .size(programReqDto.getRecSpec() != null && programReqDto.getRecSpec().getSize() != 0   ? programReqDto.getRecSpec().getSize() : ogRSpec.getSize())
+            .pRSpecId(program.getRSpec().getPRSpecId())
+            .cpu(programUpdateReqDto.getRecSpec().getCpu())
+            .gpu(programUpdateReqDto.getRecSpec().getGpu())
+            .ram(programUpdateReqDto.getRecSpec().getRam())
+            .size(programUpdateReqDto.getRecSpec().getSize())
             .build();
         programRSpecRepository.save(updateRSpec);
 
+        // Program 업데이트
         Program updatedProgram = Program.builder()
             .programId(program.getProgramId())
-            .program(programReqDto.getProgram()   != null ? programReqDto.getProgram()   : program.getProgram())
+            .program(programUpdateReqDto.getProgram())
             .purpose(purpose)
-            .specLevel(programReqDto.getSpecLevel() != null ? programReqDto.getSpecLevel() : program.getSpecLevel())
+            .specLevel(programUpdateReqDto.getSpecLevel())
             .mSpec(updateMSpec)
             .rSpec(updateRSpec)
             .createdAt(program.getCreatedAt())
             .updatedAt(LocalDateTime.now())
             .build();
-
-        programRepository.save(updatedProgram);
-    }
+            programRepository.save(updatedProgram);
+        }
 
     @Override
     @Transactional
-    public void deleteProgram(ProgramRequestDto programRequestDto) {
-        Long programId = programRequestDto.getProgramId();
+    public void deleteProgram(ProgramDeleteReqDto programDeleteReqDto) {
+        Long programId = programDeleteReqDto.getProgramId();
 
-        if (programId == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
-        }
         Program program = programRepository.findById(programId)
             .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_PROGRAM));
 
