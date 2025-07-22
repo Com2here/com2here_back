@@ -31,7 +31,7 @@ public class ProgramController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/show")
-    public CMResponse<Map<String, Object>> listPrograms(@Valid @RequestBody ProgramSearchReqDto programSearchReqDto) {
+    public CMResponse<Map<String, Object>> listPrograms(@Valid @ModelAttribute ProgramSearchReqDto programSearchReqDto) {
         Map<String, Object> page = programService.getProgram(programSearchReqDto.getPage(), programSearchReqDto.getLimit(), programSearchReqDto.getSearch(), programSearchReqDto.getPurpose());
         return CMResponse.success(BaseResponseStatus.SUCCESS, page);
     }
