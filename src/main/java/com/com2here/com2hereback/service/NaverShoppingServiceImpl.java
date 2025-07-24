@@ -28,15 +28,15 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
     public List<ProductResponseDto> searchFilteredProducts(String query, int budget) {
         try {
             String url = "https://openapi.naver.com/v1/search/shop.json" +
-                "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
-                "&display=100&exclude=rental";
+                    "?query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) +
+                    "&display=100&exclude=rental";
 
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("X-Naver-Client-Id", clientId)
-                .header("X-Naver-Client-Secret", clientSecret)
-                .GET()
-                .build();
+                    .uri(URI.create(url))
+                    .header("X-Naver-Client-Id", clientId)
+                    .header("X-Naver-Client-Secret", clientSecret)
+                    .GET()
+                    .build();
 
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -55,6 +55,12 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 int price = item.path("lprice").asInt(0);
                 if (price > budget || price == 0) continue;
 
+                String title = item.path("title").asText().replaceAll("<[^>]*>", "").toLowerCase();
+                String mallName = item.path("mallName").asText().toLowerCase();
+
+                // 해외 배송/직구 키워드 필터링
+                if (title.contains("해외") || title.contains("직구") || mallName.contains("해외") || mallName.contains("직구")) continue;
+
                 String productId = item.path("productId").asText();
                 if (seen.contains(productId)) continue;
                 seen.add(productId);
@@ -62,13 +68,13 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 // HTML 태그 제거 (ex: <b>조립PC</b>)
                 String cleanTitle = item.path("title").asText().replaceAll("<[^>]*>", "");
 
-                result.add(new ProductResponseDto(
-                    cleanTitle,
-                    item.path("link").asText(),
-                    item.path("image").asText(),
-                    price,
-                    item.path("mallName").asText()
-                ));
+                result.add(ProductResponseDto.builder()
+                        .title(cleanTitle)
+                        .link(item.path("link").asText())
+                        .image(item.path("image").asText())
+                        .price(price)
+                        .mall(item.path("mallName").asText())
+                        .build());
             }
 
             return result;
