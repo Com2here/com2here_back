@@ -2,7 +2,7 @@ package com.com2here.com2hereback.service;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
-import com.com2here.com2hereback.dto.OauthResponseDto;
+import com.com2here.com2hereback.dto.OauthRespDto;
 import com.com2here.com2hereback.dto.oauth.GoogleInfo;
 import com.com2here.com2hereback.dto.oauth.GoogleToken;
 import com.com2here.com2hereback.dto.oauth.KakaoInfo;
@@ -106,18 +106,17 @@ public class OauthServiceImpl implements OauthService {
     }
 
     @Override
-    public OauthResponseDto getGoogleUserInfo(String code)
-        throws URISyntaxException, JsonProcessingException {
+    public OauthRespDto getGoogleUserInfo(String code) {
+        try {
+            GoogleToken googleToken = getGoogleToken(code);
+            GoogleInfo googleInfo = getGoogleInfo(googleToken);
+            return OauthRespDto.entityToDto(googleInfo, googleToken);
 
-        if(code == null){
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+        } catch (URISyntaxException e) {
+            throw new BaseException(BaseResponseStatus.INVALID_URI);
+        } catch (JsonProcessingException e) {
+            throw new BaseException(BaseResponseStatus.JSON_PARSE_ERROR);
         }
-
-        GoogleToken googleToken = getGoogleToken(code);
-        GoogleInfo googleInfo = getGoogleInfo(googleToken);
-
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(googleInfo, googleToken);
-        return oauthResponseDto;
     }
 
     @Override
@@ -190,18 +189,17 @@ public class OauthServiceImpl implements OauthService {
     }
 
     @Override
-    public OauthResponseDto getKakaoUserInfo(String code)
-        throws URISyntaxException, JsonProcessingException {
-        if(code == null){
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+    public OauthRespDto getKakaoUserInfo(String code){
+
+        try {
+            KakaoToken kakaoToken = getKakaoToken(code);
+            KakaoInfo kakaoInfo = getKakaoInfo(kakaoToken);
+            return OauthRespDto.entityToDto(kakaoInfo, kakaoToken);
+        } catch (URISyntaxException e) {
+            throw new BaseException(BaseResponseStatus.INVALID_URI);
+        } catch (JsonProcessingException e) {
+            throw new BaseException(BaseResponseStatus.JSON_PARSE_ERROR);
         }
-
-        KakaoToken kakaoToken = getKakaoToken(code);
-        KakaoInfo kakaoInfo = getKakaoInfo(kakaoToken);
-
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(kakaoInfo, kakaoToken);
-
-        return oauthResponseDto;
     }
 
     @Override
@@ -282,19 +280,18 @@ public class OauthServiceImpl implements OauthService {
     }
 
     @Override
-    public OauthResponseDto getNaverUserInfo(String code)
-        throws URISyntaxException, JsonProcessingException {
+    public OauthRespDto getNaverUserInfo(String code) {
 
-        if(code == null){
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+        try {
+            NaverToken naverToken = getNaverToken(code);
+            NaverInfo naverInfo = getNaverInfo(naverToken);
+            return OauthRespDto.entityToDto(naverInfo, naverToken);
+
+        } catch (URISyntaxException e) {
+            throw new BaseException(BaseResponseStatus.INVALID_URI);
+        } catch (JsonProcessingException e) {
+            throw new BaseException(BaseResponseStatus.JSON_PARSE_ERROR);
         }
-
-        NaverToken naverToken = getNaverToken(code);
-        NaverInfo naverInfo = getNaverInfo(naverToken);
-
-        OauthResponseDto oauthResponseDto = OauthResponseDto.entityToDto(naverInfo, naverToken);
-
-        return oauthResponseDto;
     }
 
     @Override

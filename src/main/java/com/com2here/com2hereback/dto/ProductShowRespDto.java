@@ -7,15 +7,15 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProductShowResponseDto {
+public class ProductShowRespDto {
 
     private Long productId;
     private String image;
     private Spec spec;
     private int price;
 
-    public static ProductShowResponseDto entityToDto(Product product) {
-        return ProductShowResponseDto.builder()
+    public static ProductShowRespDto entityToDto(Product product) {
+        return ProductShowRespDto.builder()
             .productId(product.getProductId())
             .image(product.getImage())
             .spec(product.getSpec())

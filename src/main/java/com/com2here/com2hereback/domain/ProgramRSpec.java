@@ -32,10 +32,10 @@ public class ProgramRSpec {
     private int ram;
 
     @Column(name = "size", nullable = false)
-    private double size;
+    private int size;
 
     @Builder
-    public ProgramRSpec(Long pRSpecId, String cpu, String gpu, int ram, double size) {
+    public ProgramRSpec(Long pRSpecId, String cpu, String gpu, int ram, int size) {
         this.pRSpecId = pRSpecId;
         this.cpu = cpu;
         this.gpu = gpu;

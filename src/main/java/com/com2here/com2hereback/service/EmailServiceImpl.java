@@ -4,15 +4,17 @@ import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.config.redis.RedisUtil;
 import com.com2here.com2hereback.domain.User;
-import com.com2here.com2hereback.dto.ResetPasswordRequestDto;
+import com.com2here.com2hereback.dto.EmailAuthReqDto;
+import com.com2here.com2hereback.dto.ResetPasswordReqDto;
 import com.com2here.com2hereback.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMessage.RecipientType;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,11 +31,13 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 @Transactional
 public class EmailServiceImpl implements EmailService {
 
-//    private static final String senderEmail = "comhere@comhere.site";
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Value("${mail.from-address}")
+    private String fromAddress;
 
     @Override
     public String createCode() {
@@ -83,12 +87,11 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            // true: multipart 형식으로 생성
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(email);
             helper.setSubject("컴히얼 인증코드 안내 메일");
-            helper.setText(emailContent, true); // HTML 적용
-            helper.setFrom("comhere@comhere.site", "ComHere");
+            helper.setText(emailContent, true); 
+            helper.setFrom(fromAddress, fromAddress);
         } catch (MessagingException e) {
             throw new RuntimeException("메일 생성 중 오류 발생", e);
         } catch (UnsupportedEncodingException e) {
@@ -101,14 +104,11 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Override
-    public void sendEmail(String email) {
-        if (email == null) {
-            throw new BaseException(BaseResponseStatus.WRONG_PARAM);
+    public void sendEmail(EmailAuthReqDto emailAuthReqDto) {
+        if (redisUtil.existData(emailAuthReqDto.getEmail())) {
+            redisUtil.deleteData(emailAuthReqDto.getEmail());
         }
-        if (redisUtil.existData(email)) {
-            redisUtil.deleteData(email);
-        }
-        MimeMessage emailForm = createEmailForm(email);
+        MimeMessage emailForm = createEmailForm(emailAuthReqDto.getEmail());
         try {
             javaMailSender.send(emailForm);
         } catch (Exception e) {
@@ -149,20 +149,19 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
-    public void resetPassword(ResetPasswordRequestDto resetPasswordRequestDto) {
-        verifyCode(resetPasswordRequestDto.getMail(), resetPasswordRequestDto.getCode());
+    public void resetPassword(ResetPasswordReqDto resetPasswordRequestDto) {
+        verifyCode(resetPasswordRequestDto.getEmail(), resetPasswordRequestDto.getCode());
 
         if (!resetPasswordRequestDto.getPassword()
             .equals(resetPasswordRequestDto.getConfirmPassword())) {
             throw new BaseException(BaseResponseStatus.UNMATCHED_PASSWORD);
         }
 
-        User user = userRepository.findByEmail(resetPasswordRequestDto.getMail());
+        User user = userRepository.findByEmail(resetPasswordRequestDto.getEmail());
         if (user == null) {
             throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
         }
 
-        // 비밀번호 해싱
         String hashedPassword = bCryptPasswordEncoder.encode(resetPasswordRequestDto.getPassword());
 
         user = User.builder()
@@ -179,7 +178,7 @@ public class EmailServiceImpl implements EmailService {
 
         userRepository.save(user);
 
-        redisUtil.deleteData(resetPasswordRequestDto.getMail());
+        redisUtil.deleteData(resetPasswordRequestDto.getEmail());
     }
 
 }

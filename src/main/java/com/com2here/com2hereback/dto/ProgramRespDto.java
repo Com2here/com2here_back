@@ -6,22 +6,22 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ProgramResponseDto {
+public class ProgramRespDto {
     private String program;
     private String purpose;
     private String specLevel;
-    private SpecDto minSpec;
-    private SpecDto recSpec;
+    private ProgramSpecDto minSpec;
+    private ProgramSpecDto recSpec;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ProgramResponseDto(Program p) {
+    public ProgramRespDto(Program p) {
         this.program = p.getProgram();
         this.purpose = (p.getPurpose() != null) ? p.getPurpose().toString() : null;
         this.specLevel = p.getSpecLevel();
 
         if (p.getMSpec() != null) {
-            this.minSpec = new SpecDto(
+            this.minSpec = new ProgramSpecDto(
                 p.getMSpec().getCpu(),
                 p.getMSpec().getGpu(),
                 p.getMSpec().getRam(),
@@ -32,7 +32,7 @@ public class ProgramResponseDto {
         }
 
         if (p.getRSpec() != null) {
-            this.recSpec = new SpecDto(
+            this.recSpec = new ProgramSpecDto(
                 p.getRSpec().getCpu(),
                 p.getRSpec().getGpu(),
                 p.getRSpec().getRam(),

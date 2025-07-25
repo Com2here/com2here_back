@@ -5,10 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SocialLoginRequestDto {
+public class SocialLoginReqDto {
     private String email;
     private String nickname;
     private String profileImageUrl;
-    private String provider; // e.g., "kakao", "google", "naver"
-    private String oauthId;  // 소셜 플랫폼의 유저 식별 ID
+    private String provider;
+    private String oauthId;
 }

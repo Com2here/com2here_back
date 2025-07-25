@@ -2,11 +2,13 @@ package com.com2here.com2hereback.controller;
 
 import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
-import com.com2here.com2hereback.common.BaseException;
 import com.com2here.com2hereback.dto.*;
 import com.com2here.com2hereback.service.UserService;
-import com.com2here.com2hereback.vo.UserShowResponseVo;
-import com.com2here.com2hereback.vo.UserLoginResponseVo;
+import com.com2here.com2hereback.vo.UserShowVO;
+
+import jakarta.validation.Valid;
+
+import com.com2here.com2hereback.vo.UserLoginVO;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,89 +22,40 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public CMResponse<Void> registerUser(@RequestBody UserRequestDto userRequestDto) {
-        try {
-            userService.RegisterUser(userRequestDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<Void> registerUser(@Valid @RequestBody UserRegisterReqDto userRegisterReqDto) {
+        userService.RegisterUser(userRegisterReqDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 
     @PostMapping("/login")
-    public CMResponse<UserLoginResponseVo> loginUser(@RequestBody UserRequestDto userRequestDto) {
-        try {
-            UserLoginResponseDto userLoginResponseDto = userService.LoginUser(userRequestDto);
-            UserLoginResponseVo userLoginResponseVo = UserLoginResponseVo.dtoToVo(userLoginResponseDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, userLoginResponseVo);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<UserLoginVO> loginUser(@Valid @RequestBody UserLoginReqDto userLoginReqDto) {
+        UserLoginRespDto userLoginRespDto = userService.LoginUser(userLoginReqDto);
+        UserLoginVO userLoginVo = UserLoginVO.from(userLoginRespDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS, userLoginVo);
     }
 
     @GetMapping("/show")
-    public CMResponse<UserShowResponseVo> showUser() {
-        try{
-            ShowUserResponseDto showUserResponseDto = userService.ShowUser();
-            UserShowResponseVo userShowResponseVo = UserShowResponseVo.dtoToVo(showUserResponseDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS, userShowResponseVo);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<UserShowVO> showUser() {
+        UserShowRespDto showUserRespDto = userService.ShowUser();
+        UserShowVO userShowRespVo = UserShowVO.from(showUserRespDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS, userShowRespVo);
     }
 
-    // 유저 정보 수정 API
     @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public CMResponse<Void> updateUser(@ModelAttribute UserUpdateDto userUpdateDto) {
-        try {
-            userService.updateUser(userUpdateDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<Void> updateUser(@Valid @ModelAttribute UserUpdateReqDto userUpdateDto) {
+        userService.updateUser(userUpdateDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 
-    // 유저 정보 삭제 API
-    // 입력값 : password
-    // 출력값 : code, message, null
     @DeleteMapping("/delete")
-    public CMResponse<Void> deleteUser(@RequestBody UserRequestDto userRequestDto) {
-        try {
-            userService.deleteUser(userRequestDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<Void> deleteUser(@Valid @RequestBody UserDeleteReqDto userDeleteReqDto) {
+        userService.deleteUser(userDeleteReqDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 
-    // 비밀번호 변경 API
-    // 입력값 : currentPassword, password, confirmPassword
-    // 출력값 : code, message, null
     @PatchMapping("/password/change")
-    public CMResponse<Void> chgPassword(@RequestBody ChgPasswordRequestDto chgPasswordRequestDto) {
-        try{
-            userService.chgPassword(chgPasswordRequestDto);
-            return CMResponse.success(BaseResponseStatus.SUCCESS);
-        } catch (BaseException e) {
-            return CMResponse.fail(e.getErrorCode());
-        }
-        catch (Exception e) {
-            return CMResponse.fail(BaseResponseStatus.INTERNAL_SERVER_ERROR);
-        }
+    public CMResponse<Void> chgPassword(@Valid @RequestBody ChgPasswordReqDto chgPasswordReqDto) {
+        userService.chgPassword(chgPasswordReqDto);
+        return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 }
