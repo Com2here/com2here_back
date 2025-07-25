@@ -1,3 +1,4 @@
+
 ---
 name: "\U0001F41B Bug"
 about: 오류 신고
