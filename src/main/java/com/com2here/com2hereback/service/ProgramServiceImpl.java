@@ -73,24 +73,25 @@ public class ProgramServiceImpl implements ProgramService {
     }
 
     @Override
-    public Map<String, Object> getProgram(int offset, int limit, String search, String purpose) {
-        Pageable pageable = PageRequest.of(offset / limit, limit, Sort.by("createdAt").descending());
+    public Map<String, Object> getProgram(int page, int limit, String search, String purpose) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
 
         ProgramPurpose programPurpose = null;
         if (purpose != null && !purpose.isBlank()) {
             programPurpose = ProgramPurpose.valueOf(purpose);
         }
-        Page<Program> page = programRepository.findPage(search, programPurpose, pageable);
 
-        Page<ProgramRespDto> dtoPage = page.map(ProgramRespDto::new);
+        Page<Program> pageResult = programRepository.findPage(search, programPurpose, pageable);
+        Page<ProgramRespDto> dtoPage = pageResult.map(ProgramRespDto::new);
 
         Map<String, Object> result = new HashMap<>();
         result.put("content", dtoPage.getContent());
         result.put("totalElements", dtoPage.getTotalElements());
         result.put("totalPages", dtoPage.getTotalPages());
-        result.put("pageNumber", dtoPage.getNumber());
+        result.put("pageNumber", dtoPage.getNumber() + 1); // 사용자 기준 1부터 시작하게 다시 +1
         result.put("pageSize", dtoPage.getSize());
         result.put("isLast", dtoPage.isLast());
+
         return result;
     }
 
