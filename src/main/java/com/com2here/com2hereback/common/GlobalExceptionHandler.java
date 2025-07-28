@@ -1,7 +1,11 @@
 package com.com2here.com2hereback.common;
 
 import jakarta.validation.ConstraintViolationException;
+
+import java.nio.file.AccessDeniedException;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +40,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(status.getHttpStatusCode())
                 .body(CMResponse.fail(status, ex.getMessage()));
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<CMResponse<Void>> handleAccessDenied(Exception ex) {
+        BaseResponseStatus status = BaseResponseStatus.FORBIDDEN;
+        return ResponseEntity
+                .status(status.getHttpStatusCode())
+                .body(CMResponse.fail(status));
     }
 
     @ExceptionHandler(BaseException.class)
