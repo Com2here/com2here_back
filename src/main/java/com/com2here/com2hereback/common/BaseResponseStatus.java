@@ -81,15 +81,10 @@ public enum BaseResponseStatus {
     NOT_FOUND_DATA(HttpStatus.NOT_FOUND, false, 404, "해당 프로젝트 홍보 게시물을 찾을 수 없음"),
     INVALID_CODE(HttpStatus.BAD_REQUEST, false, 400, "잘못된 인증 코드입니다."),
 
-    /**
-     * 500 : security 에러
-     */
-    WRONG_SERVER(HttpStatus.INTERNAL_SERVER_ERROR, false, 500, "서버 내부 오류가 발생"),
-
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, 500, "서버 내부 오류 발생"),
     /**
      * 900: 기타 에러
      */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, 900, "Internal server error"),
     NO_EXIST_IMAGE(HttpStatus.NOT_FOUND, false, 901, "존재하지 않는 이미지 입니다"),
 
     /**

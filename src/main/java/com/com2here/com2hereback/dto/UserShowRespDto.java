@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class UserShowRespDto {
+    private String uuid;
     private String nickname;
     private String email;
     private String profileImageUrl;
@@ -15,6 +16,7 @@ public class UserShowRespDto {
 
     public static UserShowRespDto entityToDto(User user){
         return UserShowRespDto.builder()
+            .uuid(user.getUuid())
             .nickname(user.getNickname())
             .email(user.getEmail())
             .profileImageUrl(user.getProfileImageUrl())
