@@ -1,6 +1,9 @@
 package com.com2here.com2hereback.dto;
 
+import java.time.LocalDateTime;
+
 import com.com2here.com2hereback.domain.User;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,6 +16,8 @@ public class UserShowRespDto {
     private String profileImageUrl;
     private boolean isVerified;
     private String role;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLoginAt;
 
     public static UserShowRespDto entityToDto(User user){
         return UserShowRespDto.builder()
@@ -22,6 +27,8 @@ public class UserShowRespDto {
             .profileImageUrl(user.getProfileImageUrl())
             .isVerified(user.isEmailVerified())
             .role(user.getRole().name())
+            .createdAt(user.getCreatedAt())
+            .lastLoginAt(user.getLastLoginAt())
             .build();
     }
 }
