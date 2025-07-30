@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ProductRespDto {
+    private String productId;
     private String cpu;
     private String gpu;
     private String line;

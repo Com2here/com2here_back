@@ -62,7 +62,7 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
         }
 
         // top N개 조합만 API 요청
-        for (int i = 0; i < Math.min(topPairs.size(), 10); i++) {
+        for (int i = 0; i < Math.min(topPairs.size(), 50); i++) {
             Cpu cpu = topPairs.get(i).getFirst();
             Gpu gpu = topPairs.get(i).getSecond();
 
@@ -72,6 +72,7 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
             for (ProductRespDto product : products) {
                 if (product.getPrice() < 100000) continue;
                 results.add(ProductRespDto.builder()
+                        .productId(product.getProductId())
                         .cpu(cpu.getModel())
                         .gpu(gpu.getChipset())
                         .line(cpu.getLine())
