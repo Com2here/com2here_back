@@ -62,13 +62,18 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 // HTML 태그 제거 (ex: <b>조립PC</b>)
                 String cleanTitle = item.path("title").asText().replaceAll("<[^>]*>", "");
 
-                result.add(new ProductRespDto(
-                    cleanTitle,
-                    item.path("link").asText(),
-                    item.path("image").asText(),
-                    price,
-                    item.path("mallName").asText()
-                ));
+                result.add(ProductRespDto.builder()
+                        .cpu(null)
+                        .gpu(null)
+                        .line(null)
+                        .totalScores(0.0)
+                        .totalPrice(price)
+                        .title(cleanTitle)
+                        .link(item.path("link").asText())
+                        .image(item.path("image").asText())
+                        .price(price)
+                        .mall(item.path("mallName").asText())
+                        .build());
             }
 
             return result;
