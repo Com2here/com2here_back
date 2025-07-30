@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -72,6 +70,10 @@ public class AdminUserServiceImpl implements AdminUserService {
             updatedImageUrl = fileStorageService.upload(updateDto.getProfileImage());
         }
 
+        Boolean updatedIsEmailVerified = updateDto.getIsEmailVerified() != null 
+                ? updateDto.getIsEmailVerified() 
+                : user.isEmailVerified();
+
         User updatedUser = User.builder()
                 .userId(user.getUserId())
                 .uuid(user.getUuid())
@@ -79,7 +81,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .email(updateDto.getEmail() != null ? updateDto.getEmail() : user.getEmail())
                 .password(user.getPassword())
                 .role(updateDto.getRole() != null ? updateDto.getRole() : user.getRole())
-                .isEmailVerified(user.isEmailVerified())
+                .isEmailVerified(updatedIsEmailVerified)
                 .profileImageUrl(updatedImageUrl)
                 .refreshToken(user.getRefreshToken())
                 .createdAt(user.getCreatedAt())
@@ -88,6 +90,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         userRepository.save(updatedUser);
     }
+
 
     @Override
     @Transactional
