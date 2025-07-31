@@ -59,16 +59,35 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
                 if (seen.contains(productId)) continue;
                 seen.add(productId);
 
-                // HTML 태그 제거 (ex: <b>조립PC</b>)
                 String cleanTitle = item.path("title").asText().replaceAll("<[^>]*>", "");
+                String lowerTitle = cleanTitle.toLowerCase();
 
-                result.add(new ProductRespDto(
-                    cleanTitle,
-                    item.path("link").asText(),
-                    item.path("image").asText(),
-                    price,
-                    item.path("mallName").asText()
-                ));
+                List<String> excludedKeywords = List.of(
+                        "수랭", "워터", "블록", "백플레이트", "방열판", "라디에이터", "쿨러", "냉각", "히트싱크", "cooler", "waterblock",
+                        "컨트롤러", "커버", "수냉", "호환", "브라켓", "kit", "radiator", "cooling", "block",
+                        "커넥터", "케이블", "전원", "파워", "psu", "독", "도킹", "외장", "케이스", "프레임", "shell",
+                        "렌탈", "rental", "대여", "RGB", "LED", "fan", "리모컨", "조명",
+                        "Bykski", "Barrow", "산업용", "workstation",
+                        "그래픽 카드 방열판", "쿨링 팬", "그래픽카드 냉각"
+                );
+
+                if (excludedKeywords.stream().anyMatch(lowerTitle::contains)) continue;
+
+                System.out.println("상품ID: " + productId + " / 제목: " + cleanTitle);
+
+                result.add(ProductRespDto.builder()
+                        .productId(productId)
+                        .cpu(null)
+                        .gpu(null)
+                        .line(null)
+                        .totalScores(0.0)
+                        .totalPrice(price)
+                        .title(cleanTitle)
+                        .link(item.path("link").asText())
+                        .image(item.path("image").asText())
+                        .price(price)
+                        .mall(item.path("mallName").asText())
+                        .build());
             }
 
             return result;
