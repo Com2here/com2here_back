@@ -62,6 +62,8 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
         }
 
         // top N개 조합만 API 요청
+        Set<String> deduplicationSet = new HashSet<>();
+
         for (int i = 0; i < Math.min(topPairs.size(), 50); i++) {
             Cpu cpu = topPairs.get(i).getFirst();
             Gpu gpu = topPairs.get(i).getSecond();
@@ -71,6 +73,13 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
 
             for (ProductRespDto product : products) {
                 if (product.getPrice() < 100000) continue;
+
+                String normTitle = normalizeTitle(product.getTitle());
+                String dedupKey = normTitle + "|" + product.getImage() + "|" + product.getPrice();
+
+                if (deduplicationSet.contains(dedupKey)) continue;
+                deduplicationSet.add(dedupKey);
+
                 results.add(ProductRespDto.builder()
                         .productId(product.getProductId())
                         .cpu(cpu.getModel())
@@ -104,6 +113,13 @@ public class PcRecommendationServiceImpl implements PcRecommendationService {
             case "로우엔드" -> 1;
             default -> 0;
         };
+    }
+
+    private String normalizeTitle(String title) {
+        return title.toLowerCase()
+                .replaceAll("\\s+", "")               // 공백 제거
+                .replaceAll("\\[[^\\]]*\\]", "")      // 대괄호 옵션 제거
+                .replaceAll("[^a-zA-Z0-9가-힣]", ""); // 특수문자 제거
     }
 
     private boolean isLineGreaterThanEqual(String targetLine, String baseLine) {
