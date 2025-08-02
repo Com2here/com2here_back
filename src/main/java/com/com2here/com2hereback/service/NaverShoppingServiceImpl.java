@@ -73,7 +73,7 @@ public class NaverShoppingServiceImpl implements NaverShoppingService {
 
                 if (excludedKeywords.stream().anyMatch(lowerTitle::contains)) continue;
 
-                System.out.println("상품ID: " + productId + " / 제목: " + cleanTitle);
+//                System.out.println("상품ID: " + productId + " / 제목: " + cleanTitle);
 
                 result.add(ProductRespDto.builder()
                         .productId(productId)
