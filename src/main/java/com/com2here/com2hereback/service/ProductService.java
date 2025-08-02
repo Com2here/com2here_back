@@ -8,4 +8,5 @@ public interface ProductService {
     ProductShowRespDto showProduct(Long productId);
     ProductListRespDto listProduct (int page, int limit);
     ProductListRespDto wishlistProduct (int page, int limit);
+    void deleteWishProduct(Long productId);
 }
