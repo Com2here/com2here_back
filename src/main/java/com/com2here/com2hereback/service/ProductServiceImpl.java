@@ -121,4 +121,26 @@ public class ProductServiceImpl implements ProductService {
 
         return productListResponseDto;
     }
+
+    @Override
+    @Transactional
+    public void deleteWishProduct(Long wishId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String uuid = (String) authentication.getPrincipal();
+
+        User user = userRepository.findByUuid(uuid);
+        if (user == null) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_MEMBERS);
+        }
+
+        Wishlist wishlist = wishlistRepository.findById(wishId)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_WISH));
+
+        if (!wishlist.getUser().equals(user)) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_WISH);
+        }
+
+        wishlistRepository.delete(wishlist);
+    }
+
 }
