@@ -131,7 +131,8 @@ public enum BaseResponseStatus {
     // Oauth
     INVALID_PROVIDER(HttpStatus.BAD_REQUEST, false, 2400, "존재하지 않는 제공자입니다."),
     INVALID_URI(HttpStatus.BAD_REQUEST, false, 2400, "유효하지 않은 URI입니다."),
-    JSON_PARSE_ERROR(HttpStatus.BAD_REQUEST, false, 2401, "JSON 파싱 중 오류가 발생했습니다.");
+    JSON_PARSE_ERROR(HttpStatus.BAD_REQUEST, false, 2401, "JSON 파싱 중 오류가 발생했습니다."),
+    NO_EXIST_WISH(HttpStatus.NOT_FOUND, false, 2701, "해당 관심 상품이 존재하지 않습니다.");
 
 
 
