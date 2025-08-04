@@ -20,7 +20,7 @@ public class Program {
     private String program;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "purpose", nullable = false)
+    @Column(name = "purpose", nullable = false, length = 20)
     private ProgramPurpose purpose;
 
     @Column(name = "spec_level", nullable = false)

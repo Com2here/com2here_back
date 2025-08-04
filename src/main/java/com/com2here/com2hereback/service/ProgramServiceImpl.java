@@ -9,10 +9,11 @@ import com.com2here.com2hereback.domain.ProgramRSpec;
 import com.com2here.com2hereback.dto.ProgramUpdateReqDto;
 import com.com2here.com2hereback.dto.ProgramAddReqDto;
 import com.com2here.com2hereback.dto.ProgramDeleteReqDto;
-import com.com2here.com2hereback.dto.ProgramRespDto;
 import com.com2here.com2hereback.repository.ProgramMSpecRepository;
 import com.com2here.com2hereback.repository.ProgramRSpecRepository;
 import com.com2here.com2hereback.repository.ProgramRepository;
+import com.com2here.com2hereback.vo.ProgramVO;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,26 +73,27 @@ public class ProgramServiceImpl implements ProgramService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> getProgram(int page, int limit, String search, String purpose) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, limit);
 
-        ProgramPurpose programPurpose = null;
+        ProgramPurpose enumPurpose = null;
         if (purpose != null && !purpose.isBlank()) {
-            programPurpose = ProgramPurpose.valueOf(purpose);
+            enumPurpose = ProgramPurpose.from(purpose);
         }
 
-        Page<Program> pageResult = programRepository.findPage(search, programPurpose, pageable);
-        Page<ProgramRespDto> dtoPage = pageResult.map(ProgramRespDto::new);
+        Page<Program> programs = programRepository.findPage(search, enumPurpose, pageable);
+        Page<ProgramVO> programVOs = programs.map(ProgramVO::from);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("content", dtoPage.getContent());
-        result.put("totalElements", dtoPage.getTotalElements());
-        result.put("totalPages", dtoPage.getTotalPages());
-        result.put("pageNumber", dtoPage.getNumber() + 1); // 사용자 기준 1부터 시작하게 다시 +1
-        result.put("pageSize", dtoPage.getSize());
-        result.put("isLast", dtoPage.isLast());
+        Map<String, Object> response = new HashMap<>();
+        response.put("pageNumber", programVOs.getNumber() + 1);
+        response.put("isLast", programVOs.isLast());
+        response.put("totalPages", programVOs.getTotalPages());
+        response.put("pageSize", programVOs.getSize());
+        response.put("content", programVOs.getContent());
+        response.put("totalElements", programVOs.getTotalElements());
 
-        return result;
+        return response;
     }
 
     @Override
