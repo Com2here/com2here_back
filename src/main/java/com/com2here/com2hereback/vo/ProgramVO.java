@@ -3,14 +3,13 @@ package com.com2here.com2hereback.vo;
 import lombok.Value;
 import java.time.LocalDateTime;
 
-import com.com2here.com2hereback.common.ProgramPurpose;
 import com.com2here.com2hereback.domain.Program;
 
 @Value
 public class ProgramVO {
     Long id;
     String name;
-    ProgramPurpose purpose;
+    String purpose;
     String specLevel;
     SpecVO recSpec;
     SpecVO minSpec;
@@ -21,7 +20,7 @@ public class ProgramVO {
         return new ProgramVO(
             program.getProgramId(),
             program.getProgram(),
-            program.getPurpose(),
+            program.getPurpose().getDisplayName(),
             program.getSpecLevel(),
             new SpecVO(
                 program.getRSpec().getCpu(),

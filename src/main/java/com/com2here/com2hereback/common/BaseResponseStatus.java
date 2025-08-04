@@ -35,7 +35,10 @@ public enum BaseResponseStatus {
 
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, false, 2400, "유효성 검증에 실패했습니다."),
 
-
+    // Wishlist
+    ALREADY_WISHLISTED(HttpStatus.CONFLICT, false, 2702, "이미 관심상품에 등록된 상품입니다."),
+    NO_PERMISSION_WISH(HttpStatus.FORBIDDEN, false, 2703, "해당 관심 상품에 대한 권한이 없습니다."),
+    
     // 비밀번호 형식 불일치
     PASSWORD_FORMAT_INVALID(HttpStatus.BAD_REQUEST, false, 2601,
             "비밀번호 형식이 불일치합니다. 최소 8자 이상 최대 20자 이하, 영문, 숫자, 특수문자를 포함해야 합니다."),
