@@ -1,51 +1,40 @@
 package com.com2here.com2hereback.vo;
 
-import com.com2here.com2hereback.domain.Spec;
 import com.com2here.com2hereback.dto.ProductListRespDto;
+import lombok.Value;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Value;
-
 @Value
 public class ProductListVO {
-    private int totalElements;
-    private int totalPages;
-    private int currentPage;
-    private List<ProductInfo> products;
+    long totalElements;
+    int totalPages;
+    int currentPage;
+    List<ProductInfo> products;
 
     @Value
-    @AllArgsConstructor
     public static class ProductInfo {
         Long productId;
+        Long naverProductId;
+        String title;
         String image;
-        SpecInfo specs;
-        int price;
+        String line;
+        String mall;
+        Long price;
+        Long totalPrice;
+        Double totalScores;
+        SpecInfo spec;
     }
 
     @Value
     public static class SpecInfo {
-        String CPU;
-        String memory;
-        String graphicCard;
-        String SSD;
-        String mainBoard;
-        String power;
-        String case_;
+        String cpu;
+        String gpu;
 
-        public SpecInfo(Spec spec) {
-            this.CPU = spec.getCpu();
-            this.memory = spec.getMemory();
-            this.graphicCard = spec.getGraphicCard();
-            this.SSD = spec.getSsd();
-            this.mainBoard = spec.getMainBoard();
-            this.power = spec.getPower();
-            this.case_ = spec.getCaseName();
+        public static SpecInfo fromDto(ProductListRespDto.SpecDto specDto) {
+            if (specDto == null) return null;
+            return new SpecInfo(specDto.getCpu(), specDto.getGpu());
         }
     }
 
@@ -53,9 +42,15 @@ public class ProductListVO {
         List<ProductInfo> productInfoList = dto.getProducts().stream()
             .map(product -> new ProductInfo(
                 product.getProductId(),
+                product.getNaverProductId(),
+                product.getTitle(),
                 product.getImage(),
-                new SpecInfo(product.getSpec()),
-                product.getPrice()
+                product.getLine(),
+                product.getMall(),
+                product.getPrice(),
+                product.getTotalPrice(),
+                product.getTotalScores(),
+                SpecInfo.fromDto(product.getSpec())
             ))
             .collect(Collectors.toList());
 

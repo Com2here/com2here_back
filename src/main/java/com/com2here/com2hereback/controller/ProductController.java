@@ -4,9 +4,12 @@ import com.com2here.com2hereback.common.BaseResponseStatus;
 import com.com2here.com2hereback.common.CMResponse;
 import com.com2here.com2hereback.dto.ProductListRespDto;
 import com.com2here.com2hereback.dto.ProductShowRespDto;
+import com.com2here.com2hereback.dto.WishlistAddReqDto;
 import com.com2here.com2hereback.service.ProductService;
 import com.com2here.com2hereback.vo.ProductListVO;
 import com.com2here.com2hereback.vo.ProductShowVO;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,9 +46,9 @@ public class ProductController {
         return CMResponse.success(BaseResponseStatus.SUCCESS, productListVo);
     }
 
-    @PostMapping("/wish/add/{product_id}")
-    public CMResponse<Void> addWishProduct(@PathVariable("product_id") Long productId) {
-        productService.addWishProduct(productId);
+    @PostMapping("/wish/add")
+    public CMResponse<Void> addWishProduct(@Valid @RequestBody WishlistAddReqDto wishlistAddReqDto) {
+        productService.addWishProduct(wishlistAddReqDto);
         return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 
@@ -57,9 +61,9 @@ public class ProductController {
         return CMResponse.success(BaseResponseStatus.SUCCESS, productListVo);
     }
 
-    @DeleteMapping("/wish/delete/{wish_id}")
-    public CMResponse<Void> deleteWishProduct(@PathVariable("wish_id") Long wishId) {
-        productService.deleteWishProduct(wishId);
+    @DeleteMapping("/wish/delete/{naverProductId}")
+    public CMResponse<Void> deleteWishProduct(@PathVariable("naverProductId") Long naverProductId) {
+        productService.deleteWishProduct(naverProductId);
         return CMResponse.success(BaseResponseStatus.SUCCESS);
     }
 }
